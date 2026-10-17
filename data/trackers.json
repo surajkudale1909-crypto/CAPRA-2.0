@@ -1,0 +1,108 @@
+{
+  "version": "1.0.0",
+  "source": "Exodus Privacy & Android Tracker Signatures Database",
+  "trackers": [
+    {
+      "name": "Google AdMob",
+      "category": "Advertising",
+      "code_signature": "com.google.android.gms.ads",
+      "website": "https://admob.google.com"
+    },
+    {
+      "name": "Google Firebase Analytics",
+      "category": "Analytics",
+      "code_signature": "com.google.firebase.analytics",
+      "website": "https://firebase.google.com"
+    },
+    {
+      "name": "Meta / Facebook Audience Network",
+      "category": "Advertising",
+      "code_signature": "com.facebook.ads",
+      "website": "https://developers.facebook.com/docs/audience-network"
+    },
+    {
+      "name": "Meta / Facebook Analytics",
+      "category": "Analytics",
+      "code_signature": "com.facebook.appevents",
+      "website": "https://developers.facebook.com"
+    },
+    {
+      "name": "Unity3D Ads",
+      "category": "Advertising",
+      "code_signature": "com.unity3d.ads",
+      "website": "https://unity.com/solutions/unity-ads"
+    },
+    {
+      "name": "AppsFlyer",
+      "category": "Analytics / Attribution",
+      "code_signature": "com.appsflyer",
+      "website": "https://www.appsflyer.com"
+    },
+    {
+      "name": "Adjust",
+      "category": "Analytics / Attribution",
+      "code_signature": "com.adjust.sdk",
+      "website": "https://www.adjust.com"
+    },
+    {
+      "name": "AppLovin",
+      "category": "Advertising",
+      "code_signature": "com.applovin",
+      "website": "https://www.applovin.com"
+    },
+    {
+      "name": "InMobi",
+      "category": "Advertising",
+      "code_signature": "com.inmobi",
+      "website": "https://www.inmobi.com"
+    },
+    {
+      "name": "Flurry",
+      "category": "Analytics",
+      "code_signature": "com.flurry.android",
+      "website": "https://www.flurry.com"
+    },
+    {
+      "name": "Mixpanel",
+      "category": "Analytics",
+      "code_signature": "com.mixpanel.android",
+      "website": "https://mixpanel.com"
+    },
+    {
+      "name": "Branch Metrics",
+      "category": "Attribution / Deep Linking",
+      "code_signature": "io.branch.referral",
+      "website": "https://branch.io"
+    },
+    {
+      "name": "IronSource",
+      "category": "Advertising",
+      "code_signature": "com.ironsource.mediationsdk",
+      "website": "https://www.is.com"
+    },
+    {
+      "name": "Vungle / Liftoff",
+      "category": "Advertising",
+      "code_signature": "com.vungle.warren",
+      "website": "https://vungle.com"
+    },
+    {
+      "name": "Chartboost",
+      "category": "Advertising",
+      "code_signature": "com.chartboost.sdk",
+      "website": "https://www.chartboost.com"
+    },
+    {
+      "name": "Sentry",
+      "category": "Crash Reporting / Analytics",
+      "code_signature": "io.sentry",
+      "website": "https://sentry.io"
+    },
+    {
+      "name": "Crashlytics (Firebase)",
+      "category": "Crash Reporting",
+      "code_signature": "com.google.firebase.crashlytics",
+      "website": "https://firebase.google.com"
+    }
+  ]
+}

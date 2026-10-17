@@ -1,0 +1,3 @@
+[console_scripts]
+capra = main:main
+capra-gui = src.gui:launch_gui

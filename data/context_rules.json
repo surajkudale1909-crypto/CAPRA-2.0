@@ -1,0 +1,676 @@
+{
+  "version": "2.0.0",
+  "project": "Context-Aware Mobile App Privacy Risk Analyzer",
+  "group": "EDAI Group 8",
+  "categories": {
+    "Calculator": {
+      "description": "Standard utility app for numerical and arithmetic calculations.",
+      "acceptable_permissions": [
+        "android.permission.VIBRATE"
+      ],
+      "suspicious_permissions": {
+        "android.permission.INTERNET": {
+          "penalty": 15,
+          "reason": "An offline utility does not require external network communication; often indicates ad-trackers or covert analytics."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 30,
+          "reason": "GPS coordinate tracking is completely anomalous for a calculation tool."
+        },
+        "android.permission.ACCESS_COARSE_LOCATION": {
+          "penalty": 25,
+          "reason": "Network location tracking is unnecessary for basic arithmetic."
+        },
+        "android.permission.READ_CONTACTS": {
+          "penalty": 35,
+          "reason": "Calculator does not have social functionality; indicates address book harvesting."
+        },
+        "android.permission.READ_EXTERNAL_STORAGE": {
+          "penalty": 20,
+          "reason": "Reading general user storage exposes private documents, photos, and files."
+        },
+        "android.permission.WRITE_EXTERNAL_STORAGE": {
+          "penalty": 20,
+          "reason": "Arbitrary external storage write access can modify or corrupt shared files."
+        },
+        "android.permission.CAMERA": {
+          "penalty": 30,
+          "reason": "Camera sensor access is suspicious unless specifically marketed as OCR/Math solver."
+        },
+        "android.permission.RECORD_AUDIO": {
+          "penalty": 35,
+          "reason": "Microphone recording permission creates severe eavesdropping risks."
+        },
+        "android.permission.READ_SMS": {
+          "penalty": 40,
+          "reason": "Access to SMS allows reading sensitive 2FA OTP tokens and private messages."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Ability to send SMS can incur financial fraud via premium-rate messaging."
+        },
+        "android.permission.READ_PHONE_STATE": {
+          "penalty": 25,
+          "reason": "Access to IMEI, phone number, and carrier state allows persistent hardware fingerprinting."
+        }
+      }
+    },
+    "Flashlight": {
+      "description": "Utility application intended to toggle the camera flash or screen illumination.",
+      "acceptable_permissions": [
+        "android.permission.CAMERA",
+        "android.permission.FLASHLIGHT",
+        "android.permission.WAKE_LOCK"
+      ],
+      "suspicious_permissions": {
+        "android.permission.INTERNET": {
+          "penalty": 20,
+          "reason": "A torch app should operate purely locally without outbound internet transmission."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 35,
+          "reason": "Fine GPS location is entirely unrelated to torch functionality; classic sign of location ad-monetization."
+        },
+        "android.permission.ACCESS_COARSE_LOCATION": {
+          "penalty": 30,
+          "reason": "Coarse network location tracking is incongruent with flashlight hardware toggle."
+        },
+        "android.permission.READ_CONTACTS": {
+          "penalty": 40,
+          "reason": "Accessing user contact records is malicious/excessive for a flashlight."
+        },
+        "android.permission.READ_EXTERNAL_STORAGE": {
+          "penalty": 25,
+          "reason": "Reading files from external shared memory is unnecessary for torch operation."
+        },
+        "android.permission.WRITE_EXTERNAL_STORAGE": {
+          "penalty": 25,
+          "reason": "Flashlight utility has no justification to write or modify user media."
+        },
+        "android.permission.RECORD_AUDIO": {
+          "penalty": 40,
+          "reason": "Microphone recording permission in a flashlight is a high-confidence spyware indicator."
+        },
+        "android.permission.READ_SMS": {
+          "penalty": 45,
+          "reason": "Reading SMS messages presents severe identity and credential interception hazards."
+        },
+        "android.permission.READ_PHONE_STATE": {
+          "penalty": 30,
+          "reason": "Reading cellular hardware identifiers for device tracking and profiling."
+        }
+      }
+    },
+    "Navigation": {
+      "description": "Mapping, routing, and turn-by-turn geolocation guidance application.",
+      "acceptable_permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_CONTACTS": {
+          "penalty": 25,
+          "reason": "Reading full contact list is sensitive; unless integrating address-book destination picker, it leaks social graphs."
+        },
+        "android.permission.READ_SMS": {
+          "penalty": 40,
+          "reason": "Reading SMS messages is completely anomalous for satellite navigation."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Sending SMS without explicit user initiation presents toll fraud hazards."
+        },
+        "android.permission.RECORD_AUDIO": {
+          "penalty": 30,
+          "reason": "Audio recording capability outside interactive voice-search represents acoustic surveillance risk."
+        },
+        "android.permission.CAMERA": {
+          "penalty": 20,
+          "reason": "Camera access is non-standard unless AR navigation or dashcam functionality is actively utilized."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 40,
+          "reason": "Access to incoming/outgoing call history has zero functional relevance to routing."
+        }
+      }
+    },
+    "Social Media": {
+      "description": "Platforms for social networking, content sharing, and community engagement.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_CONTACTS",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_SMS": {
+          "penalty": 40,
+          "reason": "Reading full SMS messages is unnecessary for modern social platforms using SMS Retriever API."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Social media applications should not trigger direct SMS dispatch."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 45,
+          "reason": "Call logs represent private telephony communications not required for social feeds."
+        },
+        "android.permission.SYSTEM_ALERT_WINDOW": {
+          "penalty": 30,
+          "reason": "Displaying overlays on top of other applications presents clickjacking and credential harvesting risks."
+        },
+        "android.permission.PROCESS_OUTGOING_CALLS": {
+          "penalty": 45,
+          "reason": "Intercepting or rerouting outgoing phone calls is dangerous."
+        }
+      }
+    },
+    "Messaging": {
+      "description": "Instant messaging, chat, VoIP, and communication applications.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.READ_CONTACTS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE"
+      ],
+      "suspicious_permissions": {
+        "android.permission.ACCESS_BACKGROUND_LOCATION": {
+          "penalty": 35,
+          "reason": "Persistent background GPS tracking is anomalous for text/voice messaging apps."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 35,
+          "reason": "Access to native cellular call logs is non-essential unless operating as default phone dialer."
+        },
+        "android.permission.SYSTEM_ALERT_WINDOW": {
+          "penalty": 25,
+          "reason": "Overlay capabilities can be abused for phishing overlays."
+        },
+        "android.permission.REQUEST_INSTALL_PACKAGES": {
+          "penalty": 40,
+          "reason": "Messaging apps requesting arbitrary package installations can act as malware droppers."
+        }
+      }
+    },
+    "Banking/Finance": {
+      "description": "Digital banking, fintech, payments, cryptocurrency, and financial management tools.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE"
+      ],
+      "suspicious_permissions": {
+        "android.permission.RECORD_AUDIO": {
+          "penalty": 40,
+          "reason": "Microphone recording is anomalous for banking applications and introduces eavesdropping risk."
+        },
+        "android.permission.SYSTEM_ALERT_WINDOW": {
+          "penalty": 50,
+          "reason": "High-confidence Banking Trojan vector: Overlay permissions allow stealing PINs, passwords, and banking credentials."
+        },
+        "android.permission.REQUEST_INSTALL_PACKAGES": {
+          "penalty": 45,
+          "reason": "Dropper functionality is completely forbidden in verified financial platforms."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 40,
+          "reason": "Access to incoming/outgoing telephony call records is unrelated to financial transactions."
+        },
+        "android.permission.READ_SMS": {
+          "penalty": 35,
+          "reason": "Modern banking apps should use SMS Retriever or User Consent API rather than broad READ_SMS."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 20,
+          "reason": "High-precision continuous GPS is generally excessive; approximate location suffices for fraud defense."
+        }
+      }
+    },
+    "Health/Fitness": {
+      "description": "Activity tracking, workouts, health telemetry, step counters, and wellness monitors.",
+      "acceptable_permissions": [
+        "android.permission.BODY_SENSORS",
+        "android.permission.BODY_SENSORS_BACKGROUND",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_SMS": {
+          "penalty": 45,
+          "reason": "Reading SMS messages is completely anomalous for exercise and health metrics."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Fitness applications should not send unauthorized SMS messages."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 45,
+          "reason": "Telephony call logs are irrelevant to physical activity and wellness tracking."
+        },
+        "android.permission.READ_CONTACTS": {
+          "penalty": 30,
+          "reason": "Reading complete address book is unnecessary unless user explicitly searches for workout buddies."
+        }
+      }
+    },
+    "Games": {
+      "description": "Mobile games, entertainment titles, and interactive gaming software.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_CONTACTS": {
+          "penalty": 35,
+          "reason": "Games harvesting phone address books without social invite features leak personal contact lists."
+        },
+        "android.permission.READ_SMS": {
+          "penalty": 45,
+          "reason": "Reading SMS in gaming apps is a recognized toll fraud and credential theft indicator."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 45,
+          "reason": "Direct SMS transmission from games has historically been exploited for premium toll fraud."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 30,
+          "reason": "Fine GPS location tracking is anomalous unless the game explicitly features augmented reality / geo-location (e.g. Pokemon GO)."
+        },
+        "android.permission.RECORD_AUDIO": {
+          "penalty": 35,
+          "reason": "Recording microphone audio without in-game voice chat features is suspicious."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 45,
+          "reason": "Games have zero legitimate need to inspect user telephony history."
+        }
+      }
+    },
+    "Camera/Photo": {
+      "description": "Photography, image editing, filters, scanner, and video recording apps.",
+      "acceptable_permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_CONTACTS": {
+          "penalty": 35,
+          "reason": "Access to address book contacts is unrelated to photo capture or editing."
+        },
+        "android.permission.READ_SMS": {
+          "penalty": 45,
+          "reason": "Reading text messages is completely anomalous for a camera or image editor."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Camera applications have no justification for sending SMS messages."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 45,
+          "reason": "Photo utilities should never access telephony call logs."
+        },
+        "android.permission.ACCESS_BACKGROUND_LOCATION": {
+          "penalty": 35,
+          "reason": "Background geolocation tracking is unnecessary; geotagging only requires foreground location."
+        }
+      }
+    },
+    "Music/Video": {
+      "description": "Media players, music streaming, podcast clients, and audio/video playback tools.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_SMS": {
+          "penalty": 45,
+          "reason": "Reading user SMS messages is completely anomalous for media playback."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Media players should never dispatch SMS messages."
+        },
+        "android.permission.READ_CONTACTS": {
+          "penalty": 35,
+          "reason": "Reading contacts is unnecessary for standard audio/video listening."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 30,
+          "reason": "GPS coordinate tracking is non-standard for music and video playback tools."
+        },
+        "android.permission.CAMERA": {
+          "penalty": 30,
+          "reason": "Camera sensor access is suspicious for audio/video playback."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 40,
+          "reason": "Access to phone call history has no functional relevance to audio players."
+        }
+      }
+    },
+    "Shopping": {
+      "description": "E-commerce, online marketplaces, retail shopping, and delivery tracking apps.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_SMS": {
+          "penalty": 35,
+          "reason": "Shopping apps should utilize modern SMS User Consent API rather than full READ_SMS."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Direct SMS sending from shopping apps can indicate covert subscription fraud."
+        },
+        "android.permission.RECORD_AUDIO": {
+          "penalty": 35,
+          "reason": "Continuous microphone access is excessive for browsing retail items."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 45,
+          "reason": "Call logs are irrelevant to browsing or ordering merchandise."
+        },
+        "android.permission.ACCESS_BACKGROUND_LOCATION": {
+          "penalty": 30,
+          "reason": "Continuous background GPS is excessive; delivery tracking only requires foreground checks."
+        }
+      }
+    },
+    "Productivity": {
+      "description": "Office suites, note-taking, calendars, file management, and personal organization.",
+      "acceptable_permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_SMS": {
+          "penalty": 40,
+          "reason": "Reading SMS messages is anomalous for office document or note tools."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 40,
+          "reason": "Productivity applications should not send unauthorized SMS messages."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 40,
+          "reason": "Telephony call logs have no functional relevance to document processing."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 25,
+          "reason": "High-precision GPS tracking is anomalous for general productivity software."
+        }
+      }
+    },
+    "Education": {
+      "description": "Learning platforms, courses, academic tools, language learning, and study aids.",
+      "acceptable_permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.WAKE_LOCK"
+      ],
+      "suspicious_permissions": {
+        "android.permission.READ_SMS": {
+          "penalty": 45,
+          "reason": "Reading SMS messages is completely anomalous for educational tools."
+        },
+        "android.permission.SEND_SMS": {
+          "penalty": 45,
+          "reason": "Education applications should not transmit background SMS."
+        },
+        "android.permission.READ_CALL_LOG": {
+          "penalty": 45,
+          "reason": "Call log access is completely unjustified in an academic application."
+        },
+        "android.permission.ACCESS_FINE_LOCATION": {
+          "penalty": 30,
+          "reason": "GPS location tracking is non-standard for educational and study applications."
+        }
+      }
+    }
+  },
+  "dangerous_combinations": [
+    {
+      "id": "COMB_STORAGE_EXFILTRATION",
+      "name": "Local Storage Exfiltration Risk",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Data Exfiltration",
+      "penalty": 30,
+      "description": "App can read arbitrary private files, documents, or photos from storage and transmit them to external internet servers."
+    },
+    {
+      "id": "COMB_MEDIA_EXFILTRATION",
+      "name": "Modern Media Library Exfiltration",
+      "permissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Media Harvesting",
+      "penalty": 30,
+      "description": "App can access sensitive personal photos and graphics via Scoped Storage APIs and exfiltrate them externally."
+    },
+    {
+      "id": "COMB_CONTACTS_HARVESTING",
+      "name": "Address Book Harvesting Risk",
+      "permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Data Exfiltration",
+      "penalty": 35,
+      "description": "App can read full contact names, emails, phone numbers, and exfiltrate the user's social graph over the network."
+    },
+    {
+      "id": "COMB_AUDIO_WIRETAPPING",
+      "name": "Covert Microphone Eavesdropping Risk",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Acoustic Surveillance",
+      "penalty": 40,
+      "description": "App possesses both microphone recording and outbound networking, allowing ambient audio streaming without visual UI indicators."
+    },
+    {
+      "id": "COMB_SMS_INTERCEPTION",
+      "name": "SMS & 2FA OTP Interception Risk",
+      "permissions": [
+        "android.permission.READ_SMS",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Credential Theft",
+      "penalty": 45,
+      "description": "App can intercept incoming two-factor authentication (2FA) one-time passwords and transmit them to remote command-and-control servers."
+    },
+    {
+      "id": "COMB_VISUAL_SURVEILLANCE",
+      "name": "Covert Visual Surveillance Risk",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Visual Surveillance",
+      "penalty": 35,
+      "description": "Ability to capture camera frames combined with internet transmission allows unauthorized image/video streaming."
+    },
+    {
+      "id": "COMB_CALL_LOG_EXFILTRATION",
+      "name": "Telephony Call Log Exfiltration",
+      "permissions": [
+        "android.permission.READ_CALL_LOG",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Metadata Exfiltration",
+      "penalty": 35,
+      "description": "Call records containing timestamps, call durations, and caller phone numbers can be transmitted externally."
+    },
+    {
+      "id": "COMB_LOCATION_TRACKING",
+      "name": "Continuous Location Exfiltration Risk",
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Geolocation Tracking",
+      "penalty": 25,
+      "description": "High-precision GPS coordinates can be streamed to cloud analytics or third-party ad brokers to establish physical movement patterns."
+    },
+    {
+      "id": "COMB_DEVICE_TRACKING",
+      "name": "Local Network / Hardware Perimeter Tracking",
+      "permissions": [
+        "android.permission.NEARBY_WIFI_DEVICES",
+        "android.permission.INTERNET"
+      ],
+      "risk_type": "Perimeter Profiling",
+      "penalty": 25,
+      "description": "App can scan nearby Wi-Fi APs and BSSIDs to fingerprint the user's home or office physical location without GPS permissions."
+    }
+  ],
+  "aosp_dangerous_permissions": [
+    "android.permission.READ_CALENDAR",
+    "android.permission.WRITE_CALENDAR",
+    "android.permission.CAMERA",
+    "android.permission.READ_CONTACTS",
+    "android.permission.WRITE_CONTACTS",
+    "android.permission.GET_ACCOUNTS",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_BACKGROUND_LOCATION",
+    "android.permission.RECORD_AUDIO",
+    "android.permission.READ_PHONE_STATE",
+    "android.permission.READ_PHONE_NUMBERS",
+    "android.permission.CALL_PHONE",
+    "android.permission.ANSWER_PHONE_CALLS",
+    "android.permission.READ_CALL_LOG",
+    "android.permission.WRITE_CALL_LOG",
+    "android.permission.ADD_VOICEMAIL",
+    "android.permission.USE_SIP",
+    "android.permission.BODY_SENSORS",
+    "android.permission.BODY_SENSORS_BACKGROUND",
+    "android.permission.ACTIVITY_RECOGNITION",
+    "android.permission.SEND_SMS",
+    "android.permission.RECEIVE_SMS",
+    "android.permission.READ_SMS",
+    "android.permission.RECEIVE_WAP_PUSH",
+    "android.permission.RECEIVE_MMS",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.WRITE_EXTERNAL_STORAGE",
+    "android.permission.ACCESS_MEDIA_LOCATION",
+    "android.permission.READ_MEDIA_AUDIO",
+    "android.permission.READ_MEDIA_IMAGES",
+    "android.permission.READ_MEDIA_VIDEO",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.NEARBY_WIFI_DEVICES",
+    "android.permission.BLUETOOTH_SCAN",
+    "android.permission.BLUETOOTH_CONNECT",
+    "android.permission.BLUETOOTH_ADVERTISE",
+    "android.permission.UWB_RANGING"
+  ],
+  "scoring_weights": {
+    "default_suspicious_penalty": 20,
+    "unlisted_dangerous_penalty": 15,
+    "exported_component_penalty": 3,
+    "max_raw_score_ceiling": 160
+  },
+  "risk_thresholds": {
+    "Safe": { "min": 0, "max": 20 },
+    "Low": { "min": 21, "max": 45 },
+    "Medium": { "min": 46, "max": 70 },
+    "High": { "min": 71, "max": 89 },
+    "Critical": { "min": 90, "max": 100 }
+  }
+}

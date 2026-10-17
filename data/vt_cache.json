@@ -1,0 +1,49 @@
+{
+  "1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff": {
+    "cached_at": "2026-10-17T14:11:52.862222+00:00",
+    "response": {
+      "data": {
+        "attributes": {
+          "sha256": "1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff",
+          "last_analysis_stats": {
+            "malicious": 0,
+            "suspicious": 0,
+            "undetected": 68,
+            "harmless": 2
+          },
+          "popular_threat_classification": {},
+          "names": [
+            "clean_utility_app.apk"
+          ]
+        }
+      }
+    }
+  },
+  "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789": {
+    "cached_at": "2026-10-17T14:11:52.884170+00:00",
+    "response": {
+      "data": {
+        "attributes": {
+          "sha256": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+          "last_analysis_stats": {
+            "malicious": 45,
+            "suspicious": 3,
+            "undetected": 15,
+            "harmless": 0
+          },
+          "popular_threat_classification": {
+            "suggested_threat_label": "trojan.banker/anubis",
+            "popular_threat_category": [
+              {
+                "value": "trojan"
+              }
+            ]
+          },
+          "names": [
+            "malicious_banking_sample.apk"
+          ]
+        }
+      }
+    }
+  }
+}

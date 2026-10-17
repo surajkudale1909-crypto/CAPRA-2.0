@@ -1,0 +1,119 @@
+"""Configuration and Settings Module for CAPRA v2.
+
+Centralizes file paths, environment variables (API keys), operational thresholds,
+and structured logging configuration.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
+
+# Try loading .env file if python-dotenv is installed or read manually
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # Minimal fallback parser for .env if python-dotenv is not installed
+    env_file = Path(__file__).resolve().parent.parent / ".env"
+    if env_file.is_file():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        os.environ.setdefault(k.strip(), v.strip().strip("'\""))
+        except Exception:
+            pass
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+MODELS_DIR = DATA_DIR / "models"
+APKS_DIR = DATA_DIR / "apks"
+REPORTS_DIR = BASE_DIR / "reports"
+
+
+@dataclass
+class Settings:
+    """Application-wide configuration settings."""
+
+    # Project Information
+    PROJECT_NAME: str = "CAPRA"
+    VERSION: str = "2.0.0"
+    GROUP: str = "VIT Pune CS-AI Group 8"
+
+    # Core Directories
+    base_dir: Path = BASE_DIR
+    data_dir: Path = DATA_DIR
+    models_dir: Path = MODELS_DIR
+    apks_dir: Path = APKS_DIR
+    reports_dir: Path = REPORTS_DIR
+
+    # Core File Paths
+    rules_path: Path = DATA_DIR / "context_rules.json"
+    hashes_path: Path = DATA_DIR / "known_malware_hashes.json"
+    trackers_path: Path = DATA_DIR / "trackers.json"
+    model_path: Path = MODELS_DIR / "rf_permission_model.joblib"
+    history_db_path: Path = DATA_DIR / "history.db"
+    threat_cache_path: Path = DATA_DIR / "threat_cache.db"
+
+    # API Keys & Threat Intel (Loaded via Environment Variables)
+    virustotal_api_key: Optional[str] = field(
+        default_factory=lambda: os.getenv("VIRUSTOTAL_API_KEY")
+    )
+    malwarebazaar_api_key: Optional[str] = field(
+        default_factory=lambda: os.getenv("MALWAREBAZAAR_API_KEY")
+    )
+
+    # Risk Fusion Settings
+    raw_score_ceiling: int = 160
+    log_level: str = field(
+        default_factory=lambda: os.getenv("CAPRA_LOG_LEVEL", "INFO").upper()
+    )
+
+    def ensure_directories(self) -> None:
+        """Create necessary directories if they do not exist."""
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.models_dir.mkdir(parents=True, exist_ok=True)
+        self.apks_dir.mkdir(parents=True, exist_ok=True)
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
+
+
+# Global singleton instance
+settings = Settings()
+settings.ensure_directories()
+
+
+def setup_logging(level: Optional[str] = None) -> logging.Logger:
+    """Configure structured logging for CAPRA across console and modules.
+
+    Args:
+        level: Optional log level override (DEBUG, INFO, WARNING, ERROR).
+
+    Returns:
+        Root CAPRA logger.
+    """
+    log_level_str = level or settings.log_level
+    numeric_level = getattr(logging, log_level_str, logging.INFO)
+
+    logger = logging.getLogger("capra")
+    logger.setLevel(numeric_level)
+
+    # Prevent duplicate handlers on re-initialization
+    if not logger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(numeric_level)
+        formatter = logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] %(name)s (%(filename)s:%(lineno)d) - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    return logger

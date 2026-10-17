@@ -1,0 +1,25 @@
+{
+  "data_source": "EMPIRICAL (sample_android_malware_dataset.csv)",
+  "is_synthetic": false,
+  "n_samples": 60,
+  "cv_folds": 5,
+  "models": {
+    "RandomForest": {
+      "accuracy_mean": 0.9833,
+      "accuracy_std": 0.0333,
+      "precision_mean": 1.0,
+      "recall_mean": 0.9667,
+      "f1_mean": 0.9818,
+      "roc_auc_mean": 1.0
+    },
+    "GradientBoosting": {
+      "accuracy_mean": 1.0,
+      "accuracy_std": 0.0,
+      "precision_mean": 1.0,
+      "recall_mean": 1.0,
+      "f1_mean": 1.0,
+      "roc_auc_mean": 1.0
+    }
+  },
+  "selected_winner": "GradientBoosting"
+}

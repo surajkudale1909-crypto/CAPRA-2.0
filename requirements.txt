@@ -1,0 +1,19 @@
+# CAPRA v2 - Core Dependencies
+androguard>=4.1.0
+scikit-learn>=1.4.0
+numpy>=1.26.0
+pandas>=2.0.0
+matplotlib>=3.8.0
+joblib>=1.3.0
+colorama>=0.4.6
+loguru>=0.7.0
+
+# Threat Intelligence & Network Lookups (Phase 5)
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Web Dashboard & Reporting (Phase 6)
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+reportlab>=4.0.0
