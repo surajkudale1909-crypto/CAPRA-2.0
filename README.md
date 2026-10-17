@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # CAPRA 2.0 - Context-Aware Mobile App Privacy Risk Analyzer
 
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
@@ -266,7 +265,7 @@ python -m unittest tests.test_pipeline.TestAdvancedStaticAnalysisPhase4
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 Developed with ❤️ by **CS-AI Group 8 (Suraj, Omraj, Ishan, Samriddhi)** at **Vishwakarma Institute of Technology, Pune**.
-=======
+
 # CAPRA-2.0
 Context-Aware Privacy Risk Analyzer (CAPRA) — a research project for analyzing Android application security and privacy risks using static analysis, data-flow analysis, and context-aware risk assessment.
->>>>>>> adf6868ae1df7f9fea8d4cc5b5dedf7b9fc0f433
+
