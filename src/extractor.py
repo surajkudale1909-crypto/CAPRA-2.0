@@ -13,11 +13,12 @@ import queue
 import threading
 import zipfile
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, Optional
 
 # Suppress noisy androguard debug logging if loguru is installed
 try:
     from loguru import logger as _loguru_logger
+
     _loguru_logger.disable("androguard")
 except ImportError:
     pass
@@ -96,7 +97,7 @@ class APKSecurityLimits:
     parse_timeout_seconds: float = 120
 
     @classmethod
-    def from_settings(cls) -> "APKSecurityLimits":
+    def from_settings(cls) -> APKSecurityLimits:
         """Build limits from the global application settings."""
         from src.config import settings
 
@@ -186,7 +187,9 @@ def validate_apk_archive(
         "entry_count": len(entries),
         "total_uncompressed_bytes": total_uncompressed,
         "total_compressed_bytes": total_compressed,
-        "compression_ratio": round(total_uncompressed / total_compressed, 2) if total_compressed else 0.0,
+        "compression_ratio": round(total_uncompressed / total_compressed, 2)
+        if total_compressed
+        else 0.0,
     }
 
 
@@ -205,7 +208,7 @@ def run_with_timeout(
     Raises:
         APKParseTimeoutError: If func does not finish within timeout_seconds.
     """
-    result_box: "queue.Queue" = queue.Queue(maxsize=1)
+    result_box: queue.Queue = queue.Queue(maxsize=1)
 
     def _worker() -> None:
         try:
@@ -214,7 +217,9 @@ def run_with_timeout(
             result_box.put((False, exc))
 
     worker = threading.Thread(
-        target=_worker, daemon=True, name="capra-apk-parse",
+        target=_worker,
+        daemon=True,
+        name="capra-apk-parse",
     )
     worker.start()
     worker.join(timeout_seconds)
@@ -340,7 +345,9 @@ def _parse_manifest_fields(apk_path: str) -> Dict[str, Any]:
     try:
         apk = APK(apk_path)
     except Exception as e:
-        raise APKCorruptedError(f"Androguard failed to initialize APK archive '{apk_path}': {e}") from e
+        raise APKCorruptedError(
+            f"Androguard failed to initialize APK archive '{apk_path}': {e}"
+        ) from e
 
     try:
         package_name = apk.get_package() or "unknown.package"

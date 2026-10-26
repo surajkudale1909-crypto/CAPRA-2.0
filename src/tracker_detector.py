@@ -33,12 +33,15 @@ class TrackerDetector:
     def _load_signatures(self) -> None:
         """Loads signature database from JSON file."""
         if not self.signatures_path.exists():
-            logger.warning("Tracker signatures file not found at %s. Using fallback rules.", self.signatures_path)
+            logger.warning(
+                "Tracker signatures file not found at %s. Using fallback rules.",
+                self.signatures_path,
+            )
             self.trackers_db = []
             return
 
         try:
-            with open(self.signatures_path, "r", encoding="utf-8") as f:
+            with open(self.signatures_path, encoding="utf-8") as f:
                 data = json.load(f)
                 self.trackers_db = data.get("trackers", [])
                 logger.debug("Loaded %d tracker signatures.", len(self.trackers_db))
@@ -66,13 +69,15 @@ class TrackerDetector:
 
             for c in normalized_classes:
                 if c.startswith(sig):
-                    matched_trackers.append({
-                        "name": tracker.get("name", "Unknown"),
-                        "category": tracker.get("category", "General"),
-                        "signature": sig,
-                        "website": tracker.get("website", ""),
-                        "sample_class": c
-                    })
+                    matched_trackers.append(
+                        {
+                            "name": tracker.get("name", "Unknown"),
+                            "category": tracker.get("category", "General"),
+                            "signature": sig,
+                            "website": tracker.get("website", ""),
+                            "sample_class": c,
+                        }
+                    )
                     categories_found.add(tracker.get("category", "General"))
                     break
 
@@ -96,13 +101,14 @@ class TrackerDetector:
             "risk_score": risk_score,
             "categories": sorted(list(categories_found)),
             "detected_trackers": matched_trackers,
-            "has_trackers": count > 0
+            "has_trackers": count > 0,
         }
 
     def detect_from_apk(self, apk_obj: Any) -> Dict[str, Any]:
         """Extracts all classes from DEX files in an Androguard APK instance and scans them."""
         try:
             from androguard.core.dex import DEX
+
             classes = []
             dex_files = apk_obj.get_all_dex()
             for dex_bytes in dex_files:
@@ -119,5 +125,5 @@ class TrackerDetector:
                 "categories": [],
                 "detected_trackers": [],
                 "has_trackers": False,
-                "error": str(e)
+                "error": str(e),
             }

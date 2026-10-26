@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,7 +39,6 @@ def generate_markdown_report(
     threat = analysis_result.get("threat", {})
     ml = analysis_result.get("ml", {})
     static_sec = analysis_result.get("static_analysis", {})
-    cat_det = analysis_result.get("category_detection", {})
 
     app_name = manifest.get("app_name") or "Unknown Application"
     pkg_name = manifest.get("package_name") or "unknown.package"
@@ -72,8 +70,10 @@ def generate_markdown_report(
 
     # Title & Header
     lines.append("# CAPRA 2.0 - Privacy Risk Audit Report")
-    lines.append(f"**Project:** Context-Aware Mobile App Privacy Risk Analyzer (CAPRA)  ")
-    lines.append(f"**Institution:** Vishwakarma Institute of Technology, Pune (CS-AI Dept, Group 8)  ")
+    lines.append("**Project:** Context-Aware Mobile App Privacy Risk Analyzer (CAPRA)  ")
+    lines.append(
+        "**Institution:** Vishwakarma Institute of Technology, Pune (CS-AI Dept, Group 8)  "
+    )
     lines.append(f"**Audit Timestamp:** `{now_str}`  ")
     lines.append("---")
     lines.append("")
@@ -81,13 +81,15 @@ def generate_markdown_report(
     # Executive Summary Card
     lines.append("## 1. Executive Summary")
     lines.append("")
-    lines.append(f"| Metric | Value |")
-    lines.append(f"| :--- | :--- |")
+    lines.append("| Metric | Value |")
+    lines.append("| :--- | :--- |")
     lines.append(f"| **Application Name** | **{app_name}** |")
     lines.append(f"| **Package Identifier** | `{pkg_name}` |")
     lines.append(f"| **Risk Verdict** | **{verdict_badge}** |")
     lines.append(f"| **Composite Privacy Risk Score** | **`{score} / 100`** |")
-    lines.append(f"| **Raw Penalty Points** | `{raw_penalty}` pts (Ceiling: {settings.raw_score_ceiling}) |")
+    lines.append(
+        f"| **Raw Penalty Points** | `{raw_penalty}` pts (Ceiling: {settings.raw_score_ceiling}) |"
+    )
     lines.append(f"| **Functional Category** | `{category}` ({cat_desc}) |")
     lines.append("")
 
@@ -99,19 +101,21 @@ def generate_markdown_report(
         lines.append("| Component | Weight | Raw Risk % | Contribution |")
         lines.append("| :--- | :---: | :---: | :---: |")
         lines.append(
-            f"| **Contextual Heuristics** | {int(sb.get('heuristic_weight', 0.5)*100)}% | "
+            f"| **Contextual Heuristics** | {int(sb.get('heuristic_weight', 0.5) * 100)}% | "
             f"{sb.get('heuristic_component', 0)}% | +{sb.get('heuristic_contribution', 0)} pts |"
         )
         lines.append(
-            f"| **Machine Learning** | {int(sb.get('ml_weight', 0.35)*100)}% | "
+            f"| **Machine Learning** | {int(sb.get('ml_weight', 0.35) * 100)}% | "
             f"{sb.get('ml_component', 0)}% | +{sb.get('ml_contribution', 0)} pts |"
         )
         lines.append(
-            f"| **Attack Surface & Static** | {int(sb.get('surface_weight', 0.15)*100)}% | "
+            f"| **Attack Surface & Static** | {int(sb.get('surface_weight', 0.15) * 100)}% | "
             f"{sb.get('surface_component', 0)}% | +{sb.get('surface_contribution', 0)} pts |"
         )
         if sb.get("threat_intel_override"):
-            lines.append("| **Threat Intel Critical Override** | Override | 100% | **Normalized to High/Critical** |")
+            lines.append(
+                "| **Threat Intel Critical Override** | Override | 100% | **Normalized to High/Critical** |"
+            )
         lines.append("")
 
     # Application Metadata & Cryptographic Hashes
@@ -156,9 +160,13 @@ def generate_markdown_report(
                 f"{vt_stats.get('total_engines', 0)}** security vendors flagged this hash"
             )
             if vt_stats.get("suggested_threat_label"):
-                lines.append(f"- **Suggested Threat Label:** `{vt_stats.get('suggested_threat_label')}`")
+                lines.append(
+                    f"- **Suggested Threat Label:** `{vt_stats.get('suggested_threat_label')}`"
+                )
             if vt_stats.get("permalink"):
-                lines.append(f"- **VirusTotal Analysis URL:** [{vt_stats.get('permalink')}]({vt_stats.get('permalink')})")
+                lines.append(
+                    f"- **VirusTotal Analysis URL:** [{vt_stats.get('permalink')}]({vt_stats.get('permalink')})"
+                )
 
         if threat.get("threat_details"):
             td = threat["threat_details"]
@@ -192,8 +200,12 @@ def generate_markdown_report(
         lines.append("### 🚨 Dangerous Permission Combinations (Collusion / Exfiltration)")
         lines.append("")
         for comb in combinations:
-            matched = [p.replace("android.permission.", "") for p in comb.get("matched_permissions", [])]
-            lines.append(f"- **{comb.get('name')}** (`{comb.get('risk_type')}`, +{comb.get('penalty')} pts)")
+            matched = [
+                p.replace("android.permission.", "") for p in comb.get("matched_permissions", [])
+            ]
+            lines.append(
+                f"- **{comb.get('name')}** (`{comb.get('risk_type')}`, +{comb.get('penalty')} pts)"
+            )
             lines.append(f"  - **Co-occurring Permissions:** `{' + '.join(matched)}`")
             lines.append(f"  - **Security Impact:** {comb.get('description')}")
         lines.append("")
@@ -206,7 +218,9 @@ def generate_markdown_report(
     if acceptable:
         lines.append(f"### Standard Expected Baseline Permissions ({len(acceptable)})")
         lines.append("")
-        acc_names = [f"`{a.get('permission', '').replace('android.permission.', '')}`" for a in acceptable]
+        acc_names = [
+            f"`{a.get('permission', '').replace('android.permission.', '')}`" for a in acceptable
+        ]
         lines.append(", ".join(acc_names))
         lines.append("")
 
@@ -218,7 +232,9 @@ def generate_markdown_report(
         ml_verdict = ml.get("ml_verdict", "N/A")
         model_name = ml.get("model_type", "Random Forest Classifier")
         is_syn = ml.get("is_synthetic", False)
-        src_tag = "Synthetic Fallback Dataset" if is_syn else ml.get("data_source", "Drebin / CIC-AndMal")
+        src_tag = (
+            "Synthetic Fallback Dataset" if is_syn else ml.get("data_source", "Drebin / CIC-AndMal")
+        )
 
         lines.append(f"- **Trained Model:** `{model_name}` ({src_tag})")
         lines.append(f"- **Inference Risk Probability:** **`{ml_prob}%`** (`{ml_verdict}`)")
@@ -231,7 +247,9 @@ def generate_markdown_report(
             lines.append("| Permission Feature | Gini Importance | Relative Contribution |")
             lines.append("| :--- | :---: | :---: |")
             for c in top_contrib:
-                lines.append(f"| `{c.get('short_name')}` | {c.get('importance_score', 0):.4f} | +{c.get('risk_contribution_pct', 0)}% |")
+                lines.append(
+                    f"| `{c.get('short_name')}` | {c.get('importance_score', 0):.4f} | +{c.get('risk_contribution_pct', 0)}% |"
+                )
             lines.append("")
     else:
         lines.append("Machine learning inference was skipped or unavailable.")
@@ -250,10 +268,14 @@ def generate_markdown_report(
             lines.append("| Tracker Name | Category | Signature Namespace |")
             lines.append("| :--- | :--- | :--- |")
             for trk in t_data.get("detected_trackers", []):
-                lines.append(f"| **{trk.get('name')}** | {trk.get('category')} | `{trk.get('signature')}` |")
+                lines.append(
+                    f"| **{trk.get('name')}** | {trk.get('category')} | `{trk.get('signature')}` |"
+                )
             lines.append("")
         else:
-            lines.append("✅ No known tracking, advertising, or profiling SDK signatures identified in DEX bytecode.")
+            lines.append(
+                "✅ No known tracking, advertising, or profiling SDK signatures identified in DEX bytecode."
+            )
             lines.append("")
 
         # Network
@@ -261,7 +283,9 @@ def generate_markdown_report(
         lines.append("### Network Surface & String Pool Inspection")
         lines.append("")
         lines.append(f"- **Total URLs Extracted:** `{n_data.get('total_urls', 0)}`")
-        lines.append(f"- **Cleartext Insecure HTTP Endpoints:** `{n_data.get('insecure_http_count', 0)}`")
+        lines.append(
+            f"- **Cleartext Insecure HTTP Endpoints:** `{n_data.get('insecure_http_count', 0)}`"
+        )
         raw_ips = n_data.get("raw_public_ips", [])
         if raw_ips:
             lines.append(f"- **Hardcoded Public IPs:** `{', '.join(raw_ips)}`")
@@ -290,7 +314,9 @@ def generate_markdown_report(
             )
             lines.append("")
             for p in r_data.get("paths", []):
-                lines.append(f"- **Source:** `{p.get('source')}` ➔ **Sink:** `{p.get('sink')}` ({p.get('confidence')})")
+                lines.append(
+                    f"- **Source:** `{p.get('source')}` ➔ **Sink:** `{p.get('sink')}` ({p.get('confidence')})"
+                )
                 if p.get("intra_procedural"):
                     lines.append(f"  - Direct intra-procedural call in: `{p.get('method')}`")
             lines.append("")
@@ -313,7 +339,9 @@ def generate_markdown_report(
 
     # Footer
     lines.append("---")
-    lines.append("*Generated by CAPRA v2.0 (Context-Aware Mobile App Privacy Risk Analyzer) | VIT Pune CS-AI Group 8*")
+    lines.append(
+        "*Generated by CAPRA v2.0 (Context-Aware Mobile App Privacy Risk Analyzer) | VIT Pune CS-AI Group 8*"
+    )
 
     content = "\n".join(lines)
 

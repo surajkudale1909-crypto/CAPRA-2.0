@@ -8,16 +8,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import hashlib
 import json
 import logging
 import os
-from pathlib import Path
-import time
-from typing import Any, Dict, Optional, Tuple
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
 
 from src.config import DATA_DIR, settings
 
@@ -93,11 +92,13 @@ class ThreatIntelEngine:
     def _load_database(self) -> Dict[str, Any]:
         """Load JSON hash database."""
         if not self.db_path.exists():
-            logger.warning("Threat intel database not found at %s; using empty database.", self.db_path)
+            logger.warning(
+                "Threat intel database not found at %s; using empty database.", self.db_path
+            )
             return {"malware_signatures": {}, "verified_benign_signatures": {}}
 
         try:
-            with open(self.db_path, "r", encoding="utf-8") as f:
+            with open(self.db_path, encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
             logger.error("Failed to parse threat intel database at %s: %s", self.db_path, e)
@@ -109,13 +110,12 @@ class ThreatIntelEngine:
             return {}
 
         try:
-            with open(self.cache_path, "r", encoding="utf-8") as f:
+            with open(self.cache_path, encoding="utf-8") as f:
                 data = json.load(f)
                 return data if isinstance(data, dict) else {}
         except Exception as e:
             logger.warning("Failed to read VirusTotal cache at %s: %s", self.cache_path, e)
             return {}
-
 
     def _save_cache(self) -> None:
         """Flush in-memory VirusTotal response cache to disk."""
@@ -157,7 +157,9 @@ class ThreatIntelEngine:
                 logger.warning("VirusTotal API quota or rate limit exceeded (HTTP 429).")
                 return None, "RATE_LIMIT"
             elif e.code in (401, 403):
-                logger.warning("VirusTotal API authentication rejected (HTTP %d). Check API key.", e.code)
+                logger.warning(
+                    "VirusTotal API authentication rejected (HTTP %d). Check API key.", e.code
+                )
                 return None, "AUTH_ERROR"
             else:
                 logger.warning("VirusTotal API returned HTTP %d: %s", e.code, e.reason)

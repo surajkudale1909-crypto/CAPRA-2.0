@@ -46,7 +46,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
-    "coverage>=7.4.0"
+    "coverage>=7.4.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.4.0",
+    "pre-commit>=3.6.0",
 ]
 
 [project.scripts]
@@ -59,4 +62,36 @@ py-modules = ["main"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*", "data*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = [".venv", "build", "dist", "capra.egg-info"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "I"]
+ignore = [
+    "E501",   # line length is handled by the formatter
+    "B008",   # function calls in defaults (argparse patterns)
+    "UP007",  # keep Optional[X] typing style used across the codebase
+    "UP006",  # keep Dict/List typing style used across the codebase
+    "UP035",  # keep typing.List/Set imports (consistent with UP006)
+    "UP045",  # keep Optional[X] annotations (consistent with UP007)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# sys.path bootstrap must run before first-party imports in standalone scripts
+"scripts/*" = ["E402"]
+"src/gui.py" = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/gui.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
 

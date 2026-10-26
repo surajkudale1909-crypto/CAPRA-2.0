@@ -47,7 +47,15 @@ CATEGORY_KEYWORDS: Dict[str, Dict[str, List[str]]] = {
     },
     "Navigation": {
         "primary": ["navigation", "navigator", "maps", "gps", "route"],
-        "secondary": ["transit", "osm", "waze", "commute", "turnbyturn", "directions", "location_tracker"],
+        "secondary": [
+            "transit",
+            "osm",
+            "waze",
+            "commute",
+            "turnbyturn",
+            "directions",
+            "location_tracker",
+        ],
     },
     "Social Media": {
         "primary": ["social", "network", "community", "feed", "profile"],
@@ -55,19 +63,59 @@ CATEGORY_KEYWORDS: Dict[str, Dict[str, List[str]]] = {
     },
     "Messaging": {
         "primary": ["message", "messaging", "chat", "messenger", "sms"],
-        "secondary": ["talk", "texting", "wechat", "whatsapp", "signal", "telegram", "inbox", "voip"],
+        "secondary": [
+            "talk",
+            "texting",
+            "wechat",
+            "whatsapp",
+            "signal",
+            "telegram",
+            "inbox",
+            "voip",
+        ],
     },
     "Banking/Finance": {
         "primary": ["bank", "banking", "finance", "fintech", "wallet"],
-        "secondary": ["pay", "payment", "money", "loan", "crypto", "credit", "invest", "stock", "wealth", "upi"],
+        "secondary": [
+            "pay",
+            "payment",
+            "money",
+            "loan",
+            "crypto",
+            "credit",
+            "invest",
+            "stock",
+            "wealth",
+            "upi",
+        ],
     },
     "Health/Fitness": {
         "primary": ["fitness", "workout", "health", "exercise", "running"],
-        "secondary": ["pedometer", "diet", "gym", "cardio", "sleep", "heartrate", "steps", "calorie"],
+        "secondary": [
+            "pedometer",
+            "diet",
+            "gym",
+            "cardio",
+            "sleep",
+            "heartrate",
+            "steps",
+            "calorie",
+        ],
     },
     "Games": {
         "primary": ["game", "games", "gaming", "play", "arcade"],
-        "secondary": ["puzzle", "rpg", "quest", "racing", "clash", "simulator", "unity", "craft", "battle", "hero"],
+        "secondary": [
+            "puzzle",
+            "rpg",
+            "quest",
+            "racing",
+            "clash",
+            "simulator",
+            "unity",
+            "craft",
+            "battle",
+            "hero",
+        ],
     },
     "Camera/Photo": {
         "primary": ["camera", "photo", "photography", "selfie", "editor"],
@@ -75,19 +123,56 @@ CATEGORY_KEYWORDS: Dict[str, Dict[str, List[str]]] = {
     },
     "Music/Video": {
         "primary": ["music", "video", "media", "player", "audio"],
-        "secondary": ["stream", "mp3", "podcast", "radio", "track", "tune", "sound", "mp4", "playback"],
+        "secondary": [
+            "stream",
+            "mp3",
+            "podcast",
+            "radio",
+            "track",
+            "tune",
+            "sound",
+            "mp4",
+            "playback",
+        ],
     },
     "Shopping": {
         "primary": ["shop", "shopping", "store", "ecommerce", "cart"],
-        "secondary": ["deals", "buy", "marketplace", "mall", "fashion", "retail", "discounts", "orders"],
+        "secondary": [
+            "deals",
+            "buy",
+            "marketplace",
+            "mall",
+            "fashion",
+            "retail",
+            "discounts",
+            "orders",
+        ],
     },
     "Productivity": {
         "primary": ["productivity", "office", "notes", "notepad", "task"],
-        "secondary": ["todo", "calendar", "document", "pdf", "scanner", "organizer", "workflow", "sheets"],
+        "secondary": [
+            "todo",
+            "calendar",
+            "document",
+            "pdf",
+            "scanner",
+            "organizer",
+            "workflow",
+            "sheets",
+        ],
     },
     "Education": {
         "primary": ["education", "learning", "study", "course", "quiz"],
-        "secondary": ["tutor", "school", "dictionary", "language", "academy", "vocab", "flashcards", "learn"],
+        "secondary": [
+            "tutor",
+            "school",
+            "dictionary",
+            "language",
+            "academy",
+            "vocab",
+            "flashcards",
+            "learn",
+        ],
     },
 }
 
@@ -98,7 +183,10 @@ PERMISSION_PROFILE_HINTS: Dict[str, Tuple[List[str], str]] = {
         "Includes biometric body sensor / physical activity telemetry",
     ),
     "Navigation": (
-        ["android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_BACKGROUND_LOCATION"],
+        [
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_BACKGROUND_LOCATION",
+        ],
         "Includes continuous background geolocation tracking",
     ),
     "Camera/Photo": (
@@ -154,6 +242,7 @@ class CategoryDetector:
         # 1. Check for explicit manual override
         if override_category:
             from src.context_engine import ContextEngine
+
             try:
                 ce = ContextEngine()
                 resolved = ce.resolve_category(override_category)
@@ -230,7 +319,9 @@ class CategoryDetector:
             best_cat = "Calculator" if "calc" in package_name.lower() else "Productivity"
             confidence = 0.30
             method = "fallback_heuristic"
-            category_signals[best_cat].append("No explicit keywords matched; default baseline applied.")
+            category_signals[best_cat].append(
+                "No explicit keywords matched; default baseline applied."
+            )
 
         return CategoryDetectionResult(
             category=best_cat,

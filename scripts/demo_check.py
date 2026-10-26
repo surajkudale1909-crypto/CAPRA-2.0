@@ -151,14 +151,25 @@ def c_history():
 
 @check("9. ML model separates malware-like from benign profiles")
 def c_ml():
+    import logging
+
     from src.ml_pipeline import PermissionMLPipeline
 
-    import logging
     logging.disable(logging.INFO)
     p = PermissionMLPipeline()
-    malware_like = ["android.permission." + x for x in
-                    ["READ_SMS", "SEND_SMS", "RECEIVE_SMS", "READ_CONTACTS", "CALL_PHONE",
-                     "READ_CALL_LOG", "SYSTEM_ALERT_WINDOW", "INTERNET"]]
+    malware_like = [
+        "android.permission." + x
+        for x in [
+            "READ_SMS",
+            "SEND_SMS",
+            "RECEIVE_SMS",
+            "READ_CONTACTS",
+            "CALL_PHONE",
+            "READ_CALL_LOG",
+            "SYSTEM_ALERT_WINDOW",
+            "INTERNET",
+        ]
+    ]
     benign_like = ["android.permission." + x for x in ["VIBRATE", "WAKE_LOCK"]]
     hi = p.predict_risk(malware_like)["risk_percentage"]
     lo = p.predict_risk(benign_like)["risk_percentage"]
@@ -206,7 +217,7 @@ def c_gui():
     try:
         import src.gui  # noqa: F401
     except Exception as e:
-        raise AssertionError(f"GUI module failed to import: {e}")
+        raise AssertionError(f"GUI module failed to import: {e}") from e
 
 
 def main() -> int:
@@ -229,7 +240,9 @@ def main() -> int:
 
     print("-" * 78)
     total = len(RESULTS)
-    print(f"  {total - failed - skipped} passed, {failed} failed, {skipped} skipped / {total} checks")
+    print(
+        f"  {total - failed - skipped} passed, {failed} failed, {skipped} skipped / {total} checks"
+    )
     if failed:
         print("\n  *** NOT DEMO-READY — fix the failures above before presenting ***")
         return 1

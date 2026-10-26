@@ -16,13 +16,14 @@ from typing import Optional
 # Try loading .env file if python-dotenv is installed or read manually
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     # Minimal fallback parser for .env if python-dotenv is not installed
     env_file = Path(__file__).resolve().parent.parent / ".env"
     if env_file.is_file():
         try:
-            with open(env_file, "r", encoding="utf-8") as f:
+            with open(env_file, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith("#") and "=" in line:
@@ -73,9 +74,7 @@ class Settings:
 
     # Risk Fusion Settings
     raw_score_ceiling: int = 160
-    log_level: str = field(
-        default_factory=lambda: os.getenv("CAPRA_LOG_LEVEL", "INFO").upper()
-    )
+    log_level: str = field(default_factory=lambda: os.getenv("CAPRA_LOG_LEVEL", "INFO").upper())
 
     # APK Input Hardening (untrusted-input safety limits, all env-overridable)
     max_apk_size_mb: int = field(

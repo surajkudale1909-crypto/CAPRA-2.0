@@ -293,6 +293,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 Developed with ❤️ by **CS-AI Group 8 (Suraj, Omraj, Ishan, Samriddhi)** at **Vishwakarma Institute of Technology, Pune**.
 
-# CAPRA-2.0
-Context-Aware Privacy Risk Analyzer (CAPRA) — a research project for analyzing Android application security and privacy risks using static analysis, data-flow analysis, and context-aware risk assessment.
-

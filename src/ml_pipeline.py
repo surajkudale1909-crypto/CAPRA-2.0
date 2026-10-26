@@ -17,14 +17,14 @@ import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import joblib
-import numpy as np
-import pandas as pd
 
 # Ensure Matplotlib operates headlessly
 import matplotlib
+import numpy as np
+import pandas as pd
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -130,7 +130,9 @@ def generate_synthetic_training_dataset(
                 X[i, perm_idx[p]] = 1
 
         if rng.rand() < 0.15:
-            rand_p = rng.choice(["android.permission.ACCESS_WIFI_STATE", "android.permission.BLUETOOTH"])
+            rand_p = rng.choice(
+                ["android.permission.ACCESS_WIFI_STATE", "android.permission.BLUETOOTH"]
+            )
             X[i, perm_idx[rand_p]] = 1
 
         y[i] = 0
@@ -191,26 +193,69 @@ def generate_synthetic_training_dataset(
 
 #: Columns that describe the app, not its permission footprint
 METADATA_COLUMNS = {
-    "pkgname", "package", "package name", "package_name", "app name", "app_name",
-    "app", "name", "downloads", "app categore", "app category", "app_category",
-    "category", "index", "unnamed: 0", "id", "md5", "sha1", "sha256",
+    "pkgname",
+    "package",
+    "package name",
+    "package_name",
+    "app name",
+    "app_name",
+    "app",
+    "name",
+    "downloads",
+    "app categore",
+    "app category",
+    "app_category",
+    "category",
+    "index",
+    "unnamed: 0",
+    "id",
+    "md5",
+    "sha1",
+    "sha256",
 }
 
 #: Aggregate Android permission-group columns (derived summaries, not real permissions)
 AGGREGATE_GROUP_COLUMNS = {
-    "CALENDAR", "CONTACTS", "LOCATION", "MICROPHONE", "PHONE", "SENSORS", "SMS", "STORAGE",
+    "CALENDAR",
+    "CONTACTS",
+    "LOCATION",
+    "MICROPHONE",
+    "PHONE",
+    "SENSORS",
+    "SMS",
+    "STORAGE",
 }
 
 #: Known label column names (case-insensitive, first match wins)
 LABEL_COLUMN_CANDIDATES = (
-    "class", "label", "result", "malware", "is_malicious", "type",
-    "verdict", "target", "y",
+    "class",
+    "label",
+    "result",
+    "malware",
+    "is_malicious",
+    "type",
+    "verdict",
+    "target",
+    "y",
 )
 
 #: Canonical label values accepted for the positive (malware) class
 LABEL_ONE_VALUES = {
-    "1", "malware", "malicious", "m", "s", "suspect", "suspicious", "true", "yes",
-    "bad", "dangerous", "trojan", "adware", "riskware", "pua",
+    "1",
+    "malware",
+    "malicious",
+    "m",
+    "s",
+    "suspect",
+    "suspicious",
+    "true",
+    "yes",
+    "bad",
+    "dangerous",
+    "trojan",
+    "adware",
+    "riskware",
+    "pua",
 }
 
 #: Canonical label values accepted for the negative (benign) class
@@ -267,7 +312,11 @@ def detect_label_column(df: pd.DataFrame) -> Optional[str]:
         if normalize_permission_column(col) is not None:
             continue
         col_str = str(col).strip()
-        if col_str in AGGREGATE_GROUP_COLUMNS or "." in col_str or col_str.lower().startswith("android."):
+        if (
+            col_str in AGGREGATE_GROUP_COLUMNS
+            or "." in col_str
+            or col_str.lower().startswith("android.")
+        ):
             continue
         values = {str(v).strip().lower() for v in df[col].dropna().unique()}
         if (
@@ -375,8 +424,8 @@ def load_dataset(
     # Ignore the bundled toy sample when real labelled datasets are present
     if len(used_files) > 1:
         kept = [
-            (f, d, l)
-            for f, d, l in zip(used_files, frames, label_cols)
+            (f, d, lbl)
+            for f, d, lbl in zip(used_files, frames, label_cols)
             if os.path.basename(f) != TOY_DATASET_NAME
         ]
         if kept and len(kept) < len(used_files):
@@ -417,8 +466,10 @@ def load_dataset(
                 combined = np.zeros(len(df), dtype=np.int32)
                 for col in cols:
                     combined |= (
-                        pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int) > 0
-                    ).astype(np.int32).values
+                        (pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int) > 0)
+                        .astype(np.int32)
+                        .values
+                    )
                 Xb[:, feat_index[norm]] = combined
             blocks.append(Xb)
             y_blocks.append(_encode_labels(df[label_col].values, os.path.basename(path)))
@@ -436,11 +487,17 @@ def load_dataset(
                 "Dataset only has %d samples (%d malware, %d benign). Metrics on such a small "
                 "sample are illustrative, NOT representative of in-the-wild accuracy. Provide a "
                 "full Drebin / CIC-AndMal / Kaggle dataset for meaningful evaluation.",
-                len(X), n_mal, n_ben,
+                len(X),
+                n_mal,
+                n_ben,
             )
         logger.info(
             "Dataset successfully loaded: %d samples (%d malware, %d benign), %d permission features [%s]",
-            len(X), n_mal, n_ben, len(feature_names), names,
+            len(X),
+            n_mal,
+            n_ben,
+            len(feature_names),
+            names,
         )
         return X, y, "EMPIRICAL", source_name, feature_names
 
@@ -451,7 +508,9 @@ def load_dataset(
         )
 
     # Synthetic fallback (strictly labeled)
-    logger.info("[DATA SOURCE: SYNTHETIC (FALLBACK)] No empirical dataset loaded. Generating synthetic benchmark.")
+    logger.info(
+        "[DATA SOURCE: SYNTHETIC (FALLBACK)] No empirical dataset loaded. Generating synthetic benchmark."
+    )
     X, y = generate_synthetic_training_dataset(n_samples=1200, random_state=42)
     return X, y, "SYNTHETIC", "SYNTHETIC (Fallback Generator)", list(FEATURE_PERMISSIONS)
 
@@ -471,12 +530,22 @@ def compare_and_evaluate_models(
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-    rf_model = RandomForestClassifier(n_estimators=100, max_depth=8, random_state=42, class_weight="balanced")
-    gb_model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42)
+    rf_model = RandomForestClassifier(
+        n_estimators=100, max_depth=8, random_state=42, class_weight="balanced"
+    )
+    gb_model = GradientBoostingClassifier(
+        n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42
+    )
 
     metrics: Dict[str, Dict[str, List[float]]] = {
         "RandomForest": {"accuracy": [], "precision": [], "recall": [], "f1": [], "roc_auc": []},
-        "GradientBoosting": {"accuracy": [], "precision": [], "recall": [], "f1": [], "roc_auc": []},
+        "GradientBoosting": {
+            "accuracy": [],
+            "precision": [],
+            "recall": [],
+            "f1": [],
+            "roc_auc": [],
+        },
     }
 
     # Tracking predictions for ROC & Confusion Matrix from representative test fold
@@ -496,8 +565,12 @@ def compare_and_evaluate_models(
         rf_probs = rf_model.predict_proba(X_test)[:, 1]
 
         metrics["RandomForest"]["accuracy"].append(float(accuracy_score(y_test, rf_preds)))
-        metrics["RandomForest"]["precision"].append(float(precision_score(y_test, rf_preds, zero_division=0)))
-        metrics["RandomForest"]["recall"].append(float(recall_score(y_test, rf_preds, zero_division=0)))
+        metrics["RandomForest"]["precision"].append(
+            float(precision_score(y_test, rf_preds, zero_division=0))
+        )
+        metrics["RandomForest"]["recall"].append(
+            float(recall_score(y_test, rf_preds, zero_division=0))
+        )
         metrics["RandomForest"]["f1"].append(float(f1_score(y_test, rf_preds, zero_division=0)))
         metrics["RandomForest"]["roc_auc"].append(float(roc_auc_score(y_test, rf_probs)))
 
@@ -507,8 +580,12 @@ def compare_and_evaluate_models(
         gb_probs = gb_model.predict_proba(X_test)[:, 1]
 
         metrics["GradientBoosting"]["accuracy"].append(float(accuracy_score(y_test, gb_preds)))
-        metrics["GradientBoosting"]["precision"].append(float(precision_score(y_test, gb_preds, zero_division=0)))
-        metrics["GradientBoosting"]["recall"].append(float(recall_score(y_test, gb_preds, zero_division=0)))
+        metrics["GradientBoosting"]["precision"].append(
+            float(precision_score(y_test, gb_preds, zero_division=0))
+        )
+        metrics["GradientBoosting"]["recall"].append(
+            float(recall_score(y_test, gb_preds, zero_division=0))
+        )
         metrics["GradientBoosting"]["f1"].append(float(f1_score(y_test, gb_preds, zero_division=0)))
         metrics["GradientBoosting"]["roc_auc"].append(float(roc_auc_score(y_test, gb_probs)))
 
@@ -536,7 +613,9 @@ def compare_and_evaluate_models(
             "GradientBoosting": {
                 "accuracy_mean": round(float(np.mean(metrics["GradientBoosting"]["accuracy"])), 4),
                 "accuracy_std": round(float(np.std(metrics["GradientBoosting"]["accuracy"])), 4),
-                "precision_mean": round(float(np.mean(metrics["GradientBoosting"]["precision"])), 4),
+                "precision_mean": round(
+                    float(np.mean(metrics["GradientBoosting"]["precision"])), 4
+                ),
                 "recall_mean": round(float(np.mean(metrics["GradientBoosting"]["recall"])), 4),
                 "f1_mean": round(float(np.mean(metrics["GradientBoosting"]["f1"])), 4),
                 "roc_auc_mean": round(float(np.mean(metrics["GradientBoosting"]["roc_auc"])), 4),
@@ -559,7 +638,11 @@ def compare_and_evaluate_models(
     md_path = os.path.join(out_dir, "evaluation_metrics.md")
     rf_m = summary["models"]["RandomForest"]
     gb_m = summary["models"]["GradientBoosting"]
-    badge = "**[DATA SOURCE: SYNTHETIC (FALLBACK)]**" if summary["is_synthetic"] else f"**[DATA SOURCE: {data_source_label}]**"
+    badge = (
+        "**[DATA SOURCE: SYNTHETIC (FALLBACK)]**"
+        if summary["is_synthetic"]
+        else f"**[DATA SOURCE: {data_source_label}]**"
+    )
 
     md_content = f"""# CAPRA Machine Learning Evaluation Report (Phase 3)
 
@@ -569,11 +652,11 @@ def compare_and_evaluate_models(
 
 | Metric | Random Forest (RF) | Gradient Boosting (GB) | Delta |
 | :--- | :---: | :---: | :---: |
-| **Accuracy** | {rf_m['accuracy_mean']:.4f} ± {rf_m['accuracy_std']:.4f} | {gb_m['accuracy_mean']:.4f} ± {gb_m['accuracy_std']:.4f} | {gb_m['accuracy_mean'] - rf_m['accuracy_mean']:+.4f} |
-| **Precision** | {rf_m['precision_mean']:.4f} | {gb_m['precision_mean']:.4f} | {gb_m['precision_mean'] - rf_m['precision_mean']:+.4f} |
-| **Recall** | {rf_m['recall_mean']:.4f} | {gb_m['recall_mean']:.4f} | {gb_m['recall_mean'] - rf_m['recall_mean']:+.4f} |
-| **F1-Score** | **{rf_m['f1_mean']:.4f}** | {gb_m['f1_mean']:.4f} | {gb_m['f1_mean'] - rf_m['f1_mean']:+.4f} |
-| **ROC-AUC** | **{rf_m['roc_auc_mean']:.4f}** | {gb_m['roc_auc_mean']:.4f} | {gb_m['roc_auc_mean'] - rf_m['roc_auc_mean']:+.4f} |
+| **Accuracy** | {rf_m["accuracy_mean"]:.4f} ± {rf_m["accuracy_std"]:.4f} | {gb_m["accuracy_mean"]:.4f} ± {gb_m["accuracy_std"]:.4f} | {gb_m["accuracy_mean"] - rf_m["accuracy_mean"]:+.4f} |
+| **Precision** | {rf_m["precision_mean"]:.4f} | {gb_m["precision_mean"]:.4f} | {gb_m["precision_mean"] - rf_m["precision_mean"]:+.4f} |
+| **Recall** | {rf_m["recall_mean"]:.4f} | {gb_m["recall_mean"]:.4f} | {gb_m["recall_mean"] - rf_m["recall_mean"]:+.4f} |
+| **F1-Score** | **{rf_m["f1_mean"]:.4f}** | {gb_m["f1_mean"]:.4f} | {gb_m["f1_mean"] - rf_m["f1_mean"]:+.4f} |
+| **ROC-AUC** | **{rf_m["roc_auc_mean"]:.4f}** | {gb_m["roc_auc_mean"]:.4f} | {gb_m["roc_auc_mean"] - rf_m["roc_auc_mean"]:+.4f} |
 
 **Selected Model**: `{winner}` (Saved to `data/models/best_model.joblib`)
 
@@ -585,7 +668,9 @@ def compare_and_evaluate_models(
     # Plot Confusion Matrix
     if y_test_rep is not None and rf_best_preds is not None and gb_best_preds is not None:
         fig, axes = plt.subplots(1, 2, figsize=(10, 4.5))
-        for ax, preds, title in zip(axes, [rf_best_preds, gb_best_preds], ["Random Forest", "Gradient Boosting"]):
+        for ax, preds, title in zip(
+            axes, [rf_best_preds, gb_best_preds], ["Random Forest", "Gradient Boosting"]
+        ):
             cm = confusion_matrix(y_test_rep, preds)
             im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
             ax.set_title(f"{title} Confusion Matrix", fontsize=11, fontweight="bold")
@@ -598,8 +683,14 @@ def compare_and_evaluate_models(
             ax.set_yticklabels(classes)
             for i in range(cm.shape[0]):
                 for j in range(cm.shape[1]):
-                    ax.text(j, i, format(cm[i, j], "d"), ha="center", va="center",
-                            color="white" if cm[i, j] > cm.max() / 2 else "black")
+                    ax.text(
+                        j,
+                        i,
+                        format(cm[i, j], "d"),
+                        ha="center",
+                        va="center",
+                        color="white" if cm[i, j] > cm.max() / 2 else "black",
+                    )
             ax.set_ylabel("True Label")
             ax.set_xlabel("Predicted Label")
         plt.tight_layout()
@@ -611,8 +702,20 @@ def compare_and_evaluate_models(
         fig, ax = plt.subplots(figsize=(7, 5))
         rf_fpr, rf_tpr, _ = roc_curve(y_test_rep, rf_best_probs)
         gb_fpr, gb_tpr, _ = roc_curve(y_test_rep, gb_best_probs)
-        ax.plot(rf_fpr, rf_tpr, color="#1f77b4", lw=2, label=f"Random Forest (AUC = {rf_m['roc_auc_mean']:.3f})")
-        ax.plot(gb_fpr, gb_tpr, color="#ff7f0e", lw=2, label=f"Gradient Boosting (AUC = {gb_m['roc_auc_mean']:.3f})")
+        ax.plot(
+            rf_fpr,
+            rf_tpr,
+            color="#1f77b4",
+            lw=2,
+            label=f"Random Forest (AUC = {rf_m['roc_auc_mean']:.3f})",
+        )
+        ax.plot(
+            gb_fpr,
+            gb_tpr,
+            color="#ff7f0e",
+            lw=2,
+            label=f"Gradient Boosting (AUC = {gb_m['roc_auc_mean']:.3f})",
+        )
         ax.plot([0, 1], [0, 1], color="grey", lw=1.5, linestyle="--")
         ax.set_xlabel("False Positive Rate (1 - Specificity)")
         ax.set_ylabel("True Positive Rate (Recall)")
@@ -656,9 +759,7 @@ class PermissionMLPipeline:
 
     def _rebuild_index(self) -> None:
         """Rebuild the permission->column index from the active feature vocabulary."""
-        self.perm_to_idx = {
-            normalize_permission_name(f): i for i, f in enumerate(self.features)
-        }
+        self.perm_to_idx = {normalize_permission_name(f): i for i, f in enumerate(self.features)}
 
     def _load_model(self) -> None:
         """Load trained model and metadata from disk."""
@@ -676,12 +777,16 @@ class PermissionMLPipeline:
                 self.data_source = "SYNTHETIC"
                 self.is_synthetic = True
             self._rebuild_index()
-            logger.info(f"Loaded ML model ({self.model_name}) from {self.model_path} [Source: {self.data_source}]")
+            logger.info(
+                f"Loaded ML model ({self.model_name}) from {self.model_path} [Source: {self.data_source}]"
+            )
         except Exception as e:
             logger.warning(f"Failed to load model from {self.model_path} ({e}). Retraining...")
             self.train_and_save()
 
-    def train_and_save(self, dataset_path: Optional[Union[str, List[str]]] = None) -> Dict[str, Any]:
+    def train_and_save(
+        self, dataset_path: Optional[Union[str, List[str]]] = None
+    ) -> Dict[str, Any]:
         """Train and evaluate models on real or synthetic data, saving the winner."""
         logger.info("Initializing ML training and model comparison...")
         X, y, source_type, source_desc, feature_names = load_dataset(dataset_path)
@@ -691,20 +796,22 @@ class PermissionMLPipeline:
         self._rebuild_index()
 
         self.data_source = source_desc
-        self.is_synthetic = (source_type == "SYNTHETIC")
+        self.is_synthetic = source_type == "SYNTHETIC"
 
         # Compare Random Forest vs Gradient Boosting with 5-fold CV
-        eval_summary = compare_and_evaluate_models(
-            X, y, data_source_label=source_desc
-        )
+        eval_summary = compare_and_evaluate_models(X, y, data_source_label=source_desc)
 
         winner = eval_summary.get("selected_winner", "RandomForest")
         self.model_name = winner
 
         if winner == "GradientBoosting":
-            self.model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42)
+            self.model = GradientBoostingClassifier(
+                n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42
+            )
         else:
-            self.model = RandomForestClassifier(n_estimators=100, max_depth=8, random_state=42, class_weight="balanced")
+            self.model = RandomForestClassifier(
+                n_estimators=100, max_depth=8, random_state=42, class_weight="balanced"
+            )
 
         self.model.fit(X, y)
 
@@ -768,7 +875,9 @@ class PermissionMLPipeline:
             if idx is not None and idx not in seen_cols:
                 active_perms.append(key)
                 seen_cols.add(idx)
-        importances = getattr(self.model, "feature_importances_", np.ones(len(self.features)) / len(self.features))
+        importances = getattr(
+            self.model, "feature_importances_", np.ones(len(self.features)) / len(self.features)
+        )
 
         # Per-prediction local explainability: directional risk contribution
         ranked_active = []
@@ -778,13 +887,15 @@ class PermissionMLPipeline:
             imp = float(importances[idx])
             # Directional weight: active dangerous permissions increment risk probability
             contrib_pct = round(imp * malicious_prob * 100, 2)
-            ranked_active.append({
-                "permission": p,
-                "short_name": short_name,
-                "importance_score": round(imp, 4),
-                "risk_contribution_pct": contrib_pct,
-                "influence": "INCREASES_RISK" if malicious_prob >= 0.40 else "BENIGN_PROFILE",
-            })
+            ranked_active.append(
+                {
+                    "permission": p,
+                    "short_name": short_name,
+                    "importance_score": round(imp, 4),
+                    "risk_contribution_pct": contrib_pct,
+                    "influence": "INCREASES_RISK" if malicious_prob >= 0.40 else "BENIGN_PROFILE",
+                }
+            )
         ranked_active.sort(key=lambda x: x["importance_score"], reverse=True)
 
         verdict_str = "High Risk / Anomaly" if malicious_prob >= 0.50 else "Benign Profile"
@@ -834,7 +945,9 @@ class PermissionMLPipeline:
         for i in range(max(0, len(bars) - 3), len(bars)):
             bars[i].set_color("#d9534f")
 
-        ax.set_xlabel("Relative Feature Importance (Gini / Split Gain)", fontsize=11, fontweight="bold")
+        ax.set_xlabel(
+            "Relative Feature Importance (Gini / Split Gain)", fontsize=11, fontweight="bold"
+        )
         badge = "[SYNTHETIC FALLBACK]" if self.is_synthetic else f"[{self.data_source}]"
         ax.set_title(
             f"{self.model_name} Top {top_n} Decision Features\n{badge}",
@@ -870,8 +983,11 @@ class PermissionMLPipeline:
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="CAPRA Machine Learning Pipeline")
-    parser.add_argument("--train", action="store_true", help="Train models and perform Stratified CV")
+    parser.add_argument(
+        "--train", action="store_true", help="Train models and perform Stratified CV"
+    )
     parser.add_argument("--dataset", type=str, default=None, help="Path to real CSV dataset")
     parser.add_argument("--plot", action="store_true", help="Generate feature importance plot")
     args = parser.parse_args()

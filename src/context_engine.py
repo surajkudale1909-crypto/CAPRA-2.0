@@ -92,7 +92,7 @@ class ContextEngine:
             raise ContextRuleError(f"Context rules file not found at: {self.rules_path}")
 
         try:
-            with open(self.rules_path, "r", encoding="utf-8") as f:
+            with open(self.rules_path, encoding="utf-8") as f:
                 return json.load(f)
         except json.JSONDecodeError as e:
             raise ContextRuleError(f"Malformed JSON in context rules file: {e}") from e
@@ -156,29 +156,35 @@ class ContextEngine:
         # Classify each requested permission
         for perm in requested_permissions:
             if perm in acceptable_set:
-                acceptable.append({
-                    "permission": perm,
-                    "status": "Acceptable",
-                    "description": "Standard baseline permission for this category.",
-                })
+                acceptable.append(
+                    {
+                        "permission": perm,
+                        "status": "Acceptable",
+                        "description": "Standard baseline permission for this category.",
+                    }
+                )
             elif perm in suspicious_rules:
                 detail = suspicious_rules[perm]
                 penalty = detail.get("penalty", self.weights.get("default_suspicious_penalty", 20))
                 reason = detail.get("reason", "Suspicious for this category.")
-                suspicious.append({
-                    "permission": perm,
-                    "penalty": penalty,
-                    "reason": reason,
-                })
+                suspicious.append(
+                    {
+                        "permission": perm,
+                        "penalty": penalty,
+                        "reason": reason,
+                    }
+                )
                 mismatch_penalty += penalty
             elif perm in self.aosp_dangerous:
                 # Unlisted runtime dangerous permission
                 penalty = self.weights.get("unlisted_dangerous_penalty", 15)
-                unexpected_dangerous.append({
-                    "permission": perm,
-                    "penalty": penalty,
-                    "reason": "Dangerous AOSP runtime permission not standard for this category.",
-                })
+                unexpected_dangerous.append(
+                    {
+                        "permission": perm,
+                        "penalty": penalty,
+                        "reason": "Dangerous AOSP runtime permission not standard for this category.",
+                    }
+                )
                 mismatch_penalty += penalty
             else:
                 neutral.append(perm)
@@ -200,14 +206,16 @@ class ContextEngine:
                 if not is_contextually_exempt:
                     penalty = comb.get("penalty", 30)
                     combination_penalty += penalty
-                    triggered_combinations.append({
-                        "id": comb.get("id"),
-                        "name": comb.get("name"),
-                        "risk_type": comb.get("risk_type"),
-                        "penalty": penalty,
-                        "description": comb.get("description"),
-                        "matched_permissions": list(comb_perms),
-                    })
+                    triggered_combinations.append(
+                        {
+                            "id": comb.get("id"),
+                            "name": comb.get("name"),
+                            "risk_type": comb.get("risk_type"),
+                            "penalty": penalty,
+                            "description": comb.get("description"),
+                            "matched_permissions": list(comb_perms),
+                        }
+                    )
 
         # Calculate exported component exposure penalty
         exported_penalty = 0

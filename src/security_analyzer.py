@@ -5,10 +5,9 @@
 #              Loading (DCL), reflection APIs, native code (.so), and obfuscation.
 # ==============================================================================
 
-from datetime import datetime, timezone
 import logging
-import re
-from typing import Any, Dict, List, Optional, Set
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("CAPRA.SecurityAnalyzer")
 
@@ -16,7 +15,7 @@ DCL_CLASSES = {
     "dalvik/system/DexClassLoader",
     "dalvik/system/PathClassLoader",
     "dalvik/system/InMemoryDexClassLoader",
-    "dalvik/system/DelegateLastClassLoader"
+    "dalvik/system/DelegateLastClassLoader",
 }
 
 REFLECTION_PATTERNS = [
@@ -24,7 +23,7 @@ REFLECTION_PATTERNS = [
     "Ljava/lang/reflect/Field;",
     "getDeclaredMethod",
     "getMethod",
-    "Class.forName"
+    "Class.forName",
 ]
 
 
@@ -53,7 +52,7 @@ class SecurityAnalyzer:
             "issuer": "Unknown",
             "subject": "Unknown",
             "findings": [],
-            "cert_risk_score": 0.0
+            "cert_risk_score": 0.0,
         }
 
         try:
@@ -80,7 +79,9 @@ class SecurityAnalyzer:
             sub_upper = subject_str.upper()
             if "ANDROID DEBUG" in sub_upper or "CN=DEBUG" in sub_upper:
                 cert_info["is_debug_cert"] = True
-                cert_info["findings"].append("APK signed with an Android Debug key. Insecure for production distribution.")
+                cert_info["findings"].append(
+                    "APK signed with an Android Debug key. Insecure for production distribution."
+                )
 
             # Check algorithm
             sig_algo = getattr(cert, "signature_algo", "Unknown")
@@ -88,7 +89,9 @@ class SecurityAnalyzer:
             sig_upper = str(sig_algo).upper()
             if "MD5" in sig_upper or "SHA1" in sig_upper:
                 cert_info["is_weak_algorithm"] = True
-                cert_info["findings"].append(f"Weak certificate signature algorithm detected ({sig_algo}). Vulnerable to collision attacks.")
+                cert_info["findings"].append(
+                    f"Weak certificate signature algorithm detected ({sig_algo}). Vulnerable to collision attacks."
+                )
 
             # Check expiration
             not_after = getattr(cert, "not_valid_after", None)
@@ -99,7 +102,9 @@ class SecurityAnalyzer:
                     not_after = not_after.replace(tzinfo=timezone.utc)
                 if not_after < now:
                     cert_info["is_expired"] = True
-                    cert_info["findings"].append(f"Signing certificate expired on {not_after.strftime('%Y-%m-%d')}.")
+                    cert_info["findings"].append(
+                        f"Signing certificate expired on {not_after.strftime('%Y-%m-%d')}."
+                    )
 
             # Compute cert penalty
             penalty = 0.0
@@ -121,10 +126,7 @@ class SecurityAnalyzer:
             return cert_info
 
     def analyze_bytecode_features(
-        self,
-        class_names: List[str],
-        strings: List[str],
-        files_list: Optional[List[str]] = None
+        self, class_names: List[str], strings: List[str], files_list: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """Analyzes bytecode artifacts for DCL, reflection, native libraries, and obfuscation."""
         # 1. Native binaries (.so files)
@@ -168,7 +170,9 @@ class SecurityAnalyzer:
             if len(simple_name) <= 2 and simple_name.isalpha():
                 short_named_classes += 1
 
-        obfuscation_ratio = round((short_named_classes / total_classes), 3) if total_classes > 10 else 0.0
+        obfuscation_ratio = (
+            round((short_named_classes / total_classes), 3) if total_classes > 10 else 0.0
+        )
 
         is_obfuscated = obfuscation_ratio > 0.20
 
@@ -178,20 +182,28 @@ class SecurityAnalyzer:
 
         if dcl_detected:
             score += 40.0
-            findings.append(f"Dynamic Code Loading (DCL) detected ({', '.join(set(dcl_detected))}). May execute uninspected external payloads.")
+            findings.append(
+                f"Dynamic Code Loading (DCL) detected ({', '.join(set(dcl_detected))}). May execute uninspected external payloads."
+            )
 
         if reflection_count > 15:
             score += 20.0
-            findings.append(f"Heavy reflection API usage ({reflection_count} references), potentially concealing hidden method invocations.")
+            findings.append(
+                f"Heavy reflection API usage ({reflection_count} references), potentially concealing hidden method invocations."
+            )
         elif reflection_count > 0:
             score += 5.0
 
         if native_libs:
             score += 15.0
-            findings.append(f"Bundles {len(native_libs)} native .so binary libraries, executing code outside Dalvik/ART runtime.")
+            findings.append(
+                f"Bundles {len(native_libs)} native .so binary libraries, executing code outside Dalvik/ART runtime."
+            )
 
         if is_obfuscated:
-            findings.append(f"High identifier minification detected ({round(obfuscation_ratio*100, 1)}% short classes), indicative of ProGuard/R8 or packer obfuscation.")
+            findings.append(
+                f"High identifier minification detected ({round(obfuscation_ratio * 100, 1)}% short classes), indicative of ProGuard/R8 or packer obfuscation."
+            )
 
         score = min(100.0, score)
 
@@ -205,7 +217,7 @@ class SecurityAnalyzer:
             "is_obfuscated": is_obfuscated,
             "obfuscation_ratio": obfuscation_ratio,
             "security_risk_score": round(score, 1),
-            "findings": findings
+            "findings": findings,
         }
 
     def analyze_apk(self, apk_obj: Any) -> Dict[str, Any]:
@@ -214,6 +226,7 @@ class SecurityAnalyzer:
 
         try:
             from androguard.core.dex import DEX
+
             classes = []
             strings = []
             for dex_bytes in apk_obj.get_all_dex():
@@ -231,11 +244,18 @@ class SecurityAnalyzer:
             bytecode_res["error"] = str(e)
 
         combined_findings = cert_res.get("findings", []) + bytecode_res.get("findings", [])
-        combined_score = round(min(100.0, cert_res.get("cert_risk_score", 0.0) * 0.4 + bytecode_res.get("security_risk_score", 0.0) * 0.6), 1)
+        combined_score = round(
+            min(
+                100.0,
+                cert_res.get("cert_risk_score", 0.0) * 0.4
+                + bytecode_res.get("security_risk_score", 0.0) * 0.6,
+            ),
+            1,
+        )
 
         return {
             "certificate": cert_res,
             "bytecode_security": bytecode_res,
             "security_risk_score": combined_score,
-            "findings": combined_findings
+            "findings": combined_findings,
         }

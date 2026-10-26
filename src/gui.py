@@ -8,7 +8,6 @@ multi-tab privacy analysis dashboard, and ML feature importance inspection.
 
 from __future__ import annotations
 
-import math
 import os
 import queue
 import sys
@@ -21,21 +20,19 @@ if ROOT_DIR not in sys.path:
 
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from src.context_engine import ContextEngine
-from src.extractor import extract_manifest_info, friendly_error_message
-from src.fusion_engine import FusionEngine, RiskVerdict
-from src.ml_pipeline import PermissionMLPipeline
-from src.pipeline import PrivacyAnalysisPipeline, get_default_pipeline, run_synthetic_demo
-from src.threat_intel import ThreatIntelEngine
+from src.extractor import friendly_error_message
+from src.pipeline import get_default_pipeline, run_synthetic_demo
 
 
 class RiskGaugeCanvas(tk.Canvas):
     """Custom Tkinter Canvas rendering a modern circular arc risk meter."""
 
     def __init__(self, parent, size: int = 240, bg_color: str = "#ffffff", **kwargs):
-        super().__init__(parent, width=size, height=size // 2 + 50, bg=bg_color, highlightthickness=0, **kwargs)
+        super().__init__(
+            parent, width=size, height=size // 2 + 50, bg=bg_color, highlightthickness=0, **kwargs
+        )
         self.size = size
         self.cx = size // 2
         self.cy = size // 2 + 10
@@ -67,9 +64,7 @@ class RiskGaugeCanvas(tk.Canvas):
 
         # 1. Background Arc (Grey track from 180° to 0°)
         self.create_arc(
-            x0, y0, x1, y1,
-            start=0, extent=180,
-            outline="#e9ecef", width=18, style="arc"
+            x0, y0, x1, y1, start=0, extent=180, outline="#e9ecef", width=18, style="arc"
         )
 
         # 2. Dynamic Filled Arc
@@ -78,20 +73,28 @@ class RiskGaugeCanvas(tk.Canvas):
 
         if extent_angle > 0:
             self.create_arc(
-                x0, y0, x1, y1,
-                start=180, extent=-extent_angle,
-                outline=color, width=18, style="arc"
+                x0,
+                y0,
+                x1,
+                y1,
+                start=180,
+                extent=-extent_angle,
+                outline=color,
+                width=18,
+                style="arc",
             )
 
         # 3. Center Text: Numerical Score
         self.create_text(
-            self.cx, self.cy - 18,
+            self.cx,
+            self.cy - 18,
             text=f"{score}",
             font=("Segoe UI", 32, "bold"),
             fill=color,
         )
         self.create_text(
-            self.cx, self.cy + 16,
+            self.cx,
+            self.cy + 16,
             text="/ 100",
             font=("Segoe UI", 10, "bold"),
             fill="#6c757d",
@@ -99,7 +102,8 @@ class RiskGaugeCanvas(tk.Canvas):
 
         # 4. Verdict Badge Banner below meter
         self.create_text(
-            self.cx, self.cy + 36,
+            self.cx,
+            self.cy + 36,
             text=f"★ {verdict.upper()} RISK ★",
             font=("Segoe UI", 11, "bold"),
             fill=color,
@@ -128,7 +132,7 @@ class PrivacyAnalyzerGUI:
 
         # Thread-safe UI messaging: worker threads never touch Tk widgets
         # directly; they post to this queue and the main thread drains it.
-        self._ui_queue: "queue.Queue" = queue.Queue()
+        self._ui_queue: queue.Queue = queue.Queue()
         self._analysis_running = False
         self._busy_widgets = []
         self._poller_started = False
@@ -148,7 +152,13 @@ class PrivacyAnalyzerGUI:
         style.configure("Header.TLabel", font=("Segoe UI", 14, "bold"), foreground="#1a365d")
         style.configure("SubHeader.TLabel", font=("Segoe UI", 9), foreground="#4a5568")
         style.configure("Accent.TButton", font=("Segoe UI", 10, "bold"), padding=6)
-        style.configure("Action.TButton", font=("Segoe UI", 10, "bold"), background="#0066cc", foreground="#ffffff", padding=8)
+        style.configure(
+            "Action.TButton",
+            font=("Segoe UI", 10, "bold"),
+            background="#0066cc",
+            foreground="#ffffff",
+            padding=8,
+        )
 
     def _build_ui(self):
         """Construct application layout."""
@@ -180,11 +190,20 @@ class PrivacyAnalyzerGUI:
         main_container.pack(fill="both", expand=True, padx=15, pady=10)
 
         # Control & Selection Frame
-        controls_frame = tk.LabelFrame(main_container, text=" Analysis Controls ", font=("Segoe UI", 10, "bold"), bg="#ffffff", padx=15, pady=12)
+        controls_frame = tk.LabelFrame(
+            main_container,
+            text=" Analysis Controls ",
+            font=("Segoe UI", 10, "bold"),
+            bg="#ffffff",
+            padx=15,
+            pady=12,
+        )
         controls_frame.pack(fill="x", pady=(0, 10))
 
         # Row 1: APK File Chooser
-        tk.Label(controls_frame, text="APK File:", font=("Segoe UI", 9, "bold"), bg="#ffffff").grid(row=0, column=0, sticky="w", pady=4)
+        tk.Label(controls_frame, text="APK File:", font=("Segoe UI", 9, "bold"), bg="#ffffff").grid(
+            row=0, column=0, sticky="w", pady=4
+        )
         self.apk_entry = ttk.Entry(controls_frame, textvariable=self.apk_path_var, width=58)
         self.apk_entry.grid(row=0, column=1, padx=8, pady=4, sticky="ew")
 
@@ -192,7 +211,9 @@ class PrivacyAnalyzerGUI:
         self.browse_btn.grid(row=0, column=2, padx=4, pady=4)
 
         # Row 2: Category Selector & Run Button
-        tk.Label(controls_frame, text="Category:", font=("Segoe UI", 9, "bold"), bg="#ffffff").grid(row=1, column=0, sticky="w", pady=6)
+        tk.Label(controls_frame, text="Category:", font=("Segoe UI", 9, "bold"), bg="#ffffff").grid(
+            row=1, column=0, sticky="w", pady=6
+        )
         self.cat_combo = ttk.Combobox(
             controls_frame,
             textvariable=self.category_var,
@@ -232,27 +253,55 @@ class PrivacyAnalyzerGUI:
         left_panel = tk.Frame(body_paned, bg="#ffffff", bd=1, relief="solid", padx=12, pady=12)
         body_paned.add(left_panel, width=280)
 
-        gauge_lbl = tk.Label(left_panel, text="COMPOSITE PRIVACY RISK", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#4a5568")
+        gauge_lbl = tk.Label(
+            left_panel,
+            text="COMPOSITE PRIVACY RISK",
+            font=("Segoe UI", 10, "bold"),
+            bg="#ffffff",
+            fg="#4a5568",
+        )
         gauge_lbl.pack(anchor="center", pady=(0, 4))
 
         self.gauge = RiskGaugeCanvas(left_panel, size=240, bg_color="#ffffff")
         self.gauge.pack(anchor="center", pady=4)
 
         # Mini Metrics Box
-        self.metrics_frame = tk.Frame(left_panel, bg="#f8f9fa", bd=1, relief="groove", padx=8, pady=8)
+        self.metrics_frame = tk.Frame(
+            left_panel, bg="#f8f9fa", bd=1, relief="groove", padx=8, pady=8
+        )
         self.metrics_frame.pack(fill="x", pady=10)
 
-        self.metric_threat = tk.Label(self.metrics_frame, text="Threat Intel: Idle", font=("Segoe UI", 8), bg="#f8f9fa", anchor="w")
+        self.metric_threat = tk.Label(
+            self.metrics_frame,
+            text="Threat Intel: Idle",
+            font=("Segoe UI", 8),
+            bg="#f8f9fa",
+            anchor="w",
+        )
         self.metric_threat.pack(fill="x", pady=1)
 
-        self.metric_ml = tk.Label(self.metrics_frame, text="ML Risk Prob: Idle", font=("Segoe UI", 8), bg="#f8f9fa", anchor="w")
+        self.metric_ml = tk.Label(
+            self.metrics_frame,
+            text="ML Risk Prob: Idle",
+            font=("Segoe UI", 8),
+            bg="#f8f9fa",
+            anchor="w",
+        )
         self.metric_ml.pack(fill="x", pady=1)
 
-        self.metric_perms = tk.Label(self.metrics_frame, text="Total Permissions: 0", font=("Segoe UI", 8), bg="#f8f9fa", anchor="w")
+        self.metric_perms = tk.Label(
+            self.metrics_frame,
+            text="Total Permissions: 0",
+            font=("Segoe UI", 8),
+            bg="#f8f9fa",
+            anchor="w",
+        )
         self.metric_perms.pack(fill="x", pady=1)
 
         # Button to View ML Feature Importance Plot
-        self.plot_btn = ttk.Button(left_panel, text="📊 View ML Feature Plot", command=self._open_feature_plot)
+        self.plot_btn = ttk.Button(
+            left_panel, text="📊 View ML Feature Plot", command=self._open_feature_plot
+        )
         self.plot_btn.pack(fill="x", pady=6)
 
         # Right Panel: Tabbed Notebook
@@ -348,7 +397,9 @@ class PrivacyAnalyzerGUI:
         dialog.transient(self.root)
         dialog.grab_set()
 
-        tk.Label(dialog, text="Select Evaluation Demo Scenario:", font=("Segoe UI", 10, "bold")).pack(pady=10)
+        tk.Label(
+            dialog, text="Select Evaluation Demo Scenario:", font=("Segoe UI", 10, "bold")
+        ).pack(pady=10)
 
         def pick(scenario: str, cat: str):
             self.category_var.set(cat)
@@ -381,7 +432,9 @@ class PrivacyAnalyzerGUI:
         self._set_busy(True)
         self.status_var.set(f"Running demo scenario '{scenario}'...")
         threading.Thread(
-            target=self._execute_demo, args=(scenario, category), daemon=True,
+            target=self._execute_demo,
+            args=(scenario, category),
+            daemon=True,
         ).start()
 
     def _execute_demo(self, scenario: str, category: str):
@@ -484,7 +537,9 @@ class PrivacyAnalyzerGUI:
         category = self.category_var.get().strip()
 
         if not apk_path:
-            messagebox.showwarning("Missing APK", "Please select an APK file or choose a Demo scenario.")
+            messagebox.showwarning(
+                "Missing APK", "Please select an APK file or choose a Demo scenario."
+            )
             return
 
         if not os.path.isfile(apk_path):
@@ -493,7 +548,9 @@ class PrivacyAnalyzerGUI:
 
         self._set_busy(True)
         self.status_var.set("Analyzing APK manifest and calculating risks...")
-        thread = threading.Thread(target=self._execute_analysis, args=(apk_path, category), daemon=True)
+        thread = threading.Thread(
+            target=self._execute_analysis, args=(apk_path, category), daemon=True
+        )
         thread.start()
 
     def _execute_analysis(self, apk_path: str, category: str):
@@ -528,84 +585,148 @@ class PrivacyAnalyzerGUI:
         t_status = threat.get("status", "UNKNOWN")
         self.metric_threat.config(
             text=f"Threat Intel: {t_status}",
-            fg="#dc3545" if threat.get("is_flagged") else ("#28a745" if threat.get("is_verified_benign") else "#495057"),
+            fg="#dc3545"
+            if threat.get("is_flagged")
+            else ("#28a745" if threat.get("is_verified_benign") else "#495057"),
         )
         self.metric_ml.config(
             text=f"ML Prob: {ml['risk_percentage']}% ({ml['ml_verdict']})",
             fg="#dc3545" if ml["risk_probability"] >= 0.5 else "#28a745",
         )
-        self.metric_perms.config(text=f"Total Permissions: {manifest.get('total_permissions_count', 0)}")
+        self.metric_perms.config(
+            text=f"Total Permissions: {manifest.get('total_permissions_count', 0)}"
+        )
 
         # 3. Tab: Overview
         self.txt_overview.delete("1.0", tk.END)
-        self.txt_overview.insert(tk.END, "===================================================================\n")
-        self.txt_overview.insert(tk.END, "               APPLICATION OVERVIEW & INTEGRATED AUDIT             \n")
-        self.txt_overview.insert(tk.END, "===================================================================\n\n")
-        self.txt_overview.insert(tk.END, f"App Name:           {manifest.get('app_name') or 'N/A'}\n")
+        self.txt_overview.insert(
+            tk.END, "===================================================================\n"
+        )
+        self.txt_overview.insert(
+            tk.END, "               APPLICATION OVERVIEW & INTEGRATED AUDIT             \n"
+        )
+        self.txt_overview.insert(
+            tk.END, "===================================================================\n\n"
+        )
+        self.txt_overview.insert(
+            tk.END, f"App Name:           {manifest.get('app_name') or 'N/A'}\n"
+        )
         self.txt_overview.insert(tk.END, f"Package Name:       {manifest.get('package_name')}\n")
-        self.txt_overview.insert(tk.END, f"Target SDK:         {manifest.get('target_sdk_version')} (Min SDK: {manifest.get('min_sdk_version')})\n")
-        self.txt_overview.insert(tk.END, f"Version:            {manifest.get('version_name')} (Code: {manifest.get('version_code')})\n")
-        self.txt_overview.insert(tk.END, f"Analyzed Category:  {context.get('category')} - {context.get('category_description')}\n")
-        self.txt_overview.insert(tk.END, f"Total Permissions:  {manifest.get('total_permissions_count')}\n\n")
+        self.txt_overview.insert(
+            tk.END,
+            f"Target SDK:         {manifest.get('target_sdk_version')} (Min SDK: {manifest.get('min_sdk_version')})\n",
+        )
+        self.txt_overview.insert(
+            tk.END,
+            f"Version:            {manifest.get('version_name')} (Code: {manifest.get('version_code')})\n",
+        )
+        self.txt_overview.insert(
+            tk.END,
+            f"Analyzed Category:  {context.get('category')} - {context.get('category_description')}\n",
+        )
+        self.txt_overview.insert(
+            tk.END, f"Total Permissions:  {manifest.get('total_permissions_count')}\n\n"
+        )
 
         comps = manifest.get("components", {})
         exp = comps.get("exported", {})
-        self.txt_overview.insert(tk.END, f"Exported Surface:   {exp.get('total_exported', 0)} Total | {exp.get('unprotected_exported', 0)} Unprotected\n\n")
+        self.txt_overview.insert(
+            tk.END,
+            f"Exported Surface:   {exp.get('total_exported', 0)} Total | {exp.get('unprotected_exported', 0)} Unprotected\n\n",
+        )
 
-        self.txt_overview.insert(tk.END, f"Threat Intel Hash:  {threat.get('hashes', {}).get('sha256', 'N/A')}\n")
+        self.txt_overview.insert(
+            tk.END, f"Threat Intel Hash:  {threat.get('hashes', {}).get('sha256', 'N/A')}\n"
+        )
         self.txt_overview.insert(tk.END, f"Reputation Status:  {threat.get('reputation')}\n")
         if threat.get("threat_details"):
             td = threat["threat_details"]
-            self.txt_overview.insert(tk.END, f"Matched Threat:     {td.get('family')} [{td.get('threat_type')}]\n")
+            self.txt_overview.insert(
+                tk.END, f"Matched Threat:     {td.get('family')} [{td.get('threat_type')}]\n"
+            )
 
-        self.txt_overview.insert(tk.END, f"\nML Risk Estimation: {ml.get('risk_percentage')}% [{ml.get('ml_verdict')}]\n")
+        self.txt_overview.insert(
+            tk.END, f"\nML Risk Estimation: {ml.get('risk_percentage')}% [{ml.get('ml_verdict')}]\n"
+        )
         self.txt_overview.insert(tk.END, "\nKey Privacy Findings:\n")
         for f in fusion.get("findings", []):
             self.txt_overview.insert(tk.END, f"  • {f}\n")
 
         # 4. Tab: Context Permissions Breakdown
         self.txt_context.delete("1.0", tk.END)
-        self.txt_context.insert(tk.END, "===================================================================\n")
-        self.txt_context.insert(tk.END, "                 CONTEXTUAL PERMISSION EVALUATION                  \n")
-        self.txt_context.insert(tk.END, "===================================================================\n\n")
+        self.txt_context.insert(
+            tk.END, "===================================================================\n"
+        )
+        self.txt_context.insert(
+            tk.END, "                 CONTEXTUAL PERMISSION EVALUATION                  \n"
+        )
+        self.txt_context.insert(
+            tk.END, "===================================================================\n\n"
+        )
 
         acceptable = context.get("acceptable_permissions", [])
-        self.txt_context.insert(tk.END, f"[+] Baseline Acceptable Permissions ({len(acceptable)}):\n")
+        self.txt_context.insert(
+            tk.END, f"[+] Baseline Acceptable Permissions ({len(acceptable)}):\n"
+        )
         for p in acceptable:
             self.txt_context.insert(tk.END, f"    ✓ {p['permission']}\n")
 
         suspicious = context.get("suspicious_permissions", [])
-        self.txt_context.insert(tk.END, f"\n[-] Category Mismatches / Suspicious Permissions ({len(suspicious)}):\n")
+        self.txt_context.insert(
+            tk.END, f"\n[-] Category Mismatches / Suspicious Permissions ({len(suspicious)}):\n"
+        )
         for s in suspicious:
-            self.txt_context.insert(tk.END, f"    ✗ {s['permission']} (+{s['penalty']} penalty pts)\n")
+            self.txt_context.insert(
+                tk.END, f"    ✗ {s['permission']} (+{s['penalty']} penalty pts)\n"
+            )
             self.txt_context.insert(tk.END, f"      Reason: {s['reason']}\n")
 
         unexpected = context.get("unexpected_dangerous_permissions", [])
         if unexpected:
-            self.txt_context.insert(tk.END, f"\n[!] Unlisted Dangerous AOSP Permissions ({len(unexpected)}):\n")
+            self.txt_context.insert(
+                tk.END, f"\n[!] Unlisted Dangerous AOSP Permissions ({len(unexpected)}):\n"
+            )
             for u in unexpected:
                 self.txt_context.insert(tk.END, f"    ⚠ {u['permission']} (+{u['penalty']} pts)\n")
 
         # 5. Tab: Dangerous Combinations
         self.txt_combos.delete("1.0", tk.END)
-        self.txt_combos.insert(tk.END, "===================================================================\n")
-        self.txt_combos.insert(tk.END, "          DANGEROUS COMBINATIONS (COLLUSION / EXFILTRATION)         \n")
-        self.txt_combos.insert(tk.END, "===================================================================\n\n")
+        self.txt_combos.insert(
+            tk.END, "===================================================================\n"
+        )
+        self.txt_combos.insert(
+            tk.END, "          DANGEROUS COMBINATIONS (COLLUSION / EXFILTRATION)         \n"
+        )
+        self.txt_combos.insert(
+            tk.END, "===================================================================\n\n"
+        )
 
         combos = context.get("triggered_combinations", [])
         if combos:
             for c in combos:
-                self.txt_combos.insert(tk.END, f"🚨 {c['name']} [{c['risk_type']}] (+{c['penalty']} pts)\n")
-                self.txt_combos.insert(tk.END, f"   Matched: {' + '.join(c['matched_permissions'])}\n")
+                self.txt_combos.insert(
+                    tk.END, f"🚨 {c['name']} [{c['risk_type']}] (+{c['penalty']} pts)\n"
+                )
+                self.txt_combos.insert(
+                    tk.END, f"   Matched: {' + '.join(c['matched_permissions'])}\n"
+                )
                 self.txt_combos.insert(tk.END, f"   Details: {c['description']}\n\n")
         else:
-            self.txt_combos.insert(tk.END, "✓ No high-risk collusion or exfiltration combinations triggered.\n")
+            self.txt_combos.insert(
+                tk.END, "✓ No high-risk collusion or exfiltration combinations triggered.\n"
+            )
 
         # 6. Tab: Recommendations
         self.txt_recs.delete("1.0", tk.END)
-        self.txt_recs.insert(tk.END, "===================================================================\n")
-        self.txt_recs.insert(tk.END, "                    ACTIONABLE RECOMMENDATIONS                     \n")
-        self.txt_recs.insert(tk.END, "===================================================================\n\n")
+        self.txt_recs.insert(
+            tk.END, "===================================================================\n"
+        )
+        self.txt_recs.insert(
+            tk.END, "                    ACTIONABLE RECOMMENDATIONS                     \n"
+        )
+        self.txt_recs.insert(
+            tk.END, "===================================================================\n\n"
+        )
         for r in fusion.get("recommendations", []):
             self.txt_recs.insert(tk.END, f"➔ {r}\n\n")
 
@@ -627,18 +748,22 @@ class PrivacyAnalyzerGUI:
                 os.startfile(plot_path)
             elif sys.platform == "darwin":
                 import subprocess
+
                 subprocess.run(["open", plot_path], check=False)
             else:
                 import subprocess
+
                 subprocess.run(["xdg-open", plot_path], check=False)
         except Exception as e:
-            messagebox.showinfo("Feature Importance Plot", f"Plot generated at:\n{plot_path}\n({e})")
+            messagebox.showinfo(
+                "Feature Importance Plot", f"Plot generated at:\n{plot_path}\n({e})"
+            )
 
 
 def launch_gui():
     """Application entrypoint for the Tkinter desktop GUI."""
     root = tk.Tk()
-    app = PrivacyAnalyzerGUI(root)
+    _app = PrivacyAnalyzerGUI(root)  # keep-alive reference for Tk callbacks
     root.mainloop()
 
 
@@ -653,7 +778,9 @@ if __name__ == "__main__":
             app._execute_analysis(sample_apk, "Calculator")
             app._pump_ui_queue()
         root.destroy()
-        print("Self-test passed: Desktop GUI initialized and connected to all pipeline modules successfully!")
+        print(
+            "Self-test passed: Desktop GUI initialized and connected to all pipeline modules successfully!"
+        )
         sys.exit(0)
 
     launch_gui()

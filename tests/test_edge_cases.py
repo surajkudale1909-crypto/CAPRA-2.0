@@ -70,7 +70,9 @@ class TestMalformedArchiveCorpus(unittest.TestCase):
         """AndroidManifest.xml must be binary AXML; a text stub must not parse."""
         path = self._path("textmanifest.apk")
         with zipfile.ZipFile(path, "w") as zf:
-            zf.writestr("AndroidManifest.xml", b'<?xml version="1.0"?><manifest package="com.fake"/>')
+            zf.writestr(
+                "AndroidManifest.xml", b'<?xml version="1.0"?><manifest package="com.fake"/>'
+            )
             zf.writestr("classes.dex", b"hello")
         with self.assertRaises(APKExtractionError):
             extract_manifest_info(path)

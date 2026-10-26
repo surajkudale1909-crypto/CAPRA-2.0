@@ -15,42 +15,45 @@ SENSITIVE_SOURCES = {
     "Location": [
         ("Landroid/location/LocationManager;", "getLastKnownLocation"),
         ("Landroid/location/LocationManager;", "requestLocationUpdates"),
-        ("Lcom/google/android/gms/location/FusedLocationProviderClient;", "getLastLocation")
+        ("Lcom/google/android/gms/location/FusedLocationProviderClient;", "getLastLocation"),
     ],
     "Device Identifier / Telephony": [
         ("Landroid/telephony/TelephonyManager;", "getDeviceId"),
         ("Landroid/telephony/TelephonyManager;", "getImei"),
         ("Landroid/telephony/TelephonyManager;", "getSubscriberId"),
         ("Landroid/telephony/TelephonyManager;", "getSimSerialNumber"),
-        ("Landroid/telephony/TelephonyManager;", "getLine1Number")
+        ("Landroid/telephony/TelephonyManager;", "getLine1Number"),
     ],
     "Contacts & Accounts": [
         ("Landroid/accounts/AccountManager;", "getAccounts"),
         ("Landroid/accounts/AccountManager;", "getAccountsByType"),
-        ("Landroid/provider/ContactsContract;", "Contacts")
+        ("Landroid/provider/ContactsContract;", "Contacts"),
     ],
     "Microphone & Audio": [
         ("Landroid/media/MediaRecorder;", "start"),
-        ("Landroid/media/AudioRecord;", "startRecording")
+        ("Landroid/media/AudioRecord;", "startRecording"),
     ],
     "Camera": [
         ("Landroid/hardware/Camera;", "takePicture"),
-        ("Landroid/hardware/camera2/CameraDevice;", "createCaptureSession")
+        ("Landroid/hardware/camera2/CameraDevice;", "createCaptureSession"),
     ],
     "Clipboard": [
         ("Landroid/content/ClipboardManager;", "getPrimaryClip"),
-        ("Landroid/content/ClipboardManager;", "getText")
-    ]
+        ("Landroid/content/ClipboardManager;", "getText"),
+    ],
 }
 
 # Curated Network Egress Sinks
 NETWORK_SINKS = {
-    "HttpURLConnection": ("Ljava/net/HttpURLConnection;", ["connect", "getOutputStream", "getInputStream"]),
+    "HttpURLConnection": (
+        "Ljava/net/HttpURLConnection;",
+        ["connect", "getOutputStream", "getInputStream"],
+    ),
     "URL.openConnection": ("Ljava/net/URL;", ["openConnection"]),
     "Raw Socket": ("Ljava/net/Socket;", ["getOutputStream", "connect"]),
     "OkHttp": ("Lokhttp3/OkHttpClient;", ["newCall"]),
     "Apache HttpClient": ("Lorg/apache/http/client/HttpClient;", ["execute"]),
-    "WebView Egress": ("Landroid/webkit/WebView;", ["loadUrl", "postUrl"])
+    "WebView Egress": ("Landroid/webkit/WebView;", ["loadUrl", "postUrl"]),
 }
 
 LIMITATIONS_DISCLAIMER = (
@@ -68,10 +71,7 @@ class ReachabilityAnalyzer:
     def __init__(self):
         pass
 
-    def analyze_mock_graph(
-        self,
-        methods_map: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def analyze_mock_graph(self, methods_map: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Analyzes a synthetic dictionary mapping method names to their sources and sinks invoked.
 
         Format:
@@ -101,36 +101,42 @@ class ReachabilityAnalyzer:
             if sources and sinks:
                 for src in sources:
                     for snk in sinks:
-                        paths.append({
-                            "type": "intra-method",
-                            "confidence": "High (Direct Call)",
-                            "confidence_score": 0.90,
-                            "caller_class": cls,
-                            "caller_method": m_name,
-                            "source": src,
-                            "sink": snk,
-                            "description": f"Method {m_name} directly invokes sensitive source '{src}' and network sink '{snk}'."
-                        })
+                        paths.append(
+                            {
+                                "type": "intra-method",
+                                "confidence": "High (Direct Call)",
+                                "confidence_score": 0.90,
+                                "caller_class": cls,
+                                "caller_method": m_name,
+                                "source": src,
+                                "sink": snk,
+                                "description": f"Method {m_name} directly invokes sensitive source '{src}' and network sink '{snk}'.",
+                            }
+                        )
 
         # Intra-class paths (same class accesses source in one method and sink in another)
         for cls, srcs in class_sources.items():
             if cls in class_sinks:
                 snks = class_sinks[cls]
                 # Only add if not already covered as intra-method
-                existing_pairs = {(p["source"], p["sink"]) for p in paths if p["caller_class"] == cls}
+                existing_pairs = {
+                    (p["source"], p["sink"]) for p in paths if p["caller_class"] == cls
+                }
                 for src in srcs:
                     for snk in snks:
                         if (src, snk) not in existing_pairs:
-                            paths.append({
-                                "type": "intra-class",
-                                "confidence": "Medium (Co-located in Class)",
-                                "confidence_score": 0.65,
-                                "caller_class": cls,
-                                "caller_method": f"{cls}.*",
-                                "source": src,
-                                "sink": snk,
-                                "description": f"Class {cls} encapsulates both sensitive source '{src}' and network sink '{snk}'."
-                            })
+                            paths.append(
+                                {
+                                    "type": "intra-class",
+                                    "confidence": "Medium (Co-located in Class)",
+                                    "confidence_score": 0.65,
+                                    "caller_class": cls,
+                                    "caller_method": f"{cls}.*",
+                                    "source": src,
+                                    "sink": snk,
+                                    "description": f"Class {cls} encapsulates both sensitive source '{src}' and network sink '{snk}'.",
+                                }
+                            )
 
         leak_risk_score = 0.0
         findings = []
@@ -140,9 +146,13 @@ class ReachabilityAnalyzer:
             max_conf = max(p["confidence_score"] for p in paths)
             count = len(paths)
             leak_risk_score = min(100.0, max_conf * 60.0 + min(40.0, count * 10.0))
-            findings.append(f"Identified {count} potential data exfiltration path(s) bridging sensitive sources to network egress sinks.")
+            findings.append(
+                f"Identified {count} potential data exfiltration path(s) bridging sensitive sources to network egress sinks."
+            )
             if any(p["type"] == "intra-method" for p in paths):
-                findings.append("Direct intra-procedural leakage detected: same method queries sensitive device data and transmits via network.")
+                findings.append(
+                    "Direct intra-procedural leakage detected: same method queries sensitive device data and transmits via network."
+                )
 
         return {
             "has_leakage_path": len(paths) > 0,
@@ -150,7 +160,7 @@ class ReachabilityAnalyzer:
             "paths": paths,
             "leak_risk_score": round(leak_risk_score, 1),
             "findings": findings,
-            "limitations_disclaimer": LIMITATIONS_DISCLAIMER
+            "limitations_disclaimer": LIMITATIONS_DISCLAIMER,
         }
 
     def analyze_apk(self, apk_obj: Any, dx: Optional[Any] = None) -> Dict[str, Any]:
@@ -160,6 +170,7 @@ class ReachabilityAnalyzer:
         """
         try:
             from loguru import logger as _loguru_logger
+
             _loguru_logger.disable("androguard")
         except Exception:
             pass
@@ -168,6 +179,7 @@ class ReachabilityAnalyzer:
             if dx is None:
                 from androguard.core.analysis.analysis import Analysis
                 from androguard.core.dex import DEX
+
                 dx = Analysis()
                 for dex_bytes in apk_obj.get_all_dex():
                     d = DEX(dex_bytes)
@@ -175,8 +187,10 @@ class ReachabilityAnalyzer:
                 dx.create_xref()
 
             # Map method callers
-            source_callers: Dict[str, List[Tuple[str, str]]] = {}  # (class, method) -> [source_names]
-            sink_callers: Dict[str, List[Tuple[str, str]]] = {}    # (class, method) -> [sink_names]
+            source_callers: Dict[
+                str, List[Tuple[str, str]]
+            ] = {}  # (class, method) -> [source_names]
+            sink_callers: Dict[str, List[Tuple[str, str]]] = {}  # (class, method) -> [sink_names]
 
             # 1. Search sensitive sources
             for category, sources in SENSITIVE_SOURCES.items():
@@ -206,14 +220,18 @@ class ReachabilityAnalyzer:
 
             for caller_c, caller_m in all_keys:
                 # Filter out standard Android framework internal classes
-                if caller_c.startswith("Landroid/") or caller_c.startswith("Landroidx/") or caller_c.startswith("Ljava/"):
+                if (
+                    caller_c.startswith("Landroid/")
+                    or caller_c.startswith("Landroidx/")
+                    or caller_c.startswith("Ljava/")
+                ):
                     continue
 
                 full_m = f"{caller_c}->{caller_m}"
                 methods_map[full_m] = {
                     "class": caller_c,
                     "sources": source_callers.get((caller_c, caller_m), []),
-                    "sinks": sink_callers.get((caller_c, caller_m), [])
+                    "sinks": sink_callers.get((caller_c, caller_m), []),
                 }
 
             return self.analyze_mock_graph(methods_map)
@@ -227,5 +245,5 @@ class ReachabilityAnalyzer:
                 "leak_risk_score": 0.0,
                 "findings": [],
                 "limitations_disclaimer": LIMITATIONS_DISCLAIMER,
-                "error": str(e)
+                "error": str(e),
             }

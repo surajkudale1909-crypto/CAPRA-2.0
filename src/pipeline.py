@@ -16,19 +16,17 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from src.category_detector import detect_app_category
 from src.config import settings
-from src.context_engine import ContextEngine, ContextRuleError
+from src.context_engine import ContextEngine
 from src.extractor import (
-    APKCorruptedError,
-    APKExtractionError,
     APKNotFoundError,
     extract_manifest_info,
     run_with_timeout,
 )
-from src.fusion_engine import FusionEngine, RiskVerdict
+from src.fusion_engine import FusionEngine
 from src.history_manager import HistoryManager
 from src.ml_pipeline import PermissionMLPipeline
 from src.network_detector import NetworkDetector
@@ -68,13 +66,11 @@ class PrivacyAnalysisPipeline:
         self.fusion_engine = FusionEngine(raw_ceiling=self.raw_ceiling)
         self.history_manager = HistoryManager(self.history_db_path)
 
-
         # Advanced static analysis detectors (Phase 4)
         self.tracker_detector = TrackerDetector()
         self.network_detector = NetworkDetector()
         self.security_analyzer = SecurityAnalyzer()
         self.reachability_analyzer = ReachabilityAnalyzer()
-
 
     def analyze(
         self,
@@ -148,7 +144,9 @@ class PrivacyAnalysisPipeline:
         ml_result: Optional[Dict[str, Any]] = None
         if not opts.get("skip_ml", False):
             try:
-                ml_result = self.ml_pipeline.predict_risk(manifest_data.get("declared_permissions", []))
+                ml_result = self.ml_pipeline.predict_risk(
+                    manifest_data.get("declared_permissions", [])
+                )
             except Exception as e:
                 logger.warning(f"ML risk prediction encountered an issue: {e}")
                 ml_result = {
@@ -167,6 +165,7 @@ class PrivacyAnalysisPipeline:
         if not opts.get("skip_static", False):
             try:
                 from loguru import logger as _loguru_logger
+
                 _loguru_logger.disable("androguard")
                 from androguard.core.apk import APK
 
@@ -190,7 +189,11 @@ class PrivacyAnalysisPipeline:
             except Exception as e:
                 logger.warning(f"Advanced static bytecode analysis failed: {e}")
                 static_result = {
-                    "trackers": {"tracker_count": 0, "has_trackers": False, "detected_trackers": []},
+                    "trackers": {
+                        "tracker_count": 0,
+                        "has_trackers": False,
+                        "detected_trackers": [],
+                    },
                     "network": {"total_urls": 0, "insecure_http_count": 0, "findings": []},
                     "security": {"findings": []},
                     "reachability": {"has_leakage_path": False, "findings": []},
@@ -259,7 +262,6 @@ class PrivacyAnalysisPipeline:
         return self.history_manager.compare_analyses(id1, id2)
 
 
-
 # Singleton pipeline instance for shared in-process usage
 _global_pipeline: Optional[PrivacyAnalysisPipeline] = None
 
@@ -308,10 +310,29 @@ def run_synthetic_demo(scenario: str, category: Optional[str] = None) -> Dict[st
             "threat_reputation": "Trusted Open-Source FOSS",
             "sha256": "7c5443c22d6d62c67dfe80df33ea9161ff0fa440f92590bcb45d7008b57613ed",
             "static": {
-                "trackers": {"tracker_count": 0, "has_trackers": False, "detected_trackers": [], "risk_score": 0.0},
-                "network": {"total_urls": 1, "insecure_http_count": 0, "findings": [], "network_risk_score": 0.0},
-                "security": {"findings": [], "security_risk_score": 0.0, "bytecode_security": {"has_dcl": False}},
-                "reachability": {"has_leakage_path": False, "leakage_paths_count": 0, "findings": [], "leak_risk_score": 0.0},
+                "trackers": {
+                    "tracker_count": 0,
+                    "has_trackers": False,
+                    "detected_trackers": [],
+                    "risk_score": 0.0,
+                },
+                "network": {
+                    "total_urls": 1,
+                    "insecure_http_count": 0,
+                    "findings": [],
+                    "network_risk_score": 0.0,
+                },
+                "security": {
+                    "findings": [],
+                    "security_risk_score": 0.0,
+                    "bytecode_security": {"has_dcl": False},
+                },
+                "reachability": {
+                    "has_leakage_path": False,
+                    "leakage_paths_count": 0,
+                    "findings": [],
+                    "leak_risk_score": 0.0,
+                },
             },
         },
         "malicious_flashlight": {
@@ -356,7 +377,9 @@ def run_synthetic_demo(scenario: str, category: Optional[str] = None) -> Dict[st
                     "network_risk_score": 45.0,
                 },
                 "security": {
-                    "findings": ["Dynamic Code Loading (DCL) detected (dalvik/system/DexClassLoader). May execute uninspected external payloads."],
+                    "findings": [
+                        "Dynamic Code Loading (DCL) detected (dalvik/system/DexClassLoader). May execute uninspected external payloads."
+                    ],
                     "security_risk_score": 40.0,
                     "bytecode_security": {"has_dcl": True},
                 },
@@ -389,10 +412,29 @@ def run_synthetic_demo(scenario: str, category: Optional[str] = None) -> Dict[st
             "threat_reputation": "Clean / Not In Database",
             "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             "static": {
-                "trackers": {"tracker_count": 0, "has_trackers": False, "detected_trackers": [], "risk_score": 0.0},
-                "network": {"total_urls": 3, "insecure_http_count": 0, "findings": [], "network_risk_score": 0.0},
-                "security": {"findings": [], "security_risk_score": 0.0, "bytecode_security": {"has_dcl": False}},
-                "reachability": {"has_leakage_path": False, "leakage_paths_count": 0, "findings": [], "leak_risk_score": 0.0},
+                "trackers": {
+                    "tracker_count": 0,
+                    "has_trackers": False,
+                    "detected_trackers": [],
+                    "risk_score": 0.0,
+                },
+                "network": {
+                    "total_urls": 3,
+                    "insecure_http_count": 0,
+                    "findings": [],
+                    "network_risk_score": 0.0,
+                },
+                "security": {
+                    "findings": [],
+                    "security_risk_score": 0.0,
+                    "bytecode_security": {"has_dcl": False},
+                },
+                "reachability": {
+                    "has_leakage_path": False,
+                    "leakage_paths_count": 0,
+                    "findings": [],
+                    "leak_risk_score": 0.0,
+                },
             },
         },
     }
@@ -475,7 +517,6 @@ def run_synthetic_demo(scenario: str, category: Optional[str] = None) -> Dict[st
         "benign_details": None,
     }
 
-
     ml_result = pipeline.ml_pipeline.predict_risk(selected["permissions"])
 
     mock_static = selected.get("static", {})
@@ -496,4 +537,3 @@ def run_synthetic_demo(scenario: str, category: Optional[str] = None) -> Dict[st
         "ml": ml_result,
         "static_analysis": mock_static,
     }
-

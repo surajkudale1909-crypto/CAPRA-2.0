@@ -53,15 +53,14 @@ def report_schema(path: str) -> bool:
 
     label_col = detect_label_column(df)
     perm_cols = [c for c in df.columns if normalize_permission_column(c) is not None]
-    meta_cols = [
-        c for c in df.columns
-        if normalize_permission_column(c) is None and c != label_col
-    ]
+    meta_cols = [c for c in df.columns if normalize_permission_column(c) is None and c != label_col]
 
     print(f"  Permission features detected: {len(perm_cols)}")
     if meta_cols:
-        print(f"  Ignored metadata/intent/aggregate columns: {len(meta_cols)} "
-              f"(e.g. {', '.join(str(c).strip() for c in meta_cols[:4])}...)")
+        print(
+            f"  Ignored metadata/intent/aggregate columns: {len(meta_cols)} "
+            f"(e.g. {', '.join(str(c).strip() for c in meta_cols[:4])}...)"
+        )
 
     if label_col is None:
         print("  Label column: [NOT FOUND]  -> file will be SKIPPED for training.")
@@ -95,15 +94,21 @@ def main() -> None:
     if args.datasets:
         files = args.datasets
     else:
-        files = sorted(
-            os.path.join(DEFAULT_DATASETS_DIR, f)
-            for f in os.listdir(DEFAULT_DATASETS_DIR)
-            if f.lower().endswith(".csv")
-        ) if os.path.isdir(DEFAULT_DATASETS_DIR) else []
+        files = (
+            sorted(
+                os.path.join(DEFAULT_DATASETS_DIR, f)
+                for f in os.listdir(DEFAULT_DATASETS_DIR)
+                if f.lower().endswith(".csv")
+            )
+            if os.path.isdir(DEFAULT_DATASETS_DIR)
+            else []
+        )
 
     if not files:
-        print(f"No CSV datasets found. Place your Kaggle CSVs in '{DEFAULT_DATASETS_DIR}/' "
-              f"or pass explicit paths.")
+        print(
+            f"No CSV datasets found. Place your Kaggle CSVs in '{DEFAULT_DATASETS_DIR}/' "
+            f"or pass explicit paths."
+        )
         sys.exit(1)
 
     print("CAPRA - Real Dataset Schema Report")
@@ -127,6 +132,7 @@ def main() -> None:
     print("\nTraining... (Random Forest vs Gradient Boosting, 5-fold stratified CV)")
     pipeline = PermissionMLPipeline(dataset_path=files, force_retrain=True)
     import joblib
+
     saved = joblib.load(pipeline.model_path)
     metrics = saved.get("metrics", {}) if isinstance(saved, dict) else {}
 
@@ -136,13 +142,17 @@ def main() -> None:
     print(f"  Data source   : {pipeline.data_source}")
     print(f"  Features      : {len(pipeline.features)} permission columns")
     for name, m in metrics.get("models", {}).items():
-        print(f"  {name}: acc={m.get('accuracy_mean', 0):.4f}  "
-              f"f1={m.get('f1_mean', 0):.4f}  auc={m.get('roc_auc_mean', 0):.4f}")
+        print(
+            f"  {name}: acc={m.get('accuracy_mean', 0):.4f}  "
+            f"f1={m.get('f1_mean', 0):.4f}  auc={m.get('roc_auc_mean', 0):.4f}"
+        )
     print(f"\n  Model saved to  : {pipeline.model_path}")
-    print(f"                  : data/models/best_model.joblib")
+    print("                  : data/models/best_model.joblib")
     print("  Eval report     : reports/evaluation_metrics.md, reports/model_comparison.json")
-    print("  Charts          : reports/confusion_matrix.png, reports/roc_curve.png, "
-          "reports/feature_importance.png")
+    print(
+        "  Charts          : reports/confusion_matrix.png, reports/roc_curve.png, "
+        "reports/feature_importance.png"
+    )
     if saved.get("is_synthetic"):
         print("\n  [!] WARNING: model was trained on SYNTHETIC fallback data.")
     elif len(saved.get("features", [])) and saved.get("n_samples", 0) < 200:
