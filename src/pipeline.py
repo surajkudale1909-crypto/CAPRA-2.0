@@ -26,6 +26,7 @@ from src.extractor import (
     APKExtractionError,
     APKNotFoundError,
     extract_manifest_info,
+    run_with_timeout,
 )
 from src.fusion_engine import FusionEngine, RiskVerdict
 from src.history_manager import HistoryManager
@@ -160,23 +161,32 @@ class PrivacyAnalysisPipeline:
                 }
 
         # Stage 6: Advanced Static Analysis (Trackers, Network, Security, Reachability)
+        # Runs under a hard time budget: DEX parsing of malicious/pathological APKs
+        # must never hang the pipeline (see src/extractor.py hardening).
         static_result: Optional[Dict[str, Any]] = None
         if not opts.get("skip_static", False):
             try:
                 from loguru import logger as _loguru_logger
                 _loguru_logger.disable("androguard")
                 from androguard.core.apk import APK
-                apk_obj = APK(apk_path)
-                trackers_res = self.tracker_detector.detect_from_apk(apk_obj)
-                network_res = self.network_detector.analyze_apk(apk_obj)
-                security_res = self.security_analyzer.analyze_apk(apk_obj)
-                reachability_res = self.reachability_analyzer.analyze_apk(apk_obj)
-                static_result = {
-                    "trackers": trackers_res,
-                    "network": network_res,
-                    "security": security_res,
-                    "reachability": reachability_res,
-                }
+
+                def _static_stage() -> Dict[str, Any]:
+                    apk_obj = APK(apk_path)
+                    trackers_res = self.tracker_detector.detect_from_apk(apk_obj)
+                    network_res = self.network_detector.analyze_apk(apk_obj)
+                    security_res = self.security_analyzer.analyze_apk(apk_obj)
+                    reachability_res = self.reachability_analyzer.analyze_apk(apk_obj)
+                    return {
+                        "trackers": trackers_res,
+                        "network": network_res,
+                        "security": security_res,
+                        "reachability": reachability_res,
+                    }
+
+                static_result = run_with_timeout(
+                    _static_stage,
+                    timeout_seconds=settings.static_analysis_timeout_seconds,
+                )
             except Exception as e:
                 logger.warning(f"Advanced static bytecode analysis failed: {e}")
                 static_result = {

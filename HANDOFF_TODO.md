@@ -14,12 +14,9 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 - Use `Extracted_permssion_updated.csv` (200 apps with Play Store categories × 138 permissions) to derive empirical per-category permission baselines for `data/context_rules.json`.
 
 ### 2. Harden APK parsing against malicious input
-**Why:** the tool's *purpose* is to open untrusted, possibly hostile APKs. `src/extractor.py` currently feeds any file to Androguard/zip parsing with no limits.
-**What:**
-- Enforce a max file size (e.g. 200 MB) before parsing.
-- Guard against zip bombs: limit total uncompressed size and entry count when the zip is inspected.
-- Wrap analysis in a timeout (Androguard can choke on pathological DEX); return `APKCorruptedError` on timeout.
-- Add tests for: oversized file, zip bomb (high compression ratio), truncated DEX, zero-byte file.
+**Status (2026-10-26): ✅ DONE.** `src/extractor.py` now validates every archive against size/entry-count/uncompressed-total/compression-ratio caps (zip-bomb guards on the central directory, zero extraction) and runs manifest parsing + the DEX static stage under daemon-thread time budgets. Typed errors (`APKTooLargeError`, `APKSecurityError`, `APKParseTimeoutError`) with clean CLI messages. All limits are env-tunable (`CAPRA_*` vars documented in `.env.example`). 11 new tests cover bombs, caps, and timeouts.
+**Remaining optional stretch:**
+- Deep header-vs-payload verification (detect forged zip central directories) — Androguard already fails these; the current declared-size caps cover standard bombs.
 
 ### 3. Decide the fate of the web dashboard
 **Why:** `fastapi`, `uvicorn`, `python-multipart`, `reportlab` were removed from `requirements.txt` (Dec 2026 review) because no code used them. Either earn them back or leave them out.

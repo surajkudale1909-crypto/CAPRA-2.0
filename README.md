@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-80%2F80%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-91%2F91%20passing-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Android%20Static%20Analysis-orange.svg)]()
 
 > **Institution:** Vishwakarma Institute of Technology (VIT Pune)  
@@ -122,6 +122,12 @@ Detects dangerous co-occurring permissions capable of covert privacy leakage:
 - Embedded SQLite database (`data/history.db`) records all completed audits.
 - **Scan-to-Scan Comparisons:** Evaluates score drift and permission deltas between builds (e.g., comparing v1.0 to v2.0 of an app).
 - Automatic publication-grade Markdown and JSON report exports.
+
+### 7. Untrusted-Input Hardening
+APKs under analysis are hostile by definition; every archive is validated before any heavy parser touches it:
+- **Size caps & zip-bomb guards:** max file size (500 MB), entry count (100k), declared uncompressed total (4 GB), and compression ratio (200:1) — all checked against the zip central directory with zero extraction, and all env-tunable (`CAPRA_MAX_APK_SIZE_MB`, `CAPRA_MAX_ZIP_ENTRIES`, `CAPRA_MAX_UNCOMPRESSED_MB`, `CAPRA_MAX_COMPRESSION_RATIO`).
+- **Hard parse time budgets:** manifest parsing (120 s) and the DEX/static-analysis stage (300 s) run under daemon-thread time budgets (`CAPRA_APK_PARSE_TIMEOUT`, `CAPRA_STATIC_ANALYSIS_TIMEOUT`) so pathological APKs cannot hang the CLI or GUI.
+- Malformed archives raise typed errors (`APKTooLargeError`, `APKSecurityError`, `APKParseTimeoutError`, `APKCorruptedError`) with actionable messages.
 
 ---
 

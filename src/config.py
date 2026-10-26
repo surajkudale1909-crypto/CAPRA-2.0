@@ -77,6 +77,26 @@ class Settings:
         default_factory=lambda: os.getenv("CAPRA_LOG_LEVEL", "INFO").upper()
     )
 
+    # APK Input Hardening (untrusted-input safety limits, all env-overridable)
+    max_apk_size_mb: int = field(
+        default_factory=lambda: int(os.getenv("CAPRA_MAX_APK_SIZE_MB", "500"))
+    )
+    max_zip_entries: int = field(
+        default_factory=lambda: int(os.getenv("CAPRA_MAX_ZIP_ENTRIES", "100000"))
+    )
+    max_uncompressed_mb: int = field(
+        default_factory=lambda: int(os.getenv("CAPRA_MAX_UNCOMPRESSED_MB", "4000"))
+    )
+    max_compression_ratio: float = field(
+        default_factory=lambda: float(os.getenv("CAPRA_MAX_COMPRESSION_RATIO", "200"))
+    )
+    apk_parse_timeout_seconds: int = field(
+        default_factory=lambda: int(os.getenv("CAPRA_APK_PARSE_TIMEOUT", "120"))
+    )
+    static_analysis_timeout_seconds: int = field(
+        default_factory=lambda: int(os.getenv("CAPRA_STATIC_ANALYSIS_TIMEOUT", "300"))
+    )
+
     def ensure_directories(self) -> None:
         """Create necessary directories if they do not exist."""
         self.data_dir.mkdir(parents=True, exist_ok=True)

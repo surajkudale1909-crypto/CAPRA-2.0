@@ -626,6 +626,10 @@ def main() -> None:
     except APKCorruptedError as e:
         print(f"\n{COLOR_RED}APK Archive Corrupted / Invalid: {e}{COLOR_RESET}", file=sys.stderr)
         sys.exit(1)
+    except APKExtractionError as e:
+        # APKTooLargeError / APKSecurityError / APKParseTimeoutError land here
+        print(f"\n{COLOR_RED}APK Safety Check Failed: {e}{COLOR_RESET}", file=sys.stderr)
+        sys.exit(1)
     except ContextRuleError as e:
         print(f"\n{COLOR_RED}Context Rule Error: {e}{COLOR_RESET}", file=sys.stderr)
         sys.exit(1)
