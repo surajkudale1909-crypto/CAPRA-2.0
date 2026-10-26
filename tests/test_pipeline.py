@@ -16,6 +16,21 @@ from src.extractor import (
 from src.fusion_engine import FusionEngine, RiskVerdict
 
 
+def _tk_available() -> bool:
+    """Return True when Tkinter can create a root window (import + display)."""
+    try:
+        import tkinter as tk
+
+        root = tk.Tk()
+        root.destroy()
+        return True
+    except Exception:
+        return False
+
+
+HAS_TK = _tk_available()
+
+
 class TestExtractor(unittest.TestCase):
     """Tests for the manifest extraction module."""
 
@@ -270,6 +285,7 @@ class TestMLPipeline(unittest.TestCase):
                 os.remove(temp_png)
 
 
+@unittest.skipUnless(HAS_TK, "tkinter/display not available in this environment")
 class TestDesktopGUI(unittest.TestCase):
     """Tests for Desktop Tkinter GUI connection and execution (Samriddhi's Module)."""
 

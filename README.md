@@ -8,7 +8,7 @@
 > **Institution:** Vishwakarma Institute of Technology (VIT Pune)  
 > **Department:** Computer Science & Artificial Intelligence (CS-AI)  
 > **Course:** Engineering Design & Innovation (EDAI) | Group 8  
-> **Academic Year:** 2024–2026
+> **Academic Year:** 2026–2027 | Semester 3
 
 ---
 
@@ -89,7 +89,7 @@ CAPRA 2.0 processes an APK through a deterministic, 8-stage unified pipeline wit
 
 ### 1. Context-Aware Baseline Rules (13 Categories)
 Expanded from 3 categories in v1 to 13 canonical functional profiles:
-- `Calculator`, `Flashlight`, `Navigation`, `Camera / Photography`, `Social Media`, `Finance / Banking`, `Fitness & Health`, `Music & Audio`, `Productivity / Office`, `Communication / Messaging`, `E-Commerce / Shopping`, `Weather`, `General Utility`.
+- `Calculator`, `Flashlight`, `Navigation`, `Social Media`, `Messaging`, `Banking/Finance`, `Health/Fitness`, `Games`, `Camera/Photo`, `Music/Video`, `Shopping`, `Productivity`, `Education`.
 - Modern Android 11–14 permission definitions: `POST_NOTIFICATIONS`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, `NEARBY_WIFI_DEVICES`.
 
 ### 2. Collusion & Exfiltration Matrix
@@ -133,8 +133,8 @@ Detects dangerous co-occurring permissions capable of covert privacy leakage:
 
 ### 1. Clone & Set Up Virtual Environment
 ```bash
-git clone https://github.com/vit-pune-edai/capra.git
-cd capra
+git clone https://github.com/surajkudale1909-crypto/CAPRA-2.0.git
+cd CAPRA-2.0
 
 # Create and activate virtual environment
 python -m venv .venv
@@ -169,17 +169,19 @@ CAPRA_LOG_LEVEL="INFO"
 
 ### 1. Analyze an Android APK
 ```bash
-# Auto-detect category and analyze APK
-python main.py --apk data/apks/calculator_sample.apk
+# Auto-detect category and analyze APK (positional path)
+python main.py data/apks/calculator_sample.apk
 
 # Explicitly specify app category
-python main.py --apk data/apks/calculator_sample.apk --category Calculator
+python main.py data/apks/calculator_sample.apk --category Calculator
 
 # Export Markdown audit report
-python main.py --apk data/apks/calculator_sample.apk --report-md
+python main.py data/apks/calculator_sample.apk --report-md
 
 # Output structured JSON
-python main.py --apk data/apks/calculator_sample.apk --json
+python main.py data/apks/calculator_sample.apk --json
+
+# The --apk flag also works: python main.py --apk data/apks/calculator_sample.apk
 ```
 
 ### 2. Presentation Demo Scenarios (No APK Required)
@@ -231,9 +233,11 @@ python -m src.ml_pipeline --compare
 | **Tracker Detection** | None | **17 Exodus Signatures** |
 | **Bytecode Call-Graph Analysis** | None | **Source-to-Sink Reachability** |
 | **Threat Intelligence** | None | **Live VirusTotal v3 + Local DB** |
-| **ML Cross-Validation AUC** | Single split | **0.992 (5-Fold Stratified CV)** |
+| **ML Cross-Validation AUC** | Single split | **5-Fold Stratified CV** (illustrative sample dataset — see note below) |
 | **Audit Persistence** | Ephemeral | **SQLite History + Diff Auditing** |
 | **Reporting** | Console text only | **Terminal + Markdown + JSON + GUI** |
+
+> **Note on ML metrics:** the bundled `sample_android_malware_dataset.csv` is a small hand-built illustrative set (60 rows). Cross-validation scores computed on it demonstrate the *pipeline mechanics* (training, CV, explainability) — they are **not** in-the-wild accuracy claims. Drop a full real dataset (Drebin, CIC-AndMal2017, or Kaggle) into `data/datasets/` and retrain to obtain representative metrics.
 
 ---
 

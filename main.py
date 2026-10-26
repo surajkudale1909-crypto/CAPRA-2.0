@@ -89,7 +89,7 @@ def format_report_terminal(
     score = fusion_data.get("score", 0)
     v_color = get_verdict_color(verdict)
 
-    print(f"\n{COLOR_BOLD}[1] APPLICATION METADATA & THREAT INTEL (SURAJ'S MODULE){COLOR_RESET}")
+    print(f"\n{COLOR_BOLD}[1] APPLICATION METADATA & THREAT INTEL{COLOR_RESET}")
     print("-" * 80)
     print(f"  {COLOR_BOLD}App Name:{COLOR_RESET}           {manifest_data.get('app_name') or 'N/A'}")
     print(f"  {COLOR_BOLD}Package Name:{COLOR_RESET}       {manifest_data.get('package_name')}")
@@ -148,7 +148,7 @@ def format_report_terminal(
 
 
     # Permission Classification Breakdown
-    print(f"\n{COLOR_BOLD}[2] CONTEXTUAL PERMISSION EVALUATION (OMRAJ'S MODULE){COLOR_RESET}")
+    print(f"\n{COLOR_BOLD}[2] CONTEXTUAL PERMISSION EVALUATION (CONTEXT ENGINE){COLOR_RESET}")
     print("-" * 80)
 
     # Acceptable
@@ -200,7 +200,7 @@ def format_report_terminal(
         model_name = ml_data.get("model_type", "Random Forest")
         source_badge = f"{COLOR_YELLOW}[SYNTHETIC FALLBACK]{COLOR_RESET}" if ml_data.get("is_synthetic") else f"{COLOR_CYAN}[{data_source}]{COLOR_RESET}"
 
-        print(f"\n{COLOR_BOLD}[4] MACHINE LEARNING RISK ESTIMATION (ISHAN'S MODULE){COLOR_RESET}")
+        print(f"\n{COLOR_BOLD}[4] MACHINE LEARNING RISK ESTIMATION (ML PIPELINE){COLOR_RESET}")
         print("-" * 80)
         print(f"  {COLOR_BOLD}Model:{COLOR_RESET}                      {model_name} {source_badge}")
         print(f"  {COLOR_BOLD}Inference Risk Probability:{COLOR_RESET} [{ml_color}{COLOR_BOLD} {ml_prob}% {COLOR_RESET}] -> {ml_color}{ml_verdict}{COLOR_RESET}")
@@ -214,7 +214,7 @@ def format_report_terminal(
 
     # Advanced Static Analysis & Reachability
     if static_data:
-        print(f"\n{COLOR_BOLD}[5] ADVANCED STATIC ANALYSIS & REACHABILITY (SURAJ & OMRAJ){COLOR_RESET}")
+        print(f"\n{COLOR_BOLD}[5] ADVANCED STATIC ANALYSIS & REACHABILITY{COLOR_RESET}")
         print("-" * 80)
         # Trackers
         t_data = static_data.get("trackers", {})
@@ -382,6 +382,13 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
+        "apk_path",
+        nargs="?",
+        type=str,
+        default=None,
+        help="Path to the Android APK file to inspect (positional shortcut for --apk).",
+    )
+    parser.add_argument(
         "--apk",
         type=str,
         help="Path to the Android APK file to inspect.",
@@ -416,7 +423,7 @@ def main() -> None:
     parser.add_argument(
         "--gui",
         action="store_true",
-        help="Launch the interactive desktop Graphical User Interface (Samriddhi's Module).",
+        help="Launch the interactive desktop Graphical User Interface.",
     )
     parser.add_argument(
         "--plot",
@@ -460,6 +467,17 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    # Resolve APK path: --apk flag takes precedence, positional argument as fallback
+    if not args.apk and args.apk_path:
+        args.apk = args.apk_path
+
+    if args.vt_key:
+        print(
+            f"{COLOR_YELLOW}Warning: --vt-key exposes the API key in shell history and process lists. "
+            f"Prefer the VIRUSTOTAL_API_KEY environment variable.{COLOR_RESET}",
+            file=sys.stderr,
+        )
 
     # History Mode
     if args.history:
@@ -566,7 +584,7 @@ def main() -> None:
     # Standard APK Analysis mode
     if not args.apk:
         parser.print_help()
-        print(f"\n{COLOR_RED}Error: --apk is required for analysis (or use --demo for simulation, --gui for desktop app).{COLOR_RESET}")
+        print(f"\n{COLOR_RED}Error: an APK path is required for analysis (e.g. 'python main.py app.apk'; or use --apk, --demo for simulation, --gui for desktop app).{COLOR_RESET}")
         sys.exit(1)
 
     if not args.json:

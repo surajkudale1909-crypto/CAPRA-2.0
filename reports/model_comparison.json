@@ -1,5 +1,5 @@
 {
-  "data_source": "EMPIRICAL (sample_android_malware_dataset.csv)",
+  "data_source": "EMPIRICAL (sample_android_malware_dataset.csv) [SMALL SAMPLE n=60 - ILLUSTRATIVE ONLY]",
   "is_synthetic": false,
   "n_samples": 60,
   "cv_folds": 5,

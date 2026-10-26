@@ -99,15 +99,15 @@ def generate_markdown_report(
         lines.append("| Component | Weight | Raw Risk % | Contribution |")
         lines.append("| :--- | :---: | :---: | :---: |")
         lines.append(
-            f"| **Contextual Heuristics** (Omraj) | {int(sb.get('heuristic_weight', 0.5)*100)}% | "
+            f"| **Contextual Heuristics** | {int(sb.get('heuristic_weight', 0.5)*100)}% | "
             f"{sb.get('heuristic_component', 0)}% | +{sb.get('heuristic_contribution', 0)} pts |"
         )
         lines.append(
-            f"| **Machine Learning** (Ishan) | {int(sb.get('ml_weight', 0.35)*100)}% | "
+            f"| **Machine Learning** | {int(sb.get('ml_weight', 0.35)*100)}% | "
             f"{sb.get('ml_component', 0)}% | +{sb.get('ml_contribution', 0)} pts |"
         )
         lines.append(
-            f"| **Attack Surface & Static** (Suraj) | {int(sb.get('surface_weight', 0.15)*100)}% | "
+            f"| **Attack Surface & Static** | {int(sb.get('surface_weight', 0.15)*100)}% | "
             f"{sb.get('surface_component', 0)}% | +{sb.get('surface_contribution', 0)} pts |"
         )
         if sb.get("threat_intel_override"):
@@ -139,7 +139,7 @@ def generate_markdown_report(
     lines.append("")
 
     # Threat Intelligence & VirusTotal Live
-    lines.append("## 3. Threat Intelligence & Reputation (Suraj's Module)")
+    lines.append("## 3. Threat Intelligence & Reputation")
     lines.append("")
     if threat:
         status = threat.get("status", "UNKNOWN")
@@ -169,7 +169,7 @@ def generate_markdown_report(
     lines.append("")
 
     # Contextual Heuristic Analysis
-    lines.append("## 4. Contextual Permission Evaluation (Omraj's Module)")
+    lines.append("## 4. Contextual Permission Evaluation (Context Engine)")
     lines.append("")
     lines.append(f"**Baseline Evaluation against Category: `{category}`**")
     lines.append("")
@@ -211,7 +211,7 @@ def generate_markdown_report(
         lines.append("")
 
     # Machine Learning Estimation
-    lines.append("## 5. Machine Learning Permission Risk Estimation (Ishan's Module)")
+    lines.append("## 5. Machine Learning Permission Risk Estimation (ML Pipeline)")
     lines.append("")
     if ml:
         ml_prob = ml.get("risk_percentage", 0.0)
@@ -238,7 +238,7 @@ def generate_markdown_report(
     lines.append("")
 
     # Advanced Static Bytecode Analysis
-    lines.append("## 6. Advanced Static Analysis & Attack Surface (Suraj & Omraj)")
+    lines.append("## 6. Advanced Static Analysis & Attack Surface")
     lines.append("")
     if static_sec:
         # Trackers

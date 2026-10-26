@@ -245,7 +245,17 @@ def load_dataset(
                     X[:, feat_idx] = pd.to_numeric(df[matched_col], errors="coerce").fillna(0).astype(int)
 
             source_name = f"EMPIRICAL ({os.path.basename(candidate_path)})"
-            logger.info(f"Dataset successfully loaded: {len(X)} samples ({sum(y == 1)} malware, {sum(y == 0)} benign)")
+            n_mal = int(sum(y == 1))
+            n_ben = int(sum(y == 0))
+            if len(X) < 200:
+                source_name += f" [SMALL SAMPLE n={len(X)} - ILLUSTRATIVE ONLY]"
+                logger.warning(
+                    "Dataset only has %d samples (%d malware, %d benign). Metrics on such a small "
+                    "sample are illustrative, NOT representative of in-the-wild accuracy. Provide a "
+                    "full Drebin / CIC-AndMal / Kaggle dataset for meaningful evaluation.",
+                    len(X), n_mal, n_ben,
+                )
+            logger.info(f"Dataset successfully loaded: {len(X)} samples ({n_mal} malware, {n_ben} benign)")
             return X, y, "EMPIRICAL", source_name
 
         except Exception as e:
@@ -378,7 +388,7 @@ def compare_and_evaluate_models(
 
 **Selected Model**: `{winner}` (Saved to `data/models/best_model.joblib`)
 
-> Note on Validity: If trained on synthetic fallback, results reflect the rule generator rather than empirical malware distribution. Place real Drebin or CIC-AndMal CSV files in `data/datasets/` to evaluate true in-the-wild accuracy.
+> Note on Validity: If trained on synthetic fallback, results reflect the rule generator rather than empirical malware distribution. Small hand-built datasets (< 200 rows) are marked ILLUSTRATIVE ONLY - cross-validation metrics on them do NOT represent in-the-wild accuracy. Place a full real Drebin or CIC-AndMal CSV in `data/datasets/` to evaluate true in-the-wild accuracy.
 """
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md_content)
@@ -532,7 +542,13 @@ class PermissionMLPipeline:
 
         vec = self.vectorize(requested_permissions)
         proba = self.model.predict_proba(vec)[0]
-        malicious_prob = float(proba[1]) if len(proba) > 1 else float(proba[0])
+        # Locate the malicious/positive class robustly (do not assume label ordering)
+        classes = list(getattr(self.model, "classes_", [0, 1]))
+        if 1 in classes:
+            positive_idx = classes.index(1)
+        else:
+            positive_idx = len(classes) - 1
+        malicious_prob = float(proba[positive_idx]) if len(proba) > 1 else float(proba[0])
         pred_label = int(self.model.predict(vec)[0])
 
         active_perms = [p for p in requested_permissions if p in self.perm_to_idx]

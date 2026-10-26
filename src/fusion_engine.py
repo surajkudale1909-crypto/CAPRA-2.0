@@ -38,11 +38,17 @@ class FusionEngine:
         self.raw_ceiling = raw_ceiling
         self.weights = weights or {"heuristic": 0.50, "ml": 0.35, "surface": 0.15}
 
-    def calculate_score(self, raw_penalty: int) -> int:
-        """Normalize raw penalty points to a 0-100 integer score."""
+    def calculate_score(self, raw_penalty: int, ceiling: Optional[int] = None) -> int:
+        """Normalize raw penalty points to a 0-100 integer score.
+
+        Args:
+            raw_penalty: Raw accumulated penalty points.
+            ceiling: Optional per-call ceiling override; defaults to self.raw_ceiling.
+        """
         if raw_penalty <= 0:
             return 0
-        normalized = (raw_penalty / self.raw_ceiling) * 100
+        effective_ceiling = ceiling if ceiling is not None else self.raw_ceiling
+        normalized = (raw_penalty / effective_ceiling) * 100
         return min(100, max(0, int(round(normalized))))
 
     def get_verdict(self, score: int) -> str:
@@ -243,12 +249,11 @@ class FusionEngine:
         penalties = context_result.get("penalties", {})
         raw_penalty = penalties.get("total_raw_penalty", 0)
 
-        # Allow dynamic ceiling from rules if defined
+        # Allow dynamic ceiling from rules if defined (without mutating shared state)
         weights = context_result.get("scoring_weights", {})
         ceiling = weights.get("max_raw_score_ceiling", self.raw_ceiling)
-        self.raw_ceiling = ceiling
 
-        heuristic_score = self.calculate_score(raw_penalty)
+        heuristic_score = self.calculate_score(raw_penalty, ceiling=ceiling)
 
         if ml_data is not None:
             ml_prob = ml_data.get("risk_probability", 0.0)

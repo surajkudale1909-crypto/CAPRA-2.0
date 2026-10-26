@@ -1,6 +1,6 @@
 # CAPRA Machine Learning Evaluation Report (Phase 3)
 
-**[DATA SOURCE: EMPIRICAL (sample_android_malware_dataset.csv)]**
+**[DATA SOURCE: EMPIRICAL (sample_android_malware_dataset.csv) [SMALL SAMPLE n=60 - ILLUSTRATIVE ONLY]]**
 
 ## Model Comparison (Stratified 5-Fold Cross Validation)
 
@@ -14,4 +14,4 @@
 
 **Selected Model**: `GradientBoosting` (Saved to `data/models/best_model.joblib`)
 
-> Note on Validity: If trained on synthetic fallback, results reflect the rule generator rather than empirical malware distribution. Place real Drebin or CIC-AndMal CSV files in `data/datasets/` to evaluate true in-the-wild accuracy.
+> Note on Validity: If trained on synthetic fallback, results reflect the rule generator rather than empirical malware distribution. Small hand-built datasets (< 200 rows) are marked ILLUSTRATIVE ONLY - cross-validation metrics on them do NOT represent in-the-wild accuracy. Place a full real Drebin or CIC-AndMal CSV in `data/datasets/` to evaluate true in-the-wild accuracy.

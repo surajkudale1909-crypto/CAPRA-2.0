@@ -59,7 +59,7 @@ class Settings:
     rules_path: Path = DATA_DIR / "context_rules.json"
     hashes_path: Path = DATA_DIR / "known_malware_hashes.json"
     trackers_path: Path = DATA_DIR / "trackers.json"
-    model_path: Path = MODELS_DIR / "rf_permission_model.joblib"
+    model_path: Path = MODELS_DIR / "permission_model.joblib"
     history_db_path: Path = DATA_DIR / "history.db"
     threat_cache_path: Path = DATA_DIR / "threat_cache.db"
 
