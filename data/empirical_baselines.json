@@ -1,0 +1,4255 @@
+{
+ "metadata": {
+  "source_file": "data/datasets/Extracted_permssion_updated.csv",
+  "n_apps": 200,
+  "n_store_categories": 28,
+  "n_permission_features": 138,
+  "description": "Empirical permission request frequencies per Play Store category, derived from real-world app listings. Used by the ContextEngine to contextualize rule-based findings against real category norms."
+ },
+ "category_map": {
+  "Calculator": [
+   "Tools"
+  ],
+  "Flashlight": [
+   "Tools"
+  ],
+  "Navigation": [
+   "Maps & Navigation"
+  ],
+  "Social Media": [
+   "Social Media",
+   "Dating"
+  ],
+  "Messaging": [
+   "Communications"
+  ],
+  "Banking/Finance": [
+   "Finance"
+  ],
+  "Health/Fitness": [
+   "Sports",
+   "Medical/Healthcare"
+  ],
+  "Games": [
+   "Games"
+  ],
+  "Camera/Photo": [
+   "Photography Apps"
+  ],
+  "Music/Video": [
+   "Music & Audio",
+   "Video Players & Editors"
+  ],
+  "Shopping": [
+   "Shopping"
+  ],
+  "Productivity": [
+   "Productivity",
+   "Business",
+   "Tools"
+  ],
+  "Education": [
+   "Education",
+   "Books & Reference",
+   "Comics"
+  ]
+ },
+ "sample_sizes": {
+  "Auto & Vehicles": 2,
+  "Books & Reference": 6,
+  "Business": 10,
+  "Comics": 1,
+  "Communications": 21,
+  "Dating": 3,
+  "Education": 1,
+  "Entertainment": 18,
+  "Events": 1,
+  "Finance": 8,
+  "Food & Drink": 11,
+  "Games": 7,
+  "Hotels & Vacation Rentals": 2,
+  "House & Home Apps": 2,
+  "Lifestyle": 3,
+  "Maps & Navigation": 3,
+  "Medical/Healthcare": 1,
+  "Music & Audio": 25,
+  "News & Magazines": 9,
+  "Personalization": 2,
+  "Photography Apps": 2,
+  "Productivity": 8,
+  "Shopping": 14,
+  "Social Media": 9,
+  "Sports": 5,
+  "Tools": 16,
+  "Video Players & Editors": 7,
+  "Weather": 3
+ },
+ "frequencies": {
+  "Auto & Vehicles": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CALL_PRIVILEGED": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_COMPONENT_ENABLED_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.DUMP": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.GET_TASKS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INTERNET": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.LOCATION_HARDWARE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_CALL_LOG": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_SMS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SEND_SMS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.VIBRATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   }
+  },
+  "Books & Reference": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 6,
+    "n": 6,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 5,
+    "n": 6,
+    "frequency": 0.8333
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 2,
+    "n": 6,
+    "frequency": 0.3333
+   },
+   "android.permission.CAMERA": {
+    "count": 2,
+    "n": 6,
+    "frequency": 0.3333
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 2,
+    "n": 6,
+    "frequency": 0.3333
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 2,
+    "n": 6,
+    "frequency": 0.3333
+   },
+   "android.permission.DUMP": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.INTERNET": {
+    "count": 6,
+    "n": 6,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 6,
+    "n": 6,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 5,
+    "n": 6,
+    "frequency": 0.8333
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 4,
+    "n": 6,
+    "frequency": 0.6667
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 6,
+    "n": 6,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 5,
+    "n": 6,
+    "frequency": 0.8333
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 6,
+    "frequency": 0.1667
+   }
+  },
+  "Business": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 5,
+    "n": 10,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 6,
+    "n": 10,
+    "frequency": 0.6
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 9,
+    "n": 10,
+    "frequency": 0.9
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 6,
+    "n": 10,
+    "frequency": 0.6
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 4,
+    "n": 10,
+    "frequency": 0.4
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 2,
+    "n": 10,
+    "frequency": 0.2
+   },
+   "android.permission.BLUETOOTH_PRIVILEGED": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 3,
+    "n": 10,
+    "frequency": 0.3
+   },
+   "android.permission.CAMERA": {
+    "count": 8,
+    "n": 10,
+    "frequency": 0.8
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 3,
+    "n": 10,
+    "frequency": 0.3
+   },
+   "android.permission.DISABLE_KEYGUARD": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 4,
+    "n": 10,
+    "frequency": 0.4
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 2,
+    "n": 10,
+    "frequency": 0.2
+   },
+   "android.permission.INTERNET": {
+    "count": 10,
+    "n": 10,
+    "frequency": 1.0
+   },
+   "android.permission.KILL_BACKGROUND_PROCESSES": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 3,
+    "n": 10,
+    "frequency": 0.3
+   },
+   "android.permission.NFC": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 4,
+    "n": 10,
+    "frequency": 0.4
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 6,
+    "n": 10,
+    "frequency": 0.6
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 9,
+    "n": 10,
+    "frequency": 0.9
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 3,
+    "n": 10,
+    "frequency": 0.3
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 4,
+    "n": 10,
+    "frequency": 0.4
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 7,
+    "n": 10,
+    "frequency": 0.7
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 2,
+    "n": 10,
+    "frequency": 0.2
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.SET_ALARM": {
+    "count": 2,
+    "n": 10,
+    "frequency": 0.2
+   },
+   "android.permission.SET_WALLPAPER": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 3,
+    "n": 10,
+    "frequency": 0.3
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 2,
+    "n": 10,
+    "frequency": 0.2
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 7,
+    "n": 10,
+    "frequency": 0.7
+   },
+   "android.permission.VIBRATE": {
+    "count": 8,
+    "n": 10,
+    "frequency": 0.8
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 9,
+    "n": 10,
+    "frequency": 0.9
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 3,
+    "n": 10,
+    "frequency": 0.3
+   },
+   "android.permission.WRITE_CONTACTS": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 9,
+    "n": 10,
+    "frequency": 0.9
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 10,
+    "frequency": 0.1
+   }
+  },
+  "Comics": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.INTERNET": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   }
+  },
+  "Communications": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 14,
+    "n": 21,
+    "frequency": 0.6667
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 14,
+    "n": 21,
+    "frequency": 0.6667
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 21,
+    "n": 21,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 16,
+    "n": 21,
+    "frequency": 0.7619
+   },
+   "android.permission.ACCOUNT_MANAGER": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.BIND_APPWIDGET": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 13,
+    "n": 21,
+    "frequency": 0.619
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 2,
+    "n": 21,
+    "frequency": 0.0952
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 7,
+    "n": 21,
+    "frequency": 0.3333
+   },
+   "android.permission.BROADCAST_WAP_PUSH": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 8,
+    "n": 21,
+    "frequency": 0.381
+   },
+   "android.permission.CAMERA": {
+    "count": 17,
+    "n": 21,
+    "frequency": 0.8095
+   },
+   "android.permission.CAPTURE_AUDIO_OUTPUT": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.CHANGE_COMPONENT_ENABLED_STATE": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 8,
+    "n": 21,
+    "frequency": 0.381
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 3,
+    "n": 21,
+    "frequency": 0.1429
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 5,
+    "n": 21,
+    "frequency": 0.2381
+   },
+   "android.permission.DISABLE_KEYGUARD": {
+    "count": 5,
+    "n": 21,
+    "frequency": 0.2381
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 9,
+    "n": 21,
+    "frequency": 0.4286
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.GET_TASKS": {
+    "count": 3,
+    "n": 21,
+    "frequency": 0.1429
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 12,
+    "n": 21,
+    "frequency": 0.5714
+   },
+   "android.permission.INTERNET": {
+    "count": 21,
+    "n": 21,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 15,
+    "n": 21,
+    "frequency": 0.7143
+   },
+   "android.permission.NFC": {
+    "count": 9,
+    "n": 21,
+    "frequency": 0.4286
+   },
+   "android.permission.PROCESS_OUTGOING_CALLS": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.READ_CALL_LOG": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 12,
+    "n": 21,
+    "frequency": 0.5714
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 18,
+    "n": 21,
+    "frequency": 0.8571
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 11,
+    "n": 21,
+    "frequency": 0.5238
+   },
+   "android.permission.READ_SMS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 7,
+    "n": 21,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 19,
+    "n": 21,
+    "frequency": 0.9048
+   },
+   "android.permission.RECEIVE_MMS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.RECEIVE_SMS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.RECEIVE_WAP_PUSH": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 18,
+    "n": 21,
+    "frequency": 0.8571
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 2,
+    "n": 21,
+    "frequency": 0.0952
+   },
+   "android.permission.SEND_SMS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.SET_WALLPAPER": {
+    "count": 2,
+    "n": 21,
+    "frequency": 0.0952
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 7,
+    "n": 21,
+    "frequency": 0.3333
+   },
+   "android.permission.TRANSMIT_IR": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 7,
+    "n": 21,
+    "frequency": 0.3333
+   },
+   "android.permission.USE_SIP": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.VIBRATE": {
+    "count": 18,
+    "n": 21,
+    "frequency": 0.8571
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 21,
+    "n": 21,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 3,
+    "n": 21,
+    "frequency": 0.1429
+   },
+   "android.permission.WRITE_CONTACTS": {
+    "count": 7,
+    "n": 21,
+    "frequency": 0.3333
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 18,
+    "n": 21,
+    "frequency": 0.8571
+   },
+   "android.permission.WRITE_GSERVICES": {
+    "count": 1,
+    "n": 21,
+    "frequency": 0.0476
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 4,
+    "n": 21,
+    "frequency": 0.1905
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 7,
+    "n": 21,
+    "frequency": 0.3333
+   }
+  },
+  "Dating": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.CAMERA": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.INTERNET": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.VIBRATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   }
+  },
+  "Education": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCOUNT_MANAGER": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.INTERNET": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_GSERVICES": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   }
+  },
+  "Entertainment": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 9,
+    "n": 18,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 7,
+    "n": 18,
+    "frequency": 0.3889
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 18,
+    "n": 18,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 14,
+    "n": 18,
+    "frequency": 0.7778
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 7,
+    "n": 18,
+    "frequency": 0.3889
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 3,
+    "n": 18,
+    "frequency": 0.1667
+   },
+   "android.permission.CAMERA": {
+    "count": 5,
+    "n": 18,
+    "frequency": 0.2778
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 5,
+    "n": 18,
+    "frequency": 0.2778
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 3,
+    "n": 18,
+    "frequency": 0.1667
+   },
+   "android.permission.EXPAND_STATUS_BAR": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   },
+   "android.permission.INTERNET": {
+    "count": 18,
+    "n": 18,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 8,
+    "n": 18,
+    "frequency": 0.4444
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 13,
+    "n": 18,
+    "frequency": 0.7222
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 3,
+    "n": 18,
+    "frequency": 0.1667
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 13,
+    "n": 18,
+    "frequency": 0.7222
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 7,
+    "n": 18,
+    "frequency": 0.3889
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 2,
+    "n": 18,
+    "frequency": 0.1111
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 2,
+    "n": 18,
+    "frequency": 0.1111
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 2,
+    "n": 18,
+    "frequency": 0.1111
+   },
+   "android.permission.VIBRATE": {
+    "count": 8,
+    "n": 18,
+    "frequency": 0.4444
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 18,
+    "n": 18,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 12,
+    "n": 18,
+    "frequency": 0.6667
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 4,
+    "n": 18,
+    "frequency": 0.2222
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 18,
+    "frequency": 0.0556
+   }
+  },
+  "Events": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.INTERNET": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   }
+  },
+  "Finance": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 4,
+    "n": 8,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 7,
+    "n": 8,
+    "frequency": 0.875
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.CAMERA": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.CHANGE_CONFIGURATION": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 3,
+    "n": 8,
+    "frequency": 0.375
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.GET_TASKS": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.INTERNET": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.NFC": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 6,
+    "n": 8,
+    "frequency": 0.75
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 4,
+    "n": 8,
+    "frequency": 0.5
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 3,
+    "n": 8,
+    "frequency": 0.375
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.VIBRATE": {
+    "count": 7,
+    "n": 8,
+    "frequency": 0.875
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 6,
+    "n": 8,
+    "frequency": 0.75
+   }
+  },
+  "Food & Drink": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 11,
+    "n": 11,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 11,
+    "n": 11,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 11,
+    "n": 11,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 11,
+    "frequency": 0.0909
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 10,
+    "n": 11,
+    "frequency": 0.9091
+   },
+   "android.permission.BIND_NFC_SERVICE": {
+    "count": 1,
+    "n": 11,
+    "frequency": 0.0909
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 3,
+    "n": 11,
+    "frequency": 0.2727
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 4,
+    "n": 11,
+    "frequency": 0.3636
+   },
+   "android.permission.CAMERA": {
+    "count": 8,
+    "n": 11,
+    "frequency": 0.7273
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 3,
+    "n": 11,
+    "frequency": 0.2727
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   },
+   "android.permission.GET_TASKS": {
+    "count": 1,
+    "n": 11,
+    "frequency": 0.0909
+   },
+   "android.permission.INTERNET": {
+    "count": 11,
+    "n": 11,
+    "frequency": 1.0
+   },
+   "android.permission.NFC": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 9,
+    "n": 11,
+    "frequency": 0.8182
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 5,
+    "n": 11,
+    "frequency": 0.4545
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 11,
+    "n": 11,
+    "frequency": 1.0
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 11,
+    "frequency": 0.0909
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 3,
+    "n": 11,
+    "frequency": 0.2727
+   },
+   "android.permission.SET_ALARM": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 7,
+    "n": 11,
+    "frequency": 0.6364
+   },
+   "android.permission.VIBRATE": {
+    "count": 9,
+    "n": 11,
+    "frequency": 0.8182
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 11,
+    "n": 11,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 9,
+    "n": 11,
+    "frequency": 0.8182
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 2,
+    "n": 11,
+    "frequency": 0.1818
+   }
+  },
+  "Games": {
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 7,
+    "n": 7,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 5,
+    "n": 7,
+    "frequency": 0.7143
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 2,
+    "n": 7,
+    "frequency": 0.2857
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.BLUETOOTH_PRIVILEGED": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.INSTALL_PACKAGES": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.INTERNET": {
+    "count": 7,
+    "n": 7,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 2,
+    "n": 7,
+    "frequency": 0.2857
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.SET_PREFERRED_APPLICATIONS": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.VIBRATE": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 6,
+    "n": 7,
+    "frequency": 0.8571
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   }
+  },
+  "Hotels & Vacation Rentals": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.BIND_NFC_SERVICE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH_PRIVILEGED": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CAMERA": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INTERNET": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_CALL_LOG": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SET_ALARM": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   }
+  },
+  "House & Home Apps": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CAMERA": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INTERNET": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.NFC": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.PACKAGE_USAGE_STATS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SET_ALARM": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.VIBRATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   }
+  },
+  "Lifestyle": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH_PRIVILEGED": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.CAMERA": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.INTERNET": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.VIBRATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   }
+  },
+  "Maps & Navigation": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.INTERNET": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.LOCATION_HARDWARE": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.NFC": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.RECEIVE_SMS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.VIBRATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   }
+  },
+  "Medical/Healthcare": {
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.INTERNET": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 1,
+    "frequency": 1.0
+   }
+  },
+  "Music & Audio": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 10,
+    "n": 25,
+    "frequency": 0.4
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 7,
+    "n": 25,
+    "frequency": 0.28
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 25,
+    "n": 25,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 18,
+    "n": 25,
+    "frequency": 0.72
+   },
+   "android.permission.ACCOUNT_MANAGER": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.BIND_NFC_SERVICE": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 19,
+    "n": 25,
+    "frequency": 0.76
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 9,
+    "n": 25,
+    "frequency": 0.36
+   },
+   "android.permission.BLUETOOTH_PRIVILEGED": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 3,
+    "n": 25,
+    "frequency": 0.12
+   },
+   "android.permission.CAMERA": {
+    "count": 4,
+    "n": 25,
+    "frequency": 0.16
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 3,
+    "n": 25,
+    "frequency": 0.12
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 5,
+    "n": 25,
+    "frequency": 0.2
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 6,
+    "n": 25,
+    "frequency": 0.24
+   },
+   "android.permission.DISABLE_KEYGUARD": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.DUMP": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 4,
+    "n": 25,
+    "frequency": 0.16
+   },
+   "android.permission.GET_TASKS": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 5,
+    "n": 25,
+    "frequency": 0.2
+   },
+   "android.permission.INTERNET": {
+    "count": 25,
+    "n": 25,
+    "frequency": 1.0
+   },
+   "android.permission.KILL_BACKGROUND_PROCESSES": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.LOCATION_HARDWARE": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 9,
+    "n": 25,
+    "frequency": 0.36
+   },
+   "android.permission.NFC": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.READ_CALL_LOG": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 4,
+    "n": 25,
+    "frequency": 0.16
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 20,
+    "n": 25,
+    "frequency": 0.8
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 9,
+    "n": 25,
+    "frequency": 0.36
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 18,
+    "n": 25,
+    "frequency": 0.72
+   },
+   "android.permission.RECEIVE_SMS": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 10,
+    "n": 25,
+    "frequency": 0.4
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.SEND_RESPOND_VIA_MESSAGE": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.SET_ALARM": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 5,
+    "n": 25,
+    "frequency": 0.2
+   },
+   "android.permission.TRANSMIT_IR": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 2,
+    "n": 25,
+    "frequency": 0.08
+   },
+   "android.permission.VIBRATE": {
+    "count": 12,
+    "n": 25,
+    "frequency": 0.48
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 25,
+    "n": 25,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 19,
+    "n": 25,
+    "frequency": 0.76
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 3,
+    "n": 25,
+    "frequency": 0.12
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 25,
+    "frequency": 0.04
+   }
+  },
+  "News & Magazines": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 7,
+    "n": 9,
+    "frequency": 0.7778
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.GET_TASKS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.INTERNET": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.KILL_BACKGROUND_PROCESSES": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 7,
+    "n": 9,
+    "frequency": 0.7778
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.VIBRATE": {
+    "count": 5,
+    "n": 9,
+    "frequency": 0.5556
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 7,
+    "n": 9,
+    "frequency": 0.7778
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   }
+  },
+  "Personalization": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BIND_APPWIDGET": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.CALL_PRIVILEGED": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_COMPONENT_ENABLED_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.EXPAND_STATUS_BAR": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INTERNET": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.PACKAGE_USAGE_STATS": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.READ_FRAME_BUFFER": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SET_ALARM": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SET_WALLPAPER": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.SET_WALLPAPER_HINTS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.STATUS_BAR": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.VIBRATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SECURE_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   }
+  },
+  "Photography Apps": {
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.DISABLE_KEYGUARD": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.INTERNET": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.NFC": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 2,
+    "n": 2,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 2,
+    "frequency": 0.5
+   }
+  },
+  "Productivity": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 6,
+    "n": 8,
+    "frequency": 0.75
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 6,
+    "n": 8,
+    "frequency": 0.75
+   },
+   "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 3,
+    "n": 8,
+    "frequency": 0.375
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.BLUETOOTH_PRIVILEGED": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.CAMERA": {
+    "count": 7,
+    "n": 8,
+    "frequency": 0.875
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 4,
+    "n": 8,
+    "frequency": 0.5
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 4,
+    "n": 8,
+    "frequency": 0.5
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 3,
+    "n": 8,
+    "frequency": 0.375
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.INTERNET": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.NFC": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 3,
+    "n": 8,
+    "frequency": 0.375
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 8,
+    "n": 8,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 3,
+    "n": 8,
+    "frequency": 0.375
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 5,
+    "n": 8,
+    "frequency": 0.625
+   },
+   "android.permission.VIBRATE": {
+    "count": 6,
+    "n": 8,
+    "frequency": 0.75
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 7,
+    "n": 8,
+    "frequency": 0.875
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.WRITE_CONTACTS": {
+    "count": 1,
+    "n": 8,
+    "frequency": 0.125
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 7,
+    "n": 8,
+    "frequency": 0.875
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 2,
+    "n": 8,
+    "frequency": 0.25
+   }
+  },
+  "Shopping": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 12,
+    "n": 14,
+    "frequency": 0.8571
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 10,
+    "n": 14,
+    "frequency": 0.7143
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 13,
+    "n": 14,
+    "frequency": 0.9286
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 14,
+    "n": 14,
+    "frequency": 1.0
+   },
+   "android.permission.BIND_CARRIER_MESSAGING_SERVICE": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 3,
+    "n": 14,
+    "frequency": 0.2143
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.CAMERA": {
+    "count": 9,
+    "n": 14,
+    "frequency": 0.6429
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 4,
+    "n": 14,
+    "frequency": 0.2857
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 5,
+    "n": 14,
+    "frequency": 0.3571
+   },
+   "android.permission.EXPAND_STATUS_BAR": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 4,
+    "n": 14,
+    "frequency": 0.2857
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.GET_TASKS": {
+    "count": 4,
+    "n": 14,
+    "frequency": 0.2857
+   },
+   "android.permission.INTERNET": {
+    "count": 14,
+    "n": 14,
+    "frequency": 1.0
+   },
+   "android.permission.NFC": {
+    "count": 4,
+    "n": 14,
+    "frequency": 0.2857
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 10,
+    "n": 14,
+    "frequency": 0.7143
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 3,
+    "n": 14,
+    "frequency": 0.2143
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 13,
+    "n": 14,
+    "frequency": 0.9286
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 4,
+    "n": 14,
+    "frequency": 0.2857
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.SET_TIME_ZONE": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 4,
+    "n": 14,
+    "frequency": 0.2857
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 14,
+    "frequency": 0.0714
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 8,
+    "n": 14,
+    "frequency": 0.5714
+   },
+   "android.permission.VIBRATE": {
+    "count": 11,
+    "n": 14,
+    "frequency": 0.7857
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 14,
+    "n": 14,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 11,
+    "n": 14,
+    "frequency": 0.7857
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 2,
+    "n": 14,
+    "frequency": 0.1429
+   }
+  },
+  "Social Media": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 6,
+    "n": 9,
+    "frequency": 0.6667
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 5,
+    "n": 9,
+    "frequency": 0.5556
+   },
+   "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.BATTERY_STATS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 6,
+    "n": 9,
+    "frequency": 0.6667
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.BROADCAST_STICKY": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.CAMERA": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.CAPTURE_VIDEO_OUTPUT": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.DISABLE_KEYGUARD": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 5,
+    "n": 9,
+    "frequency": 0.5556
+   },
+   "android.permission.GET_ACCOUNTS_PRIVILEGED": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.GET_TASKS": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.INTERNET": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.NFC": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   },
+   "android.permission.PACKAGE_USAGE_STATS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 7,
+    "n": 9,
+    "frequency": 0.7778
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.READ_LOGS": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 5,
+    "n": 9,
+    "frequency": 0.5556
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 7,
+    "n": 9,
+    "frequency": 0.7778
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.SET_WALLPAPER": {
+    "count": 1,
+    "n": 9,
+    "frequency": 0.1111
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 5,
+    "n": 9,
+    "frequency": 0.5556
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   },
+   "android.permission.VIBRATE": {
+    "count": 8,
+    "n": 9,
+    "frequency": 0.8889
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_CALENDAR": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.WRITE_CONTACTS": {
+    "count": 3,
+    "n": 9,
+    "frequency": 0.3333
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 9,
+    "n": 9,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 2,
+    "n": 9,
+    "frequency": 0.2222
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 4,
+    "n": 9,
+    "frequency": 0.4444
+   }
+  },
+  "Sports": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 2,
+    "n": 5,
+    "frequency": 0.4
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 5,
+    "n": 5,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 3,
+    "n": 5,
+    "frequency": 0.6
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.INTERNET": {
+    "count": 5,
+    "n": 5,
+    "frequency": 1.0
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 5,
+    "frequency": 0.6
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 4,
+    "n": 5,
+    "frequency": 0.8
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.VIBRATE": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 4,
+    "n": 5,
+    "frequency": 0.8
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 3,
+    "n": 5,
+    "frequency": 0.6
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 5,
+    "frequency": 0.2
+   }
+  },
+  "Tools": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 7,
+    "n": 16,
+    "frequency": 0.4375
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 9,
+    "n": 16,
+    "frequency": 0.5625
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 16,
+    "n": 16,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 12,
+    "n": 16,
+    "frequency": 0.75
+   },
+   "android.permission.BIND_NFC_SERVICE": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 7,
+    "n": 16,
+    "frequency": 0.4375
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 7,
+    "n": 16,
+    "frequency": 0.4375
+   },
+   "android.permission.CALL_PHONE": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.CAMERA": {
+    "count": 9,
+    "n": 16,
+    "frequency": 0.5625
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 5,
+    "n": 16,
+    "frequency": 0.3125
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.DUMP": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.EXPAND_STATUS_BAR": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.INTERNET": {
+    "count": 16,
+    "n": 16,
+    "frequency": 1.0
+   },
+   "android.permission.KILL_BACKGROUND_PROCESSES": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.LOCATION_HARDWARE": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.MEDIA_CONTENT_CONTROL": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 5,
+    "n": 16,
+    "frequency": 0.3125
+   },
+   "android.permission.MOUNT_UNMOUNT_FILESYSTEMS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.NFC": {
+    "count": 3,
+    "n": 16,
+    "frequency": 0.1875
+   },
+   "android.permission.PACKAGE_USAGE_STATS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.READ_CALENDAR": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.READ_CALL_LOG": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 13,
+    "n": 16,
+    "frequency": 0.8125
+   },
+   "android.permission.READ_LOGS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.READ_SMS": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.READ_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.READ_SYNC_STATS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 14,
+    "n": 16,
+    "frequency": 0.875
+   },
+   "android.permission.RECEIVE_MMS": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.RECEIVE_SMS": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 7,
+    "n": 16,
+    "frequency": 0.4375
+   },
+   "android.permission.REORDER_TASKS": {
+    "count": 3,
+    "n": 16,
+    "frequency": 0.1875
+   },
+   "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS": {
+    "count": 3,
+    "n": 16,
+    "frequency": 0.1875
+   },
+   "android.permission.REQUEST_INSTALL_PACKAGES": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.SEND_SMS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.SET_ALARM": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.SET_WALLPAPER": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.STATUS_BAR": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 4,
+    "n": 16,
+    "frequency": 0.25
+   },
+   "android.permission.VIBRATE": {
+    "count": 10,
+    "n": 16,
+    "frequency": 0.625
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 13,
+    "n": 16,
+    "frequency": 0.8125
+   },
+   "android.permission.WRITE_CALL_LOG": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   },
+   "android.permission.WRITE_CONTACTS": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 12,
+    "n": 16,
+    "frequency": 0.75
+   },
+   "android.permission.WRITE_SECURE_SETTINGS": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 2,
+    "n": 16,
+    "frequency": 0.125
+   },
+   "android.permission.WRITE_SYNC_SETTINGS": {
+    "count": 1,
+    "n": 16,
+    "frequency": 0.0625
+   }
+  },
+  "Video Players & Editors": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 7,
+    "n": 7,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 7,
+    "n": 7,
+    "frequency": 1.0
+   },
+   "android.permission.BLUETOOTH": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.BLUETOOTH_ADMIN": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.CAMERA": {
+    "count": 4,
+    "n": 7,
+    "frequency": 0.5714
+   },
+   "android.permission.CHANGE_NETWORK_STATE": {
+    "count": 2,
+    "n": 7,
+    "frequency": 0.2857
+   },
+   "android.permission.CHANGE_WIFI_MULTICAST_STATE": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.CHANGE_WIFI_STATE": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.DISABLE_KEYGUARD": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.GET_ACCOUNTS": {
+    "count": 2,
+    "n": 7,
+    "frequency": 0.2857
+   },
+   "android.permission.GET_ACCOUNTS_PRIVILEGED": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.GET_PACKAGE_SIZE": {
+    "count": 2,
+    "n": 7,
+    "frequency": 0.2857
+   },
+   "android.permission.INSTALL_SHORTCUT": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.INTERNET": {
+    "count": 6,
+    "n": 7,
+    "frequency": 0.8571
+   },
+   "android.permission.KILL_BACKGROUND_PROCESSES": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.MANAGE_DOCUMENTS": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.MODIFY_AUDIO_SETTINGS": {
+    "count": 3,
+    "n": 7,
+    "frequency": 0.4286
+   },
+   "android.permission.NFC": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_CONTACTS": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_EXTERNAL_STORAGE": {
+    "count": 6,
+    "n": 7,
+    "frequency": 0.8571
+   },
+   "android.permission.READ_LOGS": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 2,
+    "n": 7,
+    "frequency": 0.2857
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 4,
+    "n": 7,
+    "frequency": 0.5714
+   },
+   "android.permission.RECORD_AUDIO": {
+    "count": 5,
+    "n": 7,
+    "frequency": 0.7143
+   },
+   "android.permission.SYSTEM_ALERT_WINDOW": {
+    "count": 4,
+    "n": 7,
+    "frequency": 0.5714
+   },
+   "android.permission.UNINSTALL_SHORTCUT": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.USE_FINGERPRINT": {
+    "count": 1,
+    "n": 7,
+    "frequency": 0.1429
+   },
+   "android.permission.VIBRATE": {
+    "count": 6,
+    "n": 7,
+    "frequency": 0.8571
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 7,
+    "n": 7,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_EXTERNAL_STORAGE": {
+    "count": 7,
+    "n": 7,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 4,
+    "n": 7,
+    "frequency": 0.5714
+   }
+  },
+  "Weather": {
+   "android.permission.ACCESS_COARSE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_FINE_LOCATION": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NETWORK_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.ACCESS_NOTIFICATION_POLICY": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.ACCESS_WIFI_STATE": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.CAMERA": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.INTERNET": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.READ_PHONE_STATE": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.RECEIVE_BOOT_COMPLETED": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.SET_PREFERRED_APPLICATIONS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   },
+   "android.permission.VIBRATE": {
+    "count": 2,
+    "n": 3,
+    "frequency": 0.6667
+   },
+   "android.permission.WAKE_LOCK": {
+    "count": 3,
+    "n": 3,
+    "frequency": 1.0
+   },
+   "android.permission.WRITE_SETTINGS": {
+    "count": 1,
+    "n": 3,
+    "frequency": 0.3333
+   }
+  }
+ }
+}

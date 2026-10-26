@@ -92,6 +92,12 @@ Expanded from 3 categories in v1 to 13 canonical functional profiles:
 - `Calculator`, `Flashlight`, `Navigation`, `Social Media`, `Messaging`, `Banking/Finance`, `Health/Fitness`, `Games`, `Camera/Photo`, `Music/Video`, `Shopping`, `Productivity`, `Education`.
 - Modern Android 11–14 permission definitions: `POST_NOTIFICATIONS`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, `NEARBY_WIFI_DEVICES`.
 
+### 1a. Context Intelligence: Real-World Baselines & Calibration
+- **Empirical category baselines** (`data/empirical_baselines.json`, derived from 200 real-world apps across 28 Play-store categories): every context verdict carries real-world request frequencies — flagged permissions get evidence like *"READ_SMS is requested by only 12% of real-world Flashlight apps (2/16)"*. Purely informational — analysis scores are provably unchanged with or without it.
+- **Data-driven context exemptions**: combinations that are *expected functionality* for a category (camera+internet in a camera app, location+internet in navigation, SMS+internet in a messaging app) are reported but not penalized — the same permission set scores **Safe in Camera/Photo but Low/High in Calculator/Flashlight** (`reports/calibration.md`).
+- **Calibrated ML decision threshold** (0.45, chosen by max-F1 on out-of-fold predictions of the 4,464-app corpus) is trained, stored in the model payload, and applied to every verdict.
+- **Category auto-detector accuracy 94.6%** on real app listings (139/147) via keyword heuristics + permission profiles + a popular-app catalog; `scripts/calibrate.py` regenerates the full evidence in `reports/calibration.md`.
+
 ### 2. Collusion & Exfiltration Matrix
 Detects dangerous co-occurring permissions capable of covert privacy leakage:
 - **Local Storage Exfiltration:** `READ_EXTERNAL_STORAGE` + `INTERNET`

@@ -196,6 +196,8 @@ def format_report_terminal(
             p_name = item["permission"].replace("android.permission.", "")
             print(f"     - {COLOR_RED}{COLOR_BOLD}{p_name}{COLOR_RESET} (+{item['penalty']} pts)")
             print(f"       {COLOR_DIM}Reason: {item['reason']}{COLOR_RESET}")
+            if item.get("empirical_note"):
+                print(f"       {COLOR_DIM}Real-world: {item['empirical_note']}{COLOR_RESET}")
 
     # Unexpected Dangerous
     unexp = context_data.get("unexpected_dangerous_permissions", [])
@@ -206,6 +208,8 @@ def format_report_terminal(
         for item in unexp:
             p_name = item["permission"].replace("android.permission.", "")
             print(f"     - {COLOR_ORANGE}{p_name}{COLOR_RESET} (+{item['penalty']} pts)")
+            if item.get("empirical_note"):
+                print(f"       {COLOR_DIM}Real-world: {item['empirical_note']}{COLOR_RESET}")
 
     # Dangerous Combinations
     combinations = context_data.get("triggered_combinations", [])
@@ -225,6 +229,33 @@ def format_report_terminal(
         print(
             f"  {COLOR_GREEN}[+] No high-risk collusion or data-exfiltration combinations triggered.{COLOR_RESET}"
         )
+
+    # Contextual exemptions (expected functionality — not penalized)
+    exemptions = context_data.get("contextual_exemptions", [])
+    if exemptions:
+        print(
+            f"\n  {COLOR_DIM}[i] Expected Functionality Combinations (not penalized):{COLOR_RESET}"
+        )
+        for comb in exemptions:
+            matched = [p.replace("android.permission.", "") for p in comb["matched_permissions"]]
+            print(f"     {COLOR_DIM}- {comb['name']}: {' + '.join(matched)}{COLOR_RESET}")
+
+    # Real-world empirical category baselines (informational)
+    empirical = context_data.get("empirical_context", {})
+    if empirical.get("available"):
+        store_list = ", ".join(empirical.get("store_categories", []))
+        print(
+            f"\n  {COLOR_DIM}[i] Real-World Baselines (n={empirical.get('sample_size', 0)} apps, "
+            f"store: {store_list}):{COLOR_RESET}"
+        )
+        notes = empirical.get("category_norm_notes", [])
+        if notes:
+            for note in notes:
+                print(f"     {COLOR_DIM}- {note}{COLOR_RESET}")
+        else:
+            print(
+                f"     {COLOR_DIM}- No unusually rare permissions for this category.{COLOR_RESET}"
+            )
 
     # Machine Learning Estimation
     if ml_data:

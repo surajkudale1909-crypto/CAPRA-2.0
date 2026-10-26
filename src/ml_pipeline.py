@@ -515,6 +515,48 @@ def load_dataset(
     return X, y, "SYNTHETIC", "SYNTHETIC (Fallback Generator)", list(FEATURE_PERMISSIONS)
 
 
+def _calibrate_decision_threshold(y_true: np.ndarray, probs: np.ndarray) -> Dict[str, Any]:
+    """Pick the probability threshold that maximizes F1 on out-of-fold predictions.
+
+    Returns a calibration block with the chosen threshold, the metrics at that
+    threshold, and the Youden's-J alternative for reference.
+    """
+    best_f1_t, best_f1 = 0.5, -1.0
+    best_j_t, best_j = 0.5, -1.0
+    for t in [i / 100 for i in range(5, 100)]:
+        preds = (probs >= t).astype(int)
+        tp = float(np.sum((preds == 1) & (y_true == 1)))
+        fp = float(np.sum((preds == 1) & (y_true == 0)))
+        fn = float(np.sum((preds == 0) & (y_true == 1)))
+        tn = float(np.sum((preds == 0) & (y_true == 0)))
+        precision = tp / (tp + fp) if (tp + fp) else 0.0
+        recall = tp / (tp + fn) if (tp + fn) else 0.0
+        f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+        tpr = recall
+        fpr = fp / (fp + tn) if (fp + tn) else 0.0
+        youden_j = tpr - fpr
+        if f1 > best_f1:
+            best_f1, best_f1_t = f1, t
+        if youden_j > best_j:
+            best_j, best_j_t = youden_j, t
+
+    preds = (probs >= best_f1_t).astype(int)
+    tp = float(np.sum((preds == 1) & (y_true == 1)))
+    fp = float(np.sum((preds == 1) & (y_true == 0)))
+    fn = float(np.sum((preds == 0) & (y_true == 1)))
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+
+    return {
+        "decision_threshold": round(best_f1_t, 2),
+        "f1_at_threshold": round(best_f1, 4),
+        "precision_at_threshold": round(precision, 4),
+        "recall_at_threshold": round(recall, 4),
+        "youden_threshold": round(best_j_t, 2),
+        "criterion": "max_F1_on_out_of_fold_predictions",
+    }
+
+
 def compare_and_evaluate_models(
     X: np.ndarray,
     y: np.ndarray,
@@ -555,14 +597,21 @@ def compare_and_evaluate_models(
     gb_best_probs: Optional[np.ndarray] = None
     y_test_rep: Optional[np.ndarray] = None
 
+    # Out-of-fold predictions across all folds (for threshold calibration)
+    oof_y: List[np.ndarray] = []
+    oof_rf_probs: List[np.ndarray] = []
+    oof_gb_probs: List[np.ndarray] = []
+
     for train_idx, test_idx in skf.split(X, y):
         X_train, X_test = X[train_idx], X[test_idx]
         y_train, y_test = y[train_idx], y[test_idx]
+        oof_y.append(y_test)
 
         # 1. Random Forest
         rf_model.fit(X_train, y_train)
         rf_preds = rf_model.predict(X_test)
         rf_probs = rf_model.predict_proba(X_test)[:, 1]
+        oof_rf_probs.append(rf_probs)
 
         metrics["RandomForest"]["accuracy"].append(float(accuracy_score(y_test, rf_preds)))
         metrics["RandomForest"]["precision"].append(
@@ -578,6 +627,7 @@ def compare_and_evaluate_models(
         gb_model.fit(X_train, y_train)
         gb_preds = gb_model.predict(X_test)
         gb_probs = gb_model.predict_proba(X_test)[:, 1]
+        oof_gb_probs.append(gb_probs)
 
         metrics["GradientBoosting"]["accuracy"].append(float(accuracy_score(y_test, gb_preds)))
         metrics["GradientBoosting"]["precision"].append(
@@ -628,6 +678,11 @@ def compare_and_evaluate_models(
     gb_f1 = summary["models"]["GradientBoosting"]["f1_mean"]
     winner = "RandomForest" if rf_f1 >= gb_f1 else "GradientBoosting"
     summary["selected_winner"] = winner
+
+    # Threshold calibration on out-of-fold predictions of the winning model
+    y_oof = np.concatenate(oof_y)
+    probs_oof = np.concatenate(oof_gb_probs if winner == "GradientBoosting" else oof_rf_probs)
+    summary["calibration"] = _calibrate_decision_threshold(y_oof, probs_oof)
 
     # Export model_comparison.json
     comp_json_path = os.path.join(out_dir, "model_comparison.json")
@@ -749,6 +804,7 @@ class PermissionMLPipeline:
         self.model_name: str = "RandomForest"
         self.data_source: str = "SYNTHETIC"
         self.is_synthetic: bool = True
+        self.decision_threshold: float = 0.5
 
         os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
 
@@ -771,6 +827,7 @@ class PermissionMLPipeline:
                 self.model_name = saved_data.get("model_name", "RandomForest")
                 self.data_source = saved_data.get("data_source", "SYNTHETIC")
                 self.is_synthetic = saved_data.get("is_synthetic", True)
+                self.decision_threshold = float(saved_data.get("decision_threshold", 0.5))
             else:
                 self.model = saved_data
                 self.model_name = "RandomForest"
@@ -778,7 +835,8 @@ class PermissionMLPipeline:
                 self.is_synthetic = True
             self._rebuild_index()
             logger.info(
-                f"Loaded ML model ({self.model_name}) from {self.model_path} [Source: {self.data_source}]"
+                f"Loaded ML model ({self.model_name}) from {self.model_path} "
+                f"[Source: {self.data_source}, threshold: {self.decision_threshold}]"
             )
         except Exception as e:
             logger.warning(f"Failed to load model from {self.model_path} ({e}). Retraining...")
@@ -803,6 +861,9 @@ class PermissionMLPipeline:
 
         winner = eval_summary.get("selected_winner", "RandomForest")
         self.model_name = winner
+        self.decision_threshold = float(
+            eval_summary.get("calibration", {}).get("decision_threshold", 0.5)
+        )
 
         if winner == "GradientBoosting":
             self.model = GradientBoostingClassifier(
@@ -822,6 +883,7 @@ class PermissionMLPipeline:
             "data_source": self.data_source,
             "is_synthetic": self.is_synthetic,
             "metrics": eval_summary,
+            "decision_threshold": self.decision_threshold,
             "n_samples": int(len(X)),
             "class_balance": {"malware": int(sum(y == 1)), "benign": int(sum(y == 0))},
         }
@@ -865,7 +927,8 @@ class PermissionMLPipeline:
         else:
             positive_idx = len(classes) - 1
         malicious_prob = float(proba[positive_idx]) if len(proba) > 1 else float(proba[0])
-        pred_label = int(self.model.predict(vec)[0])
+        # Threshold-based classification (calibrated on out-of-fold predictions)
+        pred_label = 1 if malicious_prob >= self.decision_threshold else 0
 
         active_perms = []
         seen_cols: set = set()
@@ -898,11 +961,14 @@ class PermissionMLPipeline:
             )
         ranked_active.sort(key=lambda x: x["importance_score"], reverse=True)
 
-        verdict_str = "High Risk / Anomaly" if malicious_prob >= 0.50 else "Benign Profile"
+        verdict_str = (
+            "High Risk / Anomaly" if malicious_prob >= self.decision_threshold else "Benign Profile"
+        )
 
         return {
             "risk_probability": round(malicious_prob, 4),
             "risk_percentage": round(malicious_prob * 100, 1),
+            "decision_threshold": self.decision_threshold,
             "predicted_class": pred_label,
             "ml_verdict": verdict_str,
             "model_type": self.model_name,

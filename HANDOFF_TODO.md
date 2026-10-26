@@ -28,19 +28,10 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 ## P2 — Quality improvements
 
 ### 4. Split `tests/test_pipeline.py` and gate on coverage
-- One file per module: `tests/test_extractor.py`, `tests/test_context_engine.py`, `tests/test_ml_pipeline.py`, etc.
-- Add `[tool.coverage.run]` to `pyproject.toml` and a CI step `pytest --cov=src --cov-fail-under=70`.
-- Reduce reliance on `if os.path.exists(...)` conditional skips (they silently shrink coverage) — commit 2–3 small real APKs to `data/apks/` as a regression corpus and make those tests unconditional.
+**Status (2026-10-26): ✅ DONE (Phase 2).** 1349-line monolith split into 11 per-module test files (identical 117 collected pre/post). Coverage 80.70%, CI gate `--cov-fail-under=75` (xvfb-run). `CHANGELOG.md` + `.pre-commit-config.yaml` added.
 
 ### 5. Lint & format the codebase
-- Add Ruff (replaces flake8/isort/black): `pip install ruff`, add to `pyproject.toml`:
-  ```toml
-  [tool.ruff]
-  line-length = 100
-  target-version = "py39"
-  ```
-- Run `ruff check . --fix` and `ruff format .`, fix remaining violations, add a `.github/workflows/ci.yml` lint job.
-- Optional: pre-commit hooks (`.pre-commit-config.yaml`) so the 4-person team stays consistent.
+**Status (2026-10-26): ✅ DONE (Phase 2).** Ruff configured (line-length 100, py39), 283 violations fixed, `ruff format` applied to all 42 files, lint job in CI, pre-commit hooks installed. `typing.List`/`Optional` style deliberately kept (UP006/007/035/045 ignored).
 
 ### 6. GUI thread-safety
 **Status (2026-10-26): ✅ DONE (Phase 1).** Worker threads never touch Tk widgets — results/errors flow through a `queue.Queue` drained by a main-thread poller. Busy-state guards prevent concurrent scans; errors surface via friendly dialogs (`friendly_error_message` in `src/extractor.py`, unit-tested headless); the analyze button shows progress state; UI render failures can't kill the poller.
@@ -51,6 +42,9 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 
 ### 8. Golden regression tests for risk scores
 **Status (2026-10-26): ✅ DONE (Phase 1).** `tests/test_golden.py` pins verified behavior with invariants/ranges (sample APK → Safe, spyware demo → Critical ≥ 90, navigation location exemption, fusion verdict boundaries, threat override ≥ 98, determinism). `tests/test_edge_cases.py` covers the malformed-archive corpus (empty/garbage/truncated/no-manifest/text-manifest). `scripts/demo_check.py` is the demo-day PASS/FAIL smoke checklist (caught a real `--json` stdout-pollution bug on first run, now fixed via stderr logging).
+
+### 12. Context intelligence: empirical baselines + calibration
+**Status (2026-10-26): ✅ DONE (Phase 3).** `data/empirical_baselines.json` (200 real apps × 28 store categories) enriches every verdict with real-world frequencies — informational only, score-invariance proven by tests. Data-driven `exempt_categories` in `data/context_rules.json` make combinations expected-functionality (camera app + camera/internet, nav app + location) report-not-penalize. ML decision threshold (0.45, max-F1 out-of-fold) trained into the model payload. Category detector tuned on real listings: **36.7% → 94.6% accuracy** via a popular-app catalog + keyword expansion. Full evidence in `reports/calibration.md` (regenerate with `python scripts/calibrate.py`). `tests/test_context_intelligence.py` (27 tests).
 
 ---
 

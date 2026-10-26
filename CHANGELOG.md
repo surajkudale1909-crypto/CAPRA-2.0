@@ -25,6 +25,15 @@ Complete v2 rebuild of the CAPRA privacy-risk analyzer (VIT Pune, CS-AI, EDAI Gr
 - Per-prediction explainability (top contributing permissions), model comparison (Random Forest vs Gradient Boosting), exported evaluation charts
 - `scripts/train_from_kaggle.py` one-command training with `--scan-only` schema reports
 
+### Added — Context Intelligence (Phase 3)
+- **Empirical category baselines** (`data/empirical_baselines.json`, derived by `scripts/derive_empirical_baselines.py` from 200 real-world apps × 28 store categories): per-category permission request frequencies injected into every context result as `empirical_context` — rare permissions get notes like *"READ_SMS is requested by only 12% of real-world Flashlight apps (2/16)"*. Informational enrichment only: golden tests prove byte-identical scores with/without the data
+- **Data-driven context exemptions** (`exempt_categories` in `data/context_rules.json`): combinations that are expected functionality for a category (camera+internet in Camera/Photo, location+internet in Navigation, SMS+internet in Messaging, media access in Music/Video) are reported under *"Expected Functionality Combinations"* but not penalized — same permissions, different verdicts by category, verified in `reports/calibration.md`
+- **ML decision-threshold calibration**: out-of-fold max-F1 threshold (0.45 on the real corpus, F1 0.892 / recall 0.921) computed during training, baked into the model payload, and consumed by `predict_risk` for `predicted_class`/`ml_verdict`
+- **Known-app catalog** for the category detector (brand names like WhatsApp/Spotify/AliExpress carry no descriptive keywords; longest-token-match wins, e.g. "Amazon Alexa" ≠ "Amazon") plus expanded sports/browser/radio keyword sets — detector accuracy on real app listings **36.7% → 94.6%** (139/147, `reports/calibration.md`)
+- `scripts/calibrate.py` → `reports/calibration.md`: threshold calibration tables, risk-archetype ladder (benign → moderate → exfiltration-heavy → malware-like, strictly separated), context-awareness proofs, detector accuracy
+- Report/CLI enrichment: real-world baseline column in the suspicious-permissions table, empirical notes in terminal output, exemptions section in Markdown reports
+- `tests/test_context_intelligence.py` (27 tests) covering baseline invariance, exemptions, threshold plumbing, brand catalog, and report rendering
+
 ### Security & Robustness
 - **Untrusted-input hardening**: zip-bomb guards (size/entry-count/uncompressed-total/compression-ratio caps validated on the zip central directory with zero extraction), hard parse time budgets via daemon threads, typed errors (`APKTooLargeError`, `APKSecurityError`, `APKParseTimeoutError`)
 - All limits env-tunable (`CAPRA_*` variables, documented in `.env.example`)

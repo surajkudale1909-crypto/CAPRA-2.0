@@ -187,11 +187,14 @@ def generate_markdown_report(
     if suspicious:
         lines.append("### ⚠️ Suspicious Permissions / Category Mismatches")
         lines.append("")
-        lines.append("| Permission | Penalty | Risk Rationale |")
-        lines.append("| :--- | :---: | :--- |")
+        lines.append("| Permission | Penalty | Risk Rationale | Real-World Baseline |")
+        lines.append("| :--- | :---: | :--- | :--- |")
         for s in suspicious:
             p_name = s.get("permission", "").replace("android.permission.", "")
-            lines.append(f"| `{p_name}` | +{s.get('penalty', 0)} pts | {s.get('reason', '')} |")
+            emp_note = s.get("empirical_note", "")
+            lines.append(
+                f"| `{p_name}` | +{s.get('penalty', 0)} pts | {s.get('reason', '')} | {emp_note} |"
+            )
         lines.append("")
 
     # Dangerous Combinations
@@ -211,6 +214,40 @@ def generate_markdown_report(
         lines.append("")
     else:
         lines.append("✅ **No dangerous collusion or exfiltration combinations triggered.**")
+        lines.append("")
+
+    # Contextual exemptions (combinations that are expected functionality)
+    exemptions = context.get("contextual_exemptions", [])
+    if exemptions:
+        lines.append("### ℹ️ Expected Functionality Combinations (not penalized)")
+        lines.append("")
+        for comb in exemptions:
+            matched = [
+                p.replace("android.permission.", "") for p in comb.get("matched_permissions", [])
+            ]
+            lines.append(
+                f"- **{comb.get('name')}** (`{' + '.join(matched)}`) — {comb.get('exempt_reason', '')}"
+            )
+        lines.append("")
+
+    # Real-world category baseline notes (informational enrichment)
+    empirical = context.get("empirical_context", {})
+    if empirical.get("available"):
+        store_list = ", ".join(empirical.get("store_categories", []))
+        lines.append(
+            f"### 📊 Real-World Category Baselines (sample: {empirical.get('sample_size', 0)} apps)"
+        )
+        lines.append("")
+        lines.append(
+            f"Derived from `data/empirical_baselines.json` (store categories: {store_list})."
+        )
+        lines.append("")
+        notes = empirical.get("category_norm_notes", [])
+        if notes:
+            for note in notes:
+                lines.append(f"- {note}")
+        else:
+            lines.append("- No unusually rare permissions relative to this category's norms.")
         lines.append("")
 
     # Baseline Acceptable

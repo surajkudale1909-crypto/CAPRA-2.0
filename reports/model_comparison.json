@@ -21,5 +21,13 @@
       "roc_auc_mean": 0.9542
     }
   },
-  "selected_winner": "GradientBoosting"
+  "selected_winner": "GradientBoosting",
+  "calibration": {
+    "decision_threshold": 0.45,
+    "f1_at_threshold": 0.8917,
+    "precision_at_threshold": 0.8638,
+    "recall_at_threshold": 0.9214,
+    "youden_threshold": 0.64,
+    "criterion": "max_F1_on_out_of_fold_predictions"
+  }
 }
