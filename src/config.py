@@ -127,7 +127,8 @@ def setup_logging(level: Optional[str] = None) -> logging.Logger:
 
     # Prevent duplicate handlers on re-initialization
     if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
+        # Logs go to stderr so stdout stays clean for machine-readable output (--json)
+        handler = logging.StreamHandler(sys.stderr)
         handler.setLevel(numeric_level)
         formatter = logging.Formatter(
             fmt="%(asctime)s [%(levelname)s] %(name)s (%(filename)s:%(lineno)d) - %(message)s",

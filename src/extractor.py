@@ -63,6 +63,28 @@ class APKParseTimeoutError(APKExtractionError):
     """Raised when APK parsing exceeds the configured time budget."""
 
 
+def friendly_error_message(err: Exception) -> str:
+    """Map APK extraction exceptions to friendly, actionable user-facing messages.
+
+    Shared by the CLI and the desktop GUI; defined here so it is unit-testable
+    without a Tk display.
+    """
+    if isinstance(err, APKParseTimeoutError):
+        return (
+            f"Analysis timed out: {err}\n\n"
+            "The APK may be malicious or pathological. The scan was safely abandoned."
+        )
+    if isinstance(err, APKTooLargeError):
+        return f"APK rejected by safety limit:\n{err}"
+    if isinstance(err, APKSecurityError):
+        return f"APK rejected as unsafe (possible zip bomb):\n{err}"
+    if isinstance(err, APKNotFoundError):
+        return f"File not found:\n{err}"
+    if isinstance(err, APKCorruptedError):
+        return f"The file is not a valid APK archive:\n{err}"
+    return str(err)
+
+
 @dataclass(frozen=True)
 class APKSecurityLimits:
     """Safety limits applied to untrusted APK input before heavy parsing."""

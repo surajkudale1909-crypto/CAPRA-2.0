@@ -429,9 +429,11 @@ class TestDesktopGUI(unittest.TestCase):
             sample_path = os.path.join("data", "apks", "calculator_sample.apk")
             if os.path.exists(sample_path):
                 app._execute_analysis(sample_path, "Calculator")
-                root.update()
+                # Worker posts to the UI queue; main thread drains it explicitly
+                app._pump_ui_queue()
                 self.assertIn("Calculator", app.txt_overview.get("1.0", tk.END))
                 self.assertEqual(app.status_var.get(), "Analysis completed successfully.")
+                self.assertFalse(app._analysis_running)
         finally:
             root.destroy()
 

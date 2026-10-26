@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-91%2F91%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-117%2F117%20passing-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Android%20Static%20Analysis-orange.svg)]()
 
 > **Institution:** Vishwakarma Institute of Technology (VIT Pune)  
@@ -269,16 +269,21 @@ Short permission names (`SEND_SMS`) and full names (`android.permission.SEND_SMS
 
 ## 🧪 Running Unit & Integration Tests
 
-CAPRA includes a complete test suite covering all modules:
+CAPRA includes a complete regression suite (117 tests) covering all modules:
 ```bash
-# Run full regression suite across all 6 phases
-python -m unittest discover tests
+# Run the full suite (pytest)
+python -m pytest tests/ -q
 
-# Run specific module test suite
-python -m unittest tests.test_pipeline.TestPhase6HistoryAndReporting
-python -m unittest tests.test_pipeline.TestThreatIntelPhase5
-python -m unittest tests.test_pipeline.TestAdvancedStaticAnalysisPhase4
+# Golden regression tests (freeze verified demo behavior)
+python -m pytest tests/test_golden.py -v
+
+# Malformed/hostile input edge-case corpus
+python -m pytest tests/test_edge_cases.py -v
+
+# Demo-day smoke check — run this before any live presentation
+python scripts/demo_check.py
 ```
+The smoke check exercises every demo path end-to-end (sample APK scan, all three demo scenarios, report export, history diffing, ML sanity, zip-bomb rejection, CLI subprocess) and prints a PASS/FAIL checklist.
 
 ---
 

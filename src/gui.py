@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 import os
+import queue
 import sys
 import threading
 
@@ -23,7 +24,7 @@ from tkinter import filedialog, messagebox, ttk
 from typing import Any, Dict, Optional
 
 from src.context_engine import ContextEngine
-from src.extractor import extract_manifest_info
+from src.extractor import extract_manifest_info, friendly_error_message
 from src.fusion_engine import FusionEngine, RiskVerdict
 from src.ml_pipeline import PermissionMLPipeline
 from src.pipeline import PrivacyAnalysisPipeline, get_default_pipeline, run_synthetic_demo
@@ -125,8 +126,16 @@ class PrivacyAnalyzerGUI:
         self.category_var = tk.StringVar(value="Calculator")
         self.status_var = tk.StringVar(value="Ready to analyze APK.")
 
+        # Thread-safe UI messaging: worker threads never touch Tk widgets
+        # directly; they post to this queue and the main thread drains it.
+        self._ui_queue: "queue.Queue" = queue.Queue()
+        self._analysis_running = False
+        self._busy_widgets = []
+        self._poller_started = False
+
         self._configure_styles()
         self._build_ui()
+        self._start_ui_poller()
 
     def _configure_styles(self):
         """Set up TTK widget styling."""
@@ -176,30 +185,30 @@ class PrivacyAnalyzerGUI:
 
         # Row 1: APK File Chooser
         tk.Label(controls_frame, text="APK File:", font=("Segoe UI", 9, "bold"), bg="#ffffff").grid(row=0, column=0, sticky="w", pady=4)
-        apk_entry = ttk.Entry(controls_frame, textvariable=self.apk_path_var, width=58)
-        apk_entry.grid(row=0, column=1, padx=8, pady=4, sticky="ew")
+        self.apk_entry = ttk.Entry(controls_frame, textvariable=self.apk_path_var, width=58)
+        self.apk_entry.grid(row=0, column=1, padx=8, pady=4, sticky="ew")
 
-        browse_btn = ttk.Button(controls_frame, text="Browse APK...", command=self._browse_apk)
-        browse_btn.grid(row=0, column=2, padx=4, pady=4)
+        self.browse_btn = ttk.Button(controls_frame, text="Browse APK...", command=self._browse_apk)
+        self.browse_btn.grid(row=0, column=2, padx=4, pady=4)
 
         # Row 2: Category Selector & Run Button
         tk.Label(controls_frame, text="Category:", font=("Segoe UI", 9, "bold"), bg="#ffffff").grid(row=1, column=0, sticky="w", pady=6)
-        cat_combo = ttk.Combobox(
+        self.cat_combo = ttk.Combobox(
             controls_frame,
             textvariable=self.category_var,
             values=["(Auto-Detect)"] + self.context_engine.get_supported_categories(),
             state="readonly",
             width=20,
         )
-        cat_combo.grid(row=1, column=1, sticky="w", padx=8, pady=6)
+        self.cat_combo.grid(row=1, column=1, sticky="w", padx=8, pady=6)
 
         btn_box = tk.Frame(controls_frame, bg="#ffffff")
         btn_box.grid(row=1, column=2, sticky="e")
 
-        demo_btn = ttk.Button(btn_box, text="Load Demo...", command=self._show_demo_menu)
-        demo_btn.pack(side="left", padx=4)
+        self.demo_btn = ttk.Button(btn_box, text="Load Demo...", command=self._show_demo_menu)
+        self.demo_btn.pack(side="left", padx=4)
 
-        analyze_btn = tk.Button(
+        self.analyze_btn = tk.Button(
             btn_box,
             text="⚡ Run Privacy Analysis",
             command=self._start_analysis_thread,
@@ -211,7 +220,7 @@ class PrivacyAnalyzerGUI:
             pady=4,
             cursor="hand2",
         )
-        analyze_btn.pack(side="left", padx=4)
+        self.analyze_btn.pack(side="left", padx=4)
 
         controls_frame.columnconfigure(1, weight=1)
 
@@ -243,8 +252,8 @@ class PrivacyAnalyzerGUI:
         self.metric_perms.pack(fill="x", pady=1)
 
         # Button to View ML Feature Importance Plot
-        plot_btn = ttk.Button(left_panel, text="📊 View ML Feature Plot", command=self._open_feature_plot)
-        plot_btn.pack(fill="x", pady=6)
+        self.plot_btn = ttk.Button(left_panel, text="📊 View ML Feature Plot", command=self._open_feature_plot)
+        self.plot_btn.pack(fill="x", pady=6)
 
         # Right Panel: Tabbed Notebook
         right_panel = tk.Frame(body_paned, bg="#ffffff", bd=1, relief="solid")
@@ -286,6 +295,15 @@ class PrivacyAnalyzerGUI:
             pady=3,
         )
         status_bar.pack(side="bottom", fill="x")
+
+        # Widgets disabled while an analysis is running (prevents concurrent scans)
+        self._busy_widgets = [
+            self.apk_entry,
+            self.browse_btn,
+            self.cat_combo,
+            self.demo_btn,
+            self.analyze_btn,
+        ]
 
     def _create_scrolled_text(self, parent) -> tk.Text:
         """Create a styled text widget with scrollbar."""
@@ -356,20 +374,112 @@ class PrivacyAnalyzerGUI:
         ).pack(fill="x", padx=30, pady=4)
 
     def _run_demo_scenario(self, scenario: str, category: str):
-        """Run simulated demonstration analysis using unified demo pipeline."""
+        """Run simulated demonstration analysis using unified demo pipeline (async)."""
+        if self._analysis_running:
+            messagebox.showinfo("Analysis Running", "An analysis is already running. Please wait.")
+            return
+        self._set_busy(True)
         self.status_var.set(f"Running demo scenario '{scenario}'...")
-        results = run_synthetic_demo(scenario, category=category)
-        self._render_results(
-            results["manifest"],
-            results["context"],
-            results["fusion"],
-            results.get("threat", {}),
-            results.get("ml", {}),
-        )
-        self.status_var.set(f"Demo '{scenario}' evaluation complete.")
+        threading.Thread(
+            target=self._execute_demo, args=(scenario, category), daemon=True,
+        ).start()
+
+    def _execute_demo(self, scenario: str, category: str):
+        """Worker thread: run a synthetic demo scenario and post results."""
+        try:
+            results = run_synthetic_demo(scenario, category=category)
+            self._ui_queue.put(("demo", scenario, results))
+        except Exception as e:  # noqa: BLE001 - forwarded to the UI thread
+            self._ui_queue.put(("error", e))
+
+    def _set_busy(self, busy: bool) -> None:
+        """Toggle interactive widgets while an analysis is running (main thread only)."""
+        self._analysis_running = busy
+        state = tk.DISABLED if busy else tk.NORMAL
+        for widget in self._busy_widgets:
+            try:
+                widget.configure(state=state)
+            except Exception:
+                pass
+        try:
+            self.analyze_btn.configure(
+                text="⏳ Analyzing..." if busy else "⚡ Run Privacy Analysis",
+                bg="#6c757d" if busy else "#0066cc",
+            )
+        except Exception:
+            pass
+
+    def _format_error(self, err: Exception) -> str:
+        """Map pipeline exceptions to friendly, actionable dialog messages."""
+        return friendly_error_message(err)
+
+    def _start_ui_poller(self) -> None:
+        """Start the main-thread queue poller (Tk-safe UI updates)."""
+        if not self._poller_started:
+            self._poller_started = True
+            self.root.after(100, self._poll_ui_queue)
+
+    def _process_ui_queue(self) -> int:
+        """Drain all pending worker messages on the main thread. Returns count."""
+        processed = 0
+        while True:
+            try:
+                message = self._ui_queue.get_nowait()
+            except queue.Empty:
+                break
+            processed += 1
+            kind = message[0]
+            try:
+                if kind == "results":
+                    results = message[1]
+                    self._render_results(
+                        results["manifest"],
+                        results["context"],
+                        results["fusion"],
+                        results.get("threat", {}),
+                        results.get("ml", {}),
+                    )
+                    self.status_var.set("Analysis completed successfully.")
+                elif kind == "demo":
+                    scenario, results = message[1], message[2]
+                    self._render_results(
+                        results["manifest"],
+                        results["context"],
+                        results["fusion"],
+                        results.get("threat", {}),
+                        results.get("ml", {}),
+                    )
+                    self.status_var.set(f"Demo '{scenario}' evaluation complete.")
+                elif kind == "error":
+                    err = message[1]
+                    messagebox.showerror("Analysis Error", self._format_error(err))
+                    self.status_var.set("Analysis aborted due to error.")
+            except Exception as render_err:  # never let UI errors kill the poller
+                messagebox.showerror("UI Error", f"Failed to display results: {render_err}")
+                self.status_var.set("Results could not be displayed.")
+            finally:
+                self._set_busy(False)
+        return processed
+
+    def _poll_ui_queue(self) -> None:
+        """Periodic main-thread poller for worker results."""
+        self._process_ui_queue()
+        try:
+            self.root.after(100, self._poll_ui_queue)
+        except Exception:
+            # Window is being destroyed; stop polling.
+            self._poller_started = False
+
+    def _pump_ui_queue(self) -> int:
+        """Process pending worker messages immediately (used by tests/self-test)."""
+        return self._process_ui_queue()
 
     def _start_analysis_thread(self):
         """Launch analysis pipeline in a background thread."""
+        if self._analysis_running:
+            messagebox.showinfo("Analysis Running", "An analysis is already running. Please wait.")
+            return
+
         apk_path = self.apk_path_var.get().strip()
         category = self.category_var.get().strip()
 
@@ -381,30 +491,23 @@ class PrivacyAnalyzerGUI:
             messagebox.showerror("File Error", f"Target file does not exist:\n{apk_path}")
             return
 
+        self._set_busy(True)
         self.status_var.set("Analyzing APK manifest and calculating risks...")
         thread = threading.Thread(target=self._execute_analysis, args=(apk_path, category), daemon=True)
         thread.start()
 
     def _execute_analysis(self, apk_path: str, category: str):
-        """Worker thread executing unified analysis pipeline."""
+        """Worker thread executing unified analysis pipeline.
+
+        Never touches Tk widgets directly; results/errors are posted to
+        self._ui_queue and rendered by the main-thread poller.
+        """
         try:
             chosen_cat = None if category in ("(Auto-Detect)", "", None) else category
             results = self.pipeline.analyze(apk_path, category=chosen_cat)
-            # Schedule UI update on main thread
-            self.root.after(
-                0,
-                self._render_results,
-                results["manifest"],
-                results["context"],
-                results["fusion"],
-                results.get("threat", {}),
-                results.get("ml", {}),
-            )
-            self.root.after(0, lambda: self.status_var.set("Analysis completed successfully."))
-
-        except Exception as e:
-            self.root.after(0, lambda err=e: messagebox.showerror("Analysis Error", str(err)))
-            self.root.after(0, lambda: self.status_var.set("Analysis aborted due to error."))
+            self._ui_queue.put(("results", results))
+        except Exception as e:  # noqa: BLE001 - forwarded to the UI thread
+            self._ui_queue.put(("error", e))
 
     def _render_results(
         self,
@@ -511,8 +614,12 @@ class PrivacyAnalyzerGUI:
         plot_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "data", "feature_importance.png")
         )
-        if not os.path.exists(plot_path):
-            self.ml_pipeline.export_feature_importance_plot(plot_path)
+        try:
+            if not os.path.exists(plot_path):
+                self.ml_pipeline.export_feature_importance_plot(plot_path)
+        except Exception as e:
+            messagebox.showerror("Feature Importance Plot", f"Could not generate the plot:\n{e}")
+            return
 
         # Open in default system viewer
         try:
@@ -544,7 +651,7 @@ if __name__ == "__main__":
         sample_apk = os.path.join(ROOT_DIR, "data", "apks", "calculator_sample.apk")
         if os.path.exists(sample_apk):
             app._execute_analysis(sample_apk, "Calculator")
-            root.update()
+            app._pump_ui_queue()
         root.destroy()
         print("Self-test passed: Desktop GUI initialized and connected to all pipeline modules successfully!")
         sys.exit(0)

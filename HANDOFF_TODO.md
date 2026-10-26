@@ -43,16 +43,14 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 - Optional: pre-commit hooks (`.pre-commit-config.yaml`) so the 4-person team stays consistent.
 
 ### 6. GUI thread-safety
-- `src/gui.py` runs `_execute_analysis` in a thread against the global pipeline singleton (`get_default_pipeline`). `FusionEngine.fuse()` no longer mutates shared state (fixed), but `PrivacyAnalysisPipeline` instances should ideally be created per analysis, or guarded with a lock.
-- Also: surface exceptions in the GUI status bar instead of swallowing them in the worker thread.
+**Status (2026-10-26): ✅ DONE (Phase 1).** Worker threads never touch Tk widgets — results/errors flow through a `queue.Queue` drained by a main-thread poller. Busy-state guards prevent concurrent scans; errors surface via friendly dialogs (`friendly_error_message` in `src/extractor.py`, unit-tested headless); the analyze button shows progress state; UI render failures can't kill the poller.
 
 ### 7. Model provenance
 - When saving `permission_model.joblib`, record in the payload: dataset filename + SHA-256, n_samples, class balance, scikit-learn version, training date.
 - Lets a reviewer verify which data produced which model, and invalidates stale models when data changes.
 
 ### 8. Golden regression tests for risk scores
-- For each APK in `data/apks/`, assert expected package name, detected category, and a score *range* (not exact score — fusion weights may be tuned).
-- Protects against silent scoring regressions when rules change.
+**Status (2026-10-26): ✅ DONE (Phase 1).** `tests/test_golden.py` pins verified behavior with invariants/ranges (sample APK → Safe, spyware demo → Critical ≥ 90, navigation location exemption, fusion verdict boundaries, threat override ≥ 98, determinism). `tests/test_edge_cases.py` covers the malformed-archive corpus (empty/garbage/truncated/no-manifest/text-manifest). `scripts/demo_check.py` is the demo-day PASS/FAIL smoke checklist (caught a real `--json` stdout-pollution bug on first run, now fixed via stderr logging).
 
 ---
 

@@ -22,8 +22,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install Tk (for GUI tests)
-        run: sudo apt-get update && sudo apt-get install -y python3-tk
+      - name: Install Tk + virtual display (for GUI tests)
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb
 
       - name: Install dependencies
         run: |
@@ -32,4 +32,4 @@ jobs:
           pip install pytest
 
       - name: Run test suite
-        run: python -m pytest tests/ -q
+        run: xvfb-run -a python -m pytest tests/ -q
