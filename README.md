@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-72%2F72%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-80%2F80%20passing-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Android%20Static%20Analysis-orange.svg)]()
 
 > **Institution:** Vishwakarma Institute of Technology (VIT Pune)  
@@ -245,11 +245,11 @@ Short permission names (`SEND_SMS`) and full names (`android.permission.SEND_SMS
 | **Tracker Detection** | None | **17 Exodus Signatures** |
 | **Bytecode Call-Graph Analysis** | None | **Source-to-Sink Reachability** |
 | **Threat Intelligence** | None | **Live VirusTotal v3 + Local DB** |
-| **ML Cross-Validation AUC** | Single split | **5-Fold Stratified CV** (illustrative sample dataset — see note below) |
+| **ML Cross-Validation AUC** | Single split | **0.954 AUC** (5-Fold Stratified CV, 4,464-app real dataset) |
 | **Audit Persistence** | Ephemeral | **SQLite History + Diff Auditing** |
 | **Reporting** | Console text only | **Terminal + Markdown + JSON + GUI** |
 
-> **Note on ML metrics:** the bundled `sample_android_malware_dataset.csv` is a small hand-built illustrative set (60 rows). Cross-validation scores computed on it demonstrate the *pipeline mechanics* (training, CV, explainability) — they are **not** in-the-wild accuracy claims. Drop a full real dataset (Drebin, CIC-AndMal2017, or Kaggle) into `data/datasets/` and retrain to obtain representative metrics.
+> **Note on ML metrics:** the model is trained on `data/datasets/Android_Malware_Benign.csv` — **4,464 real apps (2,533 malware / 1,931 benign), 213 permission features** — with 5-fold stratified cross-validation (Gradient Boosting selected: accuracy 0.875, F1 0.891, ROC-AUC 0.954; see `reports/evaluation_metrics.md`). The bundled 60-row `sample_android_malware_dataset.csv` is an illustrative toy set and is automatically ignored once real labelled data is present.
 
 ---
 

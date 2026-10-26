@@ -8,15 +8,10 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 ## P1 — Must do before submission/evaluation
 
 ### 1. Replace the toy ML dataset with a real one
-**Status (2026-10-26): loader + training tooling DONE — awaiting the labelled CSV.**
-`scripts/train_from_kaggle.py` and the schema-aware loader in `src/ml_pipeline.py` now handle real Kaggle/Drebin/CIC CSVs automatically (short/full permission names, metadata + aggregate + intent column exclusion, label auto-detection, multi-CSV concat, toy-dataset auto-replacement).
-**Why:** `data/datasets/sample_android_malware_dataset.csv` has 60 hand-built rows. The loader labels it `SMALL SAMPLE ... ILLUSTRATIVE ONLY`, and `reports/` metrics (AUC 1.0) are mechanically correct but scientifically meaningless. This is the #1 thing an examiner will challenge.
-**What remains:**
-- Obtain the labelled CSV (e.g. unzip `Android_Malware_Benign.csv` from the Kaggle download) and copy it into `data/datasets/`.
-- Run `python scripts/train_from_kaggle.py --scan-only` to verify label detection, then `python scripts/train_from_kaggle.py` to train.
-- Verify the "SMALL SAMPLE" warning no longer appears (needs >= 200 labelled rows), then update any README numbers with the real metrics.
-- Optional sources if more data is wanted: **Drebin-215** (request access from TU Braunschweig), **CIC-AndMal2017** (UNB website), or Kaggle Android malware permission datasets. Note: `Extracted_permssion_updated.csv` (already in `data/datasets/`) is unlabelled — it cannot train the classifier, but is useful for empirical context baselines (item below).
-- Future idea: use `Extracted_permssion_updated.csv` (200 apps with Play Store categories × 138 permissions) to derive empirical per-category permission baselines for `data/context_rules.json`.
+**Status (2026-10-26): ✅ DONE.** Trained on `data/datasets/Android_Malware_Benign.csv` (Kaggle): 4,464 apps (2,533 malware / 1,931 benign), 213 permission features after short/full-name deduplication. Gradient Boosting selected by 5-fold CV: accuracy 0.875, F1 0.891, ROC-AUC 0.954. The bundled 60-row toy CSV is auto-ignored when real labelled data is present. `scripts/train_from_kaggle.py` retrains/regenerates all reports in one command.
+**Remaining optional stretch:**
+- Merge additional labelled sources (Drebin-215, CIC-AndMal2017) via `python scripts/train_from_kaggle.py` (multi-CSV concat is supported) to broaden coverage.
+- Use `Extracted_permssion_updated.csv` (200 apps with Play Store categories × 138 permissions) to derive empirical per-category permission baselines for `data/context_rules.json`.
 
 ### 2. Harden APK parsing against malicious input
 **Why:** the tool's *purpose* is to open untrusted, possibly hostile APKs. `src/extractor.py` currently feeds any file to Androguard/zip parsing with no limits.

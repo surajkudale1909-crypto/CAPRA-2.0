@@ -389,16 +389,19 @@ def load_dataset(
             label_cols = [k[2] for k in kept]
 
     if frames:
-        # Union of canonical permission columns across all labelled files
+        # Union of canonical permission columns across all labelled files.
+        # Real-world datasets often contain BOTH short and full names of the same
+        # permission as separate columns (e.g. ACCESS_NETWORK_STATE and
+        # android.permission.ACCESS_NETWORK_STATE) - these are OR-combined.
         feature_names: List[str] = []
         seen: set = set()
-        per_file_perms: List[Dict[str, str]] = []
+        per_file_perms: List[Dict[str, List[str]]] = []
         for df in frames:
-            perms: Dict[str, str] = {}
+            perms: Dict[str, List[str]] = {}
             for col in df.columns:
                 norm = normalize_permission_column(col)
-                if norm is not None and norm not in perms:
-                    perms[norm] = col
+                if norm is not None:
+                    perms.setdefault(norm, []).append(col)
                     if norm not in seen:
                         seen.add(norm)
                         feature_names.append(norm)
@@ -410,10 +413,13 @@ def load_dataset(
         y_blocks: List[np.ndarray] = []
         for path, df, label_col, perms in zip(used_files, frames, label_cols, per_file_perms):
             Xb = np.zeros((len(df), len(feature_names)), dtype=np.int32)
-            for norm, col in perms.items():
-                Xb[:, feat_index[norm]] = (
-                    pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int) > 0
-                ).astype(np.int32)
+            for norm, cols in perms.items():
+                combined = np.zeros(len(df), dtype=np.int32)
+                for col in cols:
+                    combined |= (
+                        pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int) > 0
+                    ).astype(np.int32).values
+                Xb[:, feat_index[norm]] = combined
             blocks.append(Xb)
             y_blocks.append(_encode_labels(df[label_col].values, os.path.basename(path)))
 

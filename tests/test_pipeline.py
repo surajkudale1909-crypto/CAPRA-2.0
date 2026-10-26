@@ -239,9 +239,11 @@ class TestMLPipeline(unittest.TestCase):
     """Tests for Random Forest permission risk estimation (Ishan's Module)."""
 
     def setUp(self):
-        from src.ml_pipeline import FEATURE_PERMISSIONS, PermissionMLPipeline
+        from src.ml_pipeline import PermissionMLPipeline
         self.pipeline = PermissionMLPipeline()
-        self.features = FEATURE_PERMISSIONS
+        # The feature vocabulary is dataset-driven (real-world schemas vary);
+        # always compare against the active vocabulary of the loaded model.
+        self.features = self.pipeline.features
 
     def test_vectorization_dimensions(self):
         """Vector shape must strictly equal (1, num_features)."""
@@ -634,6 +636,20 @@ class TestKaggleSchemaLoader(unittest.TestCase):
         self.assertIsNone(npc("STORAGE"))  # aggregate group column
         self.assertIsNone(npc("android.intent.action.BOOT_COMPLETED"))
         self.assertIsNone(npc("CAMERA.1"))  # pandas-deduped aggregate
+
+    def test_short_and_full_name_duplicates_are_combined(self):
+        """When a CSV has both short and full name columns of a permission, OR them."""
+        from src.ml_pipeline import load_dataset
+        header = ["pkgname", "ACCESS_NETWORK_STATE", "android.permission.ACCESS_NETWORK_STATE", "class"]
+        rows = [
+            ["com.a", 1, 0, "malware"],   # short column set
+            ["com.b", 0, 1, "benign"],    # full column set
+            ["com.c", 0, 0, "benign"],    # neither
+        ]
+        path = self._write_csv("dup_names.csv", rows, header)
+        X, y, source_type, source_desc, features = load_dataset(path)
+        self.assertEqual(features, ["android.permission.ACCESS_NETWORK_STATE"])
+        self.assertEqual(X[:, 0].tolist(), [1, 1, 0])
 
     def test_binary_feature_columns_are_not_labels(self):
         """Regression: a 0/1 intent/feature column must never be detected as the label."""
