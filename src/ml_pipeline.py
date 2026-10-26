@@ -13,7 +13,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
+import re
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import joblib
 import numpy as np
@@ -184,87 +185,269 @@ def generate_synthetic_training_dataset(
     return X, y
 
 
-def load_dataset(
-    custom_dataset_path: Optional[str] = None,
-) -> Tuple[np.ndarray, np.ndarray, str, str]:
-    """Load real labelled dataset or return clearly marked synthetic fallback data.
+# ---------------------------------------------------------------------------
+# Dataset schema handling (real Kaggle / Drebin / CIC-AndMal style CSVs)
+# ---------------------------------------------------------------------------
 
-    Returns:
-        (X, y, data_source_type, source_description)
+#: Columns that describe the app, not its permission footprint
+METADATA_COLUMNS = {
+    "pkgname", "package", "package name", "package_name", "app name", "app_name",
+    "app", "name", "downloads", "app categore", "app category", "app_category",
+    "category", "index", "unnamed: 0", "id", "md5", "sha1", "sha256",
+}
+
+#: Aggregate Android permission-group columns (derived summaries, not real permissions)
+AGGREGATE_GROUP_COLUMNS = {
+    "CALENDAR", "CONTACTS", "LOCATION", "MICROPHONE", "PHONE", "SENSORS", "SMS", "STORAGE",
+}
+
+#: Known label column names (case-insensitive, first match wins)
+LABEL_COLUMN_CANDIDATES = (
+    "class", "label", "result", "malware", "is_malicious", "type",
+    "verdict", "target", "y",
+)
+
+#: Canonical label values accepted for the positive (malware) class
+LABEL_ONE_VALUES = {
+    "1", "malware", "malicious", "m", "s", "suspect", "suspicious", "true", "yes",
+    "bad", "dangerous", "trojan", "adware", "riskware", "pua",
+}
+
+#: Canonical label values accepted for the negative (benign) class
+LABEL_ZERO_VALUES = {"0", "benign", "b", "good", "false", "no", "clean", "normal"}
+
+#: Word-style label values (used to distinguish real labels from plain 0/1 feature columns)
+WORD_LABEL_VALUES = (LABEL_ONE_VALUES | LABEL_ZERO_VALUES) - {"0", "1"}
+
+#: The bundled toy dataset is ignored automatically when real labelled data exists
+TOY_DATASET_NAME = "sample_android_malware_dataset.csv"
+
+
+def normalize_permission_column(col: str) -> Optional[str]:
+    """Map a raw CSV column name to canonical ``android.permission.*`` form.
+
+    Handles both short (``READ_SMS``) and full (``android.permission.READ_SMS``)
+    styles used across Kaggle/Drebin/CIC datasets. Returns None for metadata,
+    intent-action, provider, and aggregate permission-group columns.
     """
-    candidate_path = custom_dataset_path
+    c = str(col).strip()
+    if c.lower() in METADATA_COLUMNS:
+        return None
+    if c.startswith("android.permission."):
+        return c
+    if "." in c:
+        # Intent actions (android.intent.action.*), providers, and pandas-deduped
+        # aggregate columns such as 'CAMERA.1' are not manifest permissions.
+        return None
+    if re.fullmatch(r"[A-Z][A-Z0-9_]*", c) and c not in AGGREGATE_GROUP_COLUMNS:
+        return "android.permission." + c
+    return None
 
-    # If no custom path provided, check data/datasets for any .csv
-    if not candidate_path and os.path.isdir(DEFAULT_DATASETS_DIR):
-        csv_files = [
-            os.path.join(DEFAULT_DATASETS_DIR, f)
-            for f in os.listdir(DEFAULT_DATASETS_DIR)
+
+def normalize_permission_name(perm: str) -> str:
+    """Normalize any permission string to canonical ``android.permission.*`` form."""
+    p = str(perm).strip()
+    if p.startswith("android.permission."):
+        return p
+    if "." not in p:
+        return "android.permission." + p
+    return p
+
+
+def detect_label_column(df: pd.DataFrame) -> Optional[str]:
+    """Locate the malware/benign label column of a dataset, if one exists."""
+    stripped = {str(c).strip().lower(): c for c in df.columns}
+    for cand in LABEL_COLUMN_CANDIDATES:
+        if cand in stripped:
+            return stripped[cand]
+    # Heuristic fallback: a small-cardinality column whose values are label words.
+    # Feature-like columns (permissions, intents, aggregate groups, plain 0/1 flags)
+    # are excluded so binary feature columns are never mistaken for the label.
+    for col in df.columns:
+        if normalize_permission_column(col) is not None:
+            continue
+        col_str = str(col).strip()
+        if col_str in AGGREGATE_GROUP_COLUMNS or "." in col_str or col_str.lower().startswith("android."):
+            continue
+        values = {str(v).strip().lower() for v in df[col].dropna().unique()}
+        if (
+            2 <= len(values) <= 6
+            and values <= (LABEL_ONE_VALUES | LABEL_ZERO_VALUES)
+            and (values & WORD_LABEL_VALUES)  # must contain a word-style label, not just 0/1
+        ):
+            return col
+    return None
+
+
+def _encode_labels(raw_labels: Any, source: str) -> np.ndarray:
+    """Map raw label values to a binary 0/1 numpy array with strict validation."""
+    y = np.zeros(len(raw_labels), dtype=np.int32)
+    unknown = 0
+    for i, val in enumerate(raw_labels):
+        v = str(val).strip().lower()
+        if v in LABEL_ONE_VALUES:
+            y[i] = 1
+        elif v in LABEL_ZERO_VALUES:
+            y[i] = 0
+        else:
+            unknown += 1
+            y[i] = 0
+    if unknown:
+        msg = (
+            f"{unknown}/{len(raw_labels)} unrecognised label value(s) in {source} "
+            f"were treated as benign (0)."
+        )
+        if unknown / max(1, len(raw_labels)) > 0.1:
+            raise ValueError(msg + " Refusing to train on ambiguous labels.")
+        logger.warning(msg)
+    return y
+
+
+def _resolve_dataset_files(custom_dataset_path: Optional[Union[str, List[str]]]) -> List[str]:
+    """Resolve the candidate CSV file list from a path, list, directory, or default."""
+    if custom_dataset_path is None:
+        if os.path.isdir(DEFAULT_DATASETS_DIR):
+            return [
+                os.path.join(DEFAULT_DATASETS_DIR, f)
+                for f in sorted(os.listdir(DEFAULT_DATASETS_DIR))
+                if f.lower().endswith(".csv")
+            ]
+        return []
+    if isinstance(custom_dataset_path, (list, tuple)):
+        return [str(p) for p in custom_dataset_path]
+    if os.path.isdir(custom_dataset_path):
+        return [
+            os.path.join(custom_dataset_path, f)
+            for f in sorted(os.listdir(custom_dataset_path))
             if f.lower().endswith(".csv")
         ]
-        if csv_files:
-            candidate_path = sorted(csv_files)[0]
+    return [str(custom_dataset_path)]
 
-    # Try loading real CSV
-    if candidate_path and os.path.isfile(candidate_path):
+
+def load_dataset(
+    custom_dataset_path: Optional[Union[str, List[str]]] = None,
+) -> Tuple[np.ndarray, np.ndarray, str, str, List[str]]:
+    """Load real labelled dataset(s) or return clearly marked synthetic fallback data.
+
+    Accepts real-world Kaggle/Drebin/CIC style CSVs:
+      * short (``READ_SMS``) or full (``android.permission.READ_SMS``) permission names
+      * metadata columns (``pkgname``, ``App categore``, ``Downloads``, ...) are ignored
+      * the label column is auto-detected (class / label / malware / type / ...)
+      * all labelled CSVs found are concatenated over the union of their permissions
+      * CSVs without a label column are skipped with an explanatory warning
+
+    Returns:
+        (X, y, data_source_type, source_description, feature_names) where
+        feature_names are canonical full permission names aligned to X's columns.
+    """
+    files = _resolve_dataset_files(custom_dataset_path)
+
+    frames: List[pd.DataFrame] = []
+    label_cols: List[str] = []
+    used_files: List[str] = []
+    skipped: List[str] = []
+
+    for path in files:
+        if not os.path.isfile(path):
+            logger.warning("Dataset file not found: %s. Skipping.", path)
+            skipped.append(path)
+            continue
         try:
-            logger.info(f"Loading real empirical dataset from: {candidate_path}")
-            df = pd.read_csv(candidate_path)
-
-            # Locate label column
-            label_col = None
-            for col in ["class", "label", "Result", "malware", "is_malicious", "type"]:
-                if col in df.columns:
-                    label_col = col
-                    break
-
-            if label_col is None:
-                raise ValueError(f"Could not find a valid label column in {candidate_path}")
-
-            # Normalize labels to binary 0 / 1
-            raw_labels = df[label_col].values
-            y = np.zeros(len(raw_labels), dtype=np.int32)
-            for i, val in enumerate(raw_labels):
-                if str(val).strip().lower() in ("1", "malware", "s", "malicious", "true"):
-                    y[i] = 1
-                else:
-                    y[i] = 0
-
-            # Build feature matrix for FEATURE_PERMISSIONS
-            n_features = len(FEATURE_PERMISSIONS)
-            X = np.zeros((len(df), n_features), dtype=np.int32)
-
-            for feat_idx, perm in enumerate(FEATURE_PERMISSIONS):
-                short_perm = perm.replace("android.permission.", "")
-                matched_col = None
-                if perm in df.columns:
-                    matched_col = perm
-                elif short_perm in df.columns:
-                    matched_col = short_perm
-
-                if matched_col:
-                    X[:, feat_idx] = pd.to_numeric(df[matched_col], errors="coerce").fillna(0).astype(int)
-
-            source_name = f"EMPIRICAL ({os.path.basename(candidate_path)})"
-            n_mal = int(sum(y == 1))
-            n_ben = int(sum(y == 0))
-            if len(X) < 200:
-                source_name += f" [SMALL SAMPLE n={len(X)} - ILLUSTRATIVE ONLY]"
-                logger.warning(
-                    "Dataset only has %d samples (%d malware, %d benign). Metrics on such a small "
-                    "sample are illustrative, NOT representative of in-the-wild accuracy. Provide a "
-                    "full Drebin / CIC-AndMal / Kaggle dataset for meaningful evaluation.",
-                    len(X), n_mal, n_ben,
-                )
-            logger.info(f"Dataset successfully loaded: {len(X)} samples ({n_mal} malware, {n_ben} benign)")
-            return X, y, "EMPIRICAL", source_name
-
+            df = pd.read_csv(path)
         except Exception as e:
-            logger.warning(f"Failed to load dataset at {candidate_path} ({e}). Falling back to synthetic.")
+            logger.warning("Could not parse %s (%s). Skipping.", path, e)
+            skipped.append(path)
+            continue
+        label_col = detect_label_column(df)
+        if label_col is None:
+            logger.warning(
+                "Skipping %s: no malware/benign label column detected. "
+                "Supervised training needs a class/label column (e.g. 'class' with "
+                "malware/benign values).",
+                os.path.basename(path),
+            )
+            skipped.append(path)
+            continue
+        frames.append(df)
+        label_cols.append(label_col)
+        used_files.append(path)
+
+    # Ignore the bundled toy sample when real labelled datasets are present
+    if len(used_files) > 1:
+        kept = [
+            (f, d, l)
+            for f, d, l in zip(used_files, frames, label_cols)
+            if os.path.basename(f) != TOY_DATASET_NAME
+        ]
+        if kept and len(kept) < len(used_files):
+            logger.info(
+                "Ignoring bundled toy dataset %s in favour of real labelled data.",
+                TOY_DATASET_NAME,
+            )
+            used_files = [k[0] for k in kept]
+            frames = [k[1] for k in kept]
+            label_cols = [k[2] for k in kept]
+
+    if frames:
+        # Union of canonical permission columns across all labelled files
+        feature_names: List[str] = []
+        seen: set = set()
+        per_file_perms: List[Dict[str, str]] = []
+        for df in frames:
+            perms: Dict[str, str] = {}
+            for col in df.columns:
+                norm = normalize_permission_column(col)
+                if norm is not None and norm not in perms:
+                    perms[norm] = col
+                    if norm not in seen:
+                        seen.add(norm)
+                        feature_names.append(norm)
+            per_file_perms.append(perms)
+        feature_names = sorted(feature_names)
+        feat_index = {p: i for i, p in enumerate(feature_names)}
+
+        blocks: List[np.ndarray] = []
+        y_blocks: List[np.ndarray] = []
+        for path, df, label_col, perms in zip(used_files, frames, label_cols, per_file_perms):
+            Xb = np.zeros((len(df), len(feature_names)), dtype=np.int32)
+            for norm, col in perms.items():
+                Xb[:, feat_index[norm]] = (
+                    pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int) > 0
+                ).astype(np.int32)
+            blocks.append(Xb)
+            y_blocks.append(_encode_labels(df[label_col].values, os.path.basename(path)))
+
+        X = np.vstack(blocks)
+        y = np.concatenate(y_blocks)
+
+        names = ", ".join(os.path.basename(f) for f in used_files)
+        source_name = f"EMPIRICAL ({names}, {len(feature_names)} features)"
+        n_mal = int(sum(y == 1))
+        n_ben = int(sum(y == 0))
+        if len(X) < 200:
+            source_name += f" [SMALL SAMPLE n={len(X)} - ILLUSTRATIVE ONLY]"
+            logger.warning(
+                "Dataset only has %d samples (%d malware, %d benign). Metrics on such a small "
+                "sample are illustrative, NOT representative of in-the-wild accuracy. Provide a "
+                "full Drebin / CIC-AndMal / Kaggle dataset for meaningful evaluation.",
+                len(X), n_mal, n_ben,
+            )
+        logger.info(
+            "Dataset successfully loaded: %d samples (%d malware, %d benign), %d permission features [%s]",
+            len(X), n_mal, n_ben, len(feature_names), names,
+        )
+        return X, y, "EMPIRICAL", source_name, feature_names
+
+    if skipped:
+        logger.warning(
+            "No labelled datasets found (files without a label column: %s).",
+            ", ".join(os.path.basename(s) for s in skipped),
+        )
 
     # Synthetic fallback (strictly labeled)
     logger.info("[DATA SOURCE: SYNTHETIC (FALLBACK)] No empirical dataset loaded. Generating synthetic benchmark.")
     X, y = generate_synthetic_training_dataset(n_samples=1200, random_state=42)
-    return X, y, "SYNTHETIC", "SYNTHETIC (Fallback Generator)"
+    return X, y, "SYNTHETIC", "SYNTHETIC (Fallback Generator)", list(FEATURE_PERMISSIONS)
 
 
 def compare_and_evaluate_models(
@@ -446,12 +629,13 @@ class PermissionMLPipeline:
         self,
         model_path: Optional[str] = None,
         force_retrain: bool = False,
-        dataset_path: Optional[str] = None,
+        dataset_path: Optional[Union[str, List[str]]] = None,
     ):
         """Initialize the ML pipeline and load or train the model."""
         self.model_path = model_path or DEFAULT_MODEL_FILE
         self.features = list(FEATURE_PERMISSIONS)
-        self.perm_to_idx = {p: i for i, p in enumerate(self.features)}
+        self.perm_to_idx: Dict[str, int] = {}
+        self._rebuild_index()
         self.model: Optional[Any] = None
         self.model_name: str = "RandomForest"
         self.data_source: str = "SYNTHETIC"
@@ -463,6 +647,12 @@ class PermissionMLPipeline:
             self._load_model()
         else:
             self.train_and_save(dataset_path=dataset_path)
+
+    def _rebuild_index(self) -> None:
+        """Rebuild the permission->column index from the active feature vocabulary."""
+        self.perm_to_idx = {
+            normalize_permission_name(f): i for i, f in enumerate(self.features)
+        }
 
     def _load_model(self) -> None:
         """Load trained model and metadata from disk."""
@@ -479,15 +669,20 @@ class PermissionMLPipeline:
                 self.model_name = "RandomForest"
                 self.data_source = "SYNTHETIC"
                 self.is_synthetic = True
+            self._rebuild_index()
             logger.info(f"Loaded ML model ({self.model_name}) from {self.model_path} [Source: {self.data_source}]")
         except Exception as e:
             logger.warning(f"Failed to load model from {self.model_path} ({e}). Retraining...")
             self.train_and_save()
 
-    def train_and_save(self, dataset_path: Optional[str] = None) -> Dict[str, Any]:
+    def train_and_save(self, dataset_path: Optional[Union[str, List[str]]] = None) -> Dict[str, Any]:
         """Train and evaluate models on real or synthetic data, saving the winner."""
         logger.info("Initializing ML training and model comparison...")
-        X, y, source_type, source_desc = load_dataset(dataset_path)
+        X, y, source_type, source_desc, feature_names = load_dataset(dataset_path)
+
+        # Adopt the dataset's permission vocabulary (dynamic for real-world schemas)
+        self.features = list(feature_names)
+        self._rebuild_index()
 
         self.data_source = source_desc
         self.is_synthetic = (source_type == "SYNTHETIC")
@@ -514,6 +709,8 @@ class PermissionMLPipeline:
             "data_source": self.data_source,
             "is_synthetic": self.is_synthetic,
             "metrics": eval_summary,
+            "n_samples": int(len(X)),
+            "class_balance": {"malware": int(sum(y == 1)), "benign": int(sum(y == 0))},
         }
 
         # Save primary model file and best_model.joblib
@@ -528,11 +725,17 @@ class PermissionMLPipeline:
         return eval_summary
 
     def vectorize(self, permissions: List[str]) -> np.ndarray:
-        """Convert a list of requested permissions into a binary feature vector."""
+        """Convert a list of requested permissions into a binary feature vector.
+
+        Accepts full (``android.permission.X``) or short (``X``) names; unknown
+        permissions are ignored (they have no trained feature column).
+        """
         vec = np.zeros((1, len(self.features)), dtype=np.int32)
         for p in permissions:
-            if p in self.perm_to_idx:
-                vec[0, self.perm_to_idx[p]] = 1
+            key = normalize_permission_name(p)
+            idx = self.perm_to_idx.get(key, self.perm_to_idx.get(p))
+            if idx is not None:
+                vec[0, idx] = 1
         return vec
 
     def predict_risk(self, requested_permissions: List[str]) -> Dict[str, Any]:
@@ -551,7 +754,14 @@ class PermissionMLPipeline:
         malicious_prob = float(proba[positive_idx]) if len(proba) > 1 else float(proba[0])
         pred_label = int(self.model.predict(vec)[0])
 
-        active_perms = [p for p in requested_permissions if p in self.perm_to_idx]
+        active_perms = []
+        seen_cols: set = set()
+        for p in requested_permissions:
+            key = normalize_permission_name(p)
+            idx = self.perm_to_idx.get(key, self.perm_to_idx.get(p))
+            if idx is not None and idx not in seen_cols:
+                active_perms.append(key)
+                seen_cols.add(idx)
         importances = getattr(self.model, "feature_importances_", np.ones(len(self.features)) / len(self.features))
 
         # Per-prediction local explainability: directional risk contribution

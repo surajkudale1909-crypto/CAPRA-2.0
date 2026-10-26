@@ -220,8 +220,20 @@ python main.py --compare 1 2
 python main.py --plot
 
 # Re-train models and generate full evaluation report (ROC, PR curves, confusion matrix)
-python -m src.ml_pipeline --compare
+python -m src.ml_pipeline --train
 ```
+
+### 6. Train on Real Kaggle / Drebin / CIC-AndMal Datasets
+```bash
+# 1. Drop your labelled CSV(s) into data/datasets/ (e.g. Android_Malware_Benign.csv)
+
+# 2. Inspect what the loader detects (schema, label column, feature count)
+python scripts/train_from_kaggle.py --scan-only
+
+# 3. Train + evaluate (Random Forest vs Gradient Boosting, 5-fold stratified CV)
+python scripts/train_from_kaggle.py
+```
+Short permission names (`SEND_SMS`) and full names (`android.permission.SEND_SMS`) are both supported; metadata columns (`pkgname`, `App categore`, `Downloads`) and unlabelled permission dumps are handled automatically. See `data/datasets/README.md` for the full schema rules.
 
 ---
 

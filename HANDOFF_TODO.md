@@ -8,12 +8,15 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 ## P1 — Must do before submission/evaluation
 
 ### 1. Replace the toy ML dataset with a real one
-**Why:** `data/datasets/sample_android_malware_dataset.csv` has 60 hand-built rows. The loader now labels it `SMALL SAMPLE ... ILLUSTRATIVE ONLY`, and `reports/` metrics (AUC 1.0) are mechanically correct but scientifically meaningless. This is the #1 thing an examiner will challenge.
-**What:**
-- Obtain a real labelled dataset: **Drebin-215** (request access from TU Braunschweig), **CIC-AndMal2017** (UNB website), or a Kaggle Android malware permissions dataset.
-- Convert to the loader's expected format: one row per app, columns = the 32 permissions in `FEATURE_PERMISSIONS` (short names like `INTERNET` or full `android.permission.*` both work), plus a label column named `class` with `1/malware` and `0/benign`.
-- Drop the CSV into `data/datasets/` and retrain: `python -c "from src.ml_pipeline import PermissionMLPipeline; PermissionMLPipeline(force_retrain=True)"`.
-- Verify the "SMALL SAMPLE" warning no longer appears, then regenerate `reports/` and update any README numbers with the real metrics.
+**Status (2026-10-26): loader + training tooling DONE — awaiting the labelled CSV.**
+`scripts/train_from_kaggle.py` and the schema-aware loader in `src/ml_pipeline.py` now handle real Kaggle/Drebin/CIC CSVs automatically (short/full permission names, metadata + aggregate + intent column exclusion, label auto-detection, multi-CSV concat, toy-dataset auto-replacement).
+**Why:** `data/datasets/sample_android_malware_dataset.csv` has 60 hand-built rows. The loader labels it `SMALL SAMPLE ... ILLUSTRATIVE ONLY`, and `reports/` metrics (AUC 1.0) are mechanically correct but scientifically meaningless. This is the #1 thing an examiner will challenge.
+**What remains:**
+- Obtain the labelled CSV (e.g. unzip `Android_Malware_Benign.csv` from the Kaggle download) and copy it into `data/datasets/`.
+- Run `python scripts/train_from_kaggle.py --scan-only` to verify label detection, then `python scripts/train_from_kaggle.py` to train.
+- Verify the "SMALL SAMPLE" warning no longer appears (needs >= 200 labelled rows), then update any README numbers with the real metrics.
+- Optional sources if more data is wanted: **Drebin-215** (request access from TU Braunschweig), **CIC-AndMal2017** (UNB website), or Kaggle Android malware permission datasets. Note: `Extracted_permssion_updated.csv` (already in `data/datasets/`) is unlabelled — it cannot train the classifier, but is useful for empirical context baselines (item below).
+- Future idea: use `Extracted_permssion_updated.csv` (200 apps with Play Store categories × 138 permissions) to derive empirical per-category permission baselines for `data/context_rules.json`.
 
 ### 2. Harden APK parsing against malicious input
 **Why:** the tool's *purpose* is to open untrusted, possibly hostile APKs. `src/extractor.py` currently feeds any file to Androguard/zip parsing with no limits.
@@ -77,6 +80,8 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 ---
 
 ## Done in the 2026-10-26 review pass (for reference)
+
+- Real-dataset training tooling: schema-aware `load_dataset` (Kaggle/Drebin/CIC CSVs, label auto-detection, dynamic permission vocabulary, multi-CSV concat, toy-dataset auto-replacement) + `scripts/train_from_kaggle.py` with `--scan-only` schema reports. Model payload now records feature vocabulary, n_samples, and class balance; `perm_to_idx` rebuilt correctly on model load.
 
 - Removed unused deps (`fastapi`, `uvicorn`, `python-multipart`, `reportlab`).
 - README drift fixed: academic year (2026–27, Sem 3), category list (actual 13), clone URL, honest ML benchmark wording + validity note.
