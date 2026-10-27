@@ -25,6 +25,12 @@ Complete v2 rebuild of the CAPRA privacy-risk analyzer (VIT Pune, CS-AI, EDAI Gr
 - Per-prediction explainability (top contributing permissions), model comparison (Random Forest vs Gradient Boosting), exported evaluation charts
 - `scripts/train_from_kaggle.py` one-command training with `--scan-only` schema reports
 
+### Added — Packaging & Final Release (Phase 6)
+- `scripts/release_check.py`: automated fresh-machine verification — clean venv → `pip install -r requirements.txt` + `pip install .[dev]` → console script, demo from an unrelated cwd (proves the wheel ships models/rules/data), web boot, GUI-toolkit caveat check, full test suite, demo-day smoke — 8/9 PASS (GUI skips without `python3-tk`, documented)
+- Runtime data packaged with the wheel (`data` package + `package-data`): context rules, tracker signatures, empirical baselines, pretrained model all ship with `pip install .`
+- `scripts/build_binary.sh`: one-file PyInstaller demo binary recipe with known gotchas encoded (androguard `pentest` package exclusion, sklearn pickles) and artifact smoke tests
+- README Release & Packaging section: fresh-install steps (incl. the `python3-tk` system-package caveat), binary recipe, demo-day checklist
+
 ### Added — Web Dashboard (Phase 5)
 - **FastAPI web dashboard** (`src/webapp.py`, `python main.py --web`): APK upload with category override, one-click demo scenarios, and a styled HTML report rendering the same sections as `report_generator` (score gauge, threat intel, context + empirical baselines, ML + provenance, static analysis, secrets, reachability, deep links, findings)
 - Machine-readable `POST /api/analyze` + `GET /api/demo/{scenario}` JSON endpoints and OpenAPI explorer at `/api/docs`

@@ -296,7 +296,7 @@ Short permission names (`SEND_SMS`) and full names (`android.permission.SEND_SMS
 
 ## 🧪 Running Unit & Integration Tests
 
-CAPRA includes a complete regression suite (117 tests) covering all modules:
+CAPRA includes a complete regression suite (177 tests) covering all modules:
 ```bash
 # Run the full suite (pytest)
 python -m pytest tests/ -q
@@ -309,8 +309,44 @@ python -m pytest tests/test_edge_cases.py -v
 
 # Demo-day smoke check — run this before any live presentation
 python scripts/demo_check.py
+
+# Fresh-machine release check — full install verification in a clean venv
+python scripts/release_check.py
 ```
-The smoke check exercises every demo path end-to-end (sample APK scan, all three demo scenarios, report export, history diffing, ML sanity, zip-bomb rejection, CLI subprocess) and prints a PASS/FAIL checklist.
+The smoke check exercises every demo path end-to-end (sample APK scan, all three demo scenarios, report export, history diffing, ML sanity, zip-bomb rejection, CLI subprocess, web boot) and prints a PASS/FAIL checklist (13 checks). The release check additionally proves a clean `pip install` works end-to-end (console script, packaged data files, tests) — 9 checks.
+
+---
+
+## 🚀 Release & Packaging (Phase 6)
+
+### Fresh install (demo-day machine)
+```bash
+git clone https://github.com/surajkudale1909-crypto/CAPRA-2.0.git
+cd CAPRA-2.0
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pip install ".[dev]"          # installs the `capra` console command + test tools
+sudo apt install python3-tk   # ONLY needed for the desktop GUI (system package!)
+capra --demo malicious_flashlight
+```
+> **Note:** `python3-tk` is an OS package — `pip install` alone provides the CLI,
+> web dashboard, and tests, but not the Tkinter GUI. Verify any machine with
+> `python scripts/release_check.py` before a presentation.
+
+### One-file demo binary (optional)
+```bash
+sudo apt install libpython3.11   # PyInstaller needs the shared library
+pip install pyinstaller
+bash scripts/build_binary.sh     # -> dist/capra (do not commit the binary)
+./dist/capra --demo benign_calculator
+```
+The build script encodes the known gotchas (androguard `pentest` package exclusion, sklearn pickles) and smoke-tests the artifact.
+
+### Demo-day checklist
+1. `python scripts/release_check.py` on the exact presentation machine
+2. `python scripts/demo_check.py` immediately before the demo (13 checks, exit 0)
+3. Web dashboard: `python main.py --web` · GUI: `python main.py --gui` · CLI: `capra app.apk`
+4. History diffs and reports land under `data/` and `reports/`
 
 ---
 

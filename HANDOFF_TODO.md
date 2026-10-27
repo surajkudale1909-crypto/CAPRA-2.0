@@ -58,12 +58,10 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 - The synopsis references FlowDroid/SweetDroid papers in `DOCX/`. A small experiment comparing CAPRA's static reachability verdicts against FlowDroid on 3–5 APKs would make a strong evaluation chapter — even if CAPRA loses on some cases, the honest comparison scores points.
 
 ### 10. Packaging for demo day
-- PyInstaller one-file build: `pyinstaller --onefile --name capra main.py` (GUI: `--windowed`). Avoids "install Python + deps" friction during live demos. Test on the exact lab machine first.
+**Status (2026-10-27): ✅ DONE (Phase 6).** `scripts/build_binary.sh` — validated one-file PyInstaller recipe (encodes the androguard `pentest` exit()-at-import gotcha + sklearn pickle notes, smoke-tests `dist/capra`). **Caveat:** the frozen binary must be built on a machine that has `libpython3.11` (e.g. `sudo apt install libpython3.11`) — the sandbox has no root, so the recipe is verified up to that boundary and the script fails with actionable instructions. Primary demo-day path is the venv install (proven by `scripts/release_check.py`, 8/9 PASS incl. wheel-with-data verification from an unrelated cwd). Binary never committed — attach to a GitHub Release if wanted.
 
 ### 11. Documentation polish
-- Screenshots of the GUI (risk gauge, tabs) in the README.
-- `CHANGELOG.md` with v1 → v2 deltas.
-- Align final project report/presentation claims with the honest ML wording now used in the README.
+**Status (2026-10-27): ✅ DONE (Phase 6, screenshots excepted).** README has Release & Packaging section (fresh install incl. the `python3-tk` system-package caveat, one-file binary recipe, demo-day checklist), all counts updated (178 tests / 13 demo checks / 9 release checks), ML claims aligned with the honest wording. CHANGELOG complete through Phase 6. **Remaining lab-machine task:** capture GUI screenshots (risk gauge, tabs) on a display-equipped machine for the README.
 
 ---
 

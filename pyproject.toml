@@ -69,6 +69,9 @@ py-modules = ["main"]
 where = ["."]
 include = ["src*", "data*"]
 
+[tool.setuptools.package-data]
+data = ["*.json", "models/*.joblib"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py39"
