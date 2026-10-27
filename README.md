@@ -223,6 +223,18 @@ python main.py --gui
 python src/gui.py
 ```
 
+**Polished workbench (GUI Polish pass):**
+- Modern card layout with **light/dark theme toggle** (preference persisted in `~/.capra/gui_settings.json`)
+- **Verdict-colored banded risk gauge** (Safe/Low/Medium/High/Critical arcs, 0–100) with animated needle and band legend
+- Color-coded metric chips (threat intel, ML probability, permission totals)
+- **Permissions breakdown table** (green acceptable / amber suspicious / red dangerous / gray neutral / blue exempt rows) and an **Exfiltration Combinations** table
+- Real progress bar with **Cancel** and an elapsed-time ticker; concurrent scans are blocked while one runs
+- Selected-file feedback (name + size), **recent-files dropdown**, and last-directory memory
+- **Export Markdown / Export JSON / Open Reports Folder** buttons and an ML feature-importance plot viewer
+- **Scan History window** with refresh, delete, and **two-scan comparison** (score/ML drift, tracker delta, verdict trajectory)
+- Optional **drag & drop** of APKs (via `tkinterdnd2` when installed; Browse works regardless)
+- Friendlier error dialogs with actionable remediation hints
+
 ### 3b. Web Dashboard (Phase 5)
 Browser front-end to the same analysis engine — upload an APK or run a bundled demo:
 ```bash

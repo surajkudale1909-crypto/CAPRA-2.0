@@ -4,6 +4,24 @@ All notable changes to CAPRA (Context-Aware Mobile App Privacy Risk Analyzer) ar
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-10-27 — GUI Polish & Usability
+
+### Added — Desktop GUI
+- **Light/dark theme toggle** with persisted preference (`~/.capra/gui_settings.json`)
+- **Banded risk gauge** (5 verdict-colored arcs) with animated needle sweep and band legend
+- Color-coded metric chips; **Permissions breakdown** and **Exfiltration Combinations** Treeview tables with green/amber/red/gray/blue row tags
+- **Progress bar + Cancel + elapsed timer** with a busy-state guard against concurrent scans
+- Selected-filename feedback (name + size), **recent-files dropdown**, and last-directory memory
+- **Export Markdown / Export JSON / Open Reports Folder** actions plus ML feature-importance plot viewer
+- **Scan History window**: refresh, multi-delete, and two-scan comparison (score/ML drift, tracker delta, verdict trajectory)
+- Optional **drag & drop** via `tkinterdnd2` (graceful fallback to Browse when unavailable)
+- Friendlier error dialogs with actionable remediation hints
+
+### Engineering
+- Presentation logic extracted into **`src/gui_formatters.py`** (Tk-free: risk bands, gauge geometry, permission/combination rows, theme palettes, settings persistence, text builders) — fully unit-tested headless
+- **`tests/test_gui_formatters.py`** (26 tests) and **`tests/test_gui_headless_logic.py`** (mock-Tk harness reproducing CI's pinned GUI flow without a display) — suite now 209 passing
+- CI `tests/test_gui.py` pins unchanged (exact status string, synchronous `_execute_analysis`, busy-flag semantics)
+
 ## [2.0.0] — 2026-10-26
 
 Complete v2 rebuild of the CAPRA privacy-risk analyzer (VIT Pune, CS-AI, EDAI Group 8).
