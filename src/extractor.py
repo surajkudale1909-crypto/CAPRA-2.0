@@ -13,7 +13,7 @@ import queue
 import threading
 import zipfile
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 # Suppress noisy androguard debug logging if loguru is installed
 try:
@@ -298,6 +298,8 @@ def _parse_exported_components(
         "providers": [],
         "total_exported": 0,
         "unprotected_exported": 0,
+        "deeplinks": [],
+        "browsable_unprotected": 0,
     }
 
     try:
@@ -323,16 +325,64 @@ def _parse_exported_components(
                 is_exported = _is_component_exported(elem, tag, target_sdk)
 
                 if is_exported:
+                    # Intent-filter / deep-link attack-surface detail
+                    intent_filters = []
+                    deeplinks: List[str] = []
+                    is_browsable = False
+                    for f in elem.findall("intent-filter"):
+                        actions = [
+                            a for a in (_get_attr(x, "name") for x in f.findall("action")) if a
+                        ]
+                        categories = [
+                            c for c in (_get_attr(x, "name") for x in f.findall("category")) if c
+                        ]
+                        data_entries = []
+                        for d in f.findall("data"):
+                            entry = {
+                                k: v
+                                for k, v in {
+                                    "scheme": _get_attr(d, "scheme"),
+                                    "host": _get_attr(d, "host"),
+                                    "port": _get_attr(d, "port"),
+                                    "pathPrefix": _get_attr(d, "pathPrefix"),
+                                    "mimeType": _get_attr(d, "mimeType"),
+                                }.items()
+                                if v
+                            }
+                            if entry:
+                                data_entries.append(entry)
+                            scheme = entry.get("scheme")
+                            host = entry.get("host")
+                            if scheme and host:
+                                port = entry.get("port")
+                                deeplinks.append(
+                                    f"{scheme}://{host}" + (f":{port}" if port else "")
+                                )
+                            elif scheme:
+                                deeplinks.append(f"{scheme}://")
+                        if any("BROWSABLE" in (c or "") for c in categories):
+                            is_browsable = True
+                        intent_filters.append(
+                            {"actions": actions, "categories": categories, "data": data_entries}
+                        )
+
                     comp_info = {
                         "name": name,
                         "type": tag,
                         "permission_required": permission,
                         "is_protected": bool(permission),
+                        "intent_filters": intent_filters,
+                        "deeplinks": sorted(set(deeplinks)),
+                        "is_browsable": is_browsable,
                     }
                     exported_summary[key].append(comp_info)
                     exported_summary["total_exported"] += 1
                     if not permission:
                         exported_summary["unprotected_exported"] += 1
+                    if deeplinks:
+                        exported_summary["deeplinks"].extend(sorted(set(deeplinks)))
+                    if is_browsable and not permission:
+                        exported_summary["browsable_unprotected"] += 1
 
     except Exception as e:
         logger.warning(f"Could not fully parse exported components: {e}")

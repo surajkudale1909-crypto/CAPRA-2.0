@@ -276,6 +276,13 @@ def format_report_terminal(
         print(
             f"  {COLOR_BOLD}Inference Risk Probability:{COLOR_RESET} [{ml_color}{COLOR_BOLD} {ml_prob}% {COLOR_RESET}] -> {ml_color}{ml_verdict}{COLOR_RESET}"
         )
+        prov = ml_data.get("model_provenance", {})
+        if prov:
+            ds = ", ".join(prov.get("dataset_files", [])) or "n/a"
+            print(
+                f"  {COLOR_DIM}Provenance: {ds} | {prov.get('n_samples', '?')} samples | "
+                f"sklearn {prov.get('sklearn_version', '?')} | {prov.get('trained_at', '')}{COLOR_RESET}"
+            )
 
         top_contrib = ml_data.get("top_contributing_permissions", [])
         if top_contrib:
@@ -328,6 +335,20 @@ def format_report_terminal(
             for sf in sec_findings[:3]:
                 print(f"     • {sf}")
 
+        # Hardcoded secrets
+        secrets = s_data.get("secrets_detected", []) or s_data.get("bytecode_security", {}).get(
+            "secrets_detected", []
+        )
+        if secrets:
+            print(
+                f"  {COLOR_RED}[ALERT] Hardcoded Secrets in String Pool ({len(secrets)} type(s)):{COLOR_RESET}"
+            )
+            for sec in secrets:
+                print(
+                    f"     • {COLOR_BOLD}{sec['type']}{COLOR_RESET} x{sec['occurrences']} "
+                    f"{COLOR_DIM}(e.g. {', '.join(sec.get('samples', [])[:2])}){COLOR_RESET}"
+                )
+
         # Reachability
         r_data = static_data.get("reachability", {})
         if r_data.get("has_leakage_path"):
@@ -342,6 +363,20 @@ def format_report_terminal(
         else:
             print(
                 f"  {COLOR_GREEN}[+] Reachability: No direct source-to-sink egress pathways identified.{COLOR_RESET}"
+            )
+
+        # Deep-link attack surface
+        exp = manifest_data.get("components", {}).get("exported", {}) if manifest_data else {}
+        if exp.get("deeplinks") or exp.get("browsable_unprotected"):
+            deep = sorted(set(exp.get("deeplinks", [])))
+            print(
+                f"  {COLOR_YELLOW}[!] Deep-Link Surface:{COLOR_RESET} "
+                f"{', '.join(deep[:4]) if deep else 'none'}"
+                + (
+                    f" | {COLOR_RED}{exp.get('browsable_unprotected')} unprotected BROWSABLE{COLOR_RESET}"
+                    if exp.get("browsable_unprotected")
+                    else ""
+                )
             )
 
     # Final Risk Verdict Box

@@ -46,6 +46,9 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 ### 12. Context intelligence: empirical baselines + calibration
 **Status (2026-10-26): ✅ DONE (Phase 3).** `data/empirical_baselines.json` (200 real apps × 28 store categories) enriches every verdict with real-world frequencies — informational only, score-invariance proven by tests. Data-driven `exempt_categories` in `data/context_rules.json` make combinations expected-functionality (camera app + camera/internet, nav app + location) report-not-penalize. ML decision threshold (0.45, max-F1 out-of-fold) trained into the model payload. Category detector tuned on real listings: **36.7% → 94.6% accuracy** via a popular-app catalog + keyword expansion. Full evidence in `reports/calibration.md` (regenerate with `python scripts/calibrate.py`). `tests/test_context_intelligence.py` (27 tests).
 
+### 13. Analysis depth: reachability, secrets, deep links
+**Status (2026-10-27): ✅ DONE (Phase 4).** Fixed a silent reachability bug (xref direction: `get_xref_to()` is callees and always empty for framework APIs — callers come from `get_xref_from()`); added inter-method call-graph paths (1-hop), hardcoded-secret detection with redacted samples (AWS/Google/JWT/private keys/credential assignments), deep-link attack-surface parsing on exported components, tracker catalog 17 → 31 signatures, and model provenance (dataset SHA-256 + sklearn version + training date) in every payload. `tests/test_analysis_depth.py` (22 tests) incl. a real-APK xref regression test.
+
 ---
 
 ## P3 — Future scope / final-semester stretch goals

@@ -25,6 +25,15 @@ Complete v2 rebuild of the CAPRA privacy-risk analyzer (VIT Pune, CS-AI, EDAI Gr
 - Per-prediction explainability (top contributing permissions), model comparison (Random Forest vs Gradient Boosting), exported evaluation charts
 - `scripts/train_from_kaggle.py` one-command training with `--scan-only` schema reports
 
+### Added — Analysis Depth (Phase 4)
+- **Call-graph reachability fixed and deepened**: the xref lookup read `get_xref_to()` (callees — always empty for framework APIs) instead of `get_xref_from()` (callers), silently disabling reachability on every real APK; fixed, and analysis now also finds **inter-method paths** — source in one method, sink in another, linked by a real call edge (1-hop), ranked with intra-method (High) and intra-class (Medium) paths, capped at 25
+- **Hardcoded secret detection**: AWS access keys, Google API keys, JWTs, embedded private-key blocks, and generic credential assignments in the DEX string pool — samples are **redacted in all outputs**, full values never leave the detector
+- **Deep-link attack-surface parsing**: exported components now carry intent-filter actions/categories/data, registered deep links (`scheme://host`), BROWSABLE flags, and an unprotected-BROWSABLE count surfaced in reports and CLI
+- **Tracker catalog expanded 17 → 31** real Exodus-style signatures (Amplitude, Countly, MoEngage, CleverTap, Kochava, Singular, Tenjin, Tapjoy, StartApp, Pangle, Yandex AppMetrica, OneSignal, Airship, Matomo)
+- **Model provenance** (HANDOFF #7): model payload records dataset filenames + SHA-256, sample/class counts, feature count, scikit-learn version, and training timestamp — rendered in reports (Model Provenance) and CLI
+- Report/CLI sections for secrets, reachability path types (with caller chains), deep-link surface, and provenance
+- `tests/test_analysis_depth.py` (22 tests) incl. a real-APK regression test that the xref direction finds callers
+
 ### Added — Context Intelligence (Phase 3)
 - **Empirical category baselines** (`data/empirical_baselines.json`, derived by `scripts/derive_empirical_baselines.py` from 200 real-world apps × 28 store categories): per-category permission request frequencies injected into every context result as `empirical_context` — rare permissions get notes like *"READ_SMS is requested by only 12% of real-world Flashlight apps (2/16)"*. Informational enrichment only: golden tests prove byte-identical scores with/without the data
 - **Data-driven context exemptions** (`exempt_categories` in `data/context_rules.json`): combinations that are expected functionality for a category (camera+internet in Camera/Photo, location+internet in Navigation, SMS+internet in Messaging, media access in Music/Video) are reported under *"Expected Functionality Combinations"* but not penalized — same permissions, different verdicts by category, verified in `reports/calibration.md`

@@ -6,6 +6,7 @@
 # ==============================================================================
 
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -26,6 +27,45 @@ REFLECTION_PATTERNS = [
     "Class.forName",
 ]
 
+# Precise hardcoded-credential signatures (deliberately low false-positive).
+SECRET_PATTERNS = [
+    (
+        "AWS Access Key ID",
+        re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+        30.0,
+    ),
+    (
+        "Google API Key",
+        re.compile(r"\bAIza[0-9A-Za-z\-_]{35}\b"),
+        25.0,
+    ),
+    (
+        "JSON Web Token",
+        re.compile(r"\beyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{5,}\b"),
+        25.0,
+    ),
+    (
+        "Embedded Private Key Block",
+        re.compile(r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY"),
+        35.0,
+    ),
+    (
+        "Hardcoded Credential Assignment",
+        re.compile(
+            r"(?i)(api[_-]?key|api[_-]?secret|auth[_-]?token|access[_-]?token|client[_-]?secret)"
+            r"\s*[=:]\s*[\"'][A-Za-z0-9_\-/+=]{16,}[\"']"
+        ),
+        15.0,
+    ),
+]
+
+
+def redact_secret(sample: str) -> str:
+    """Return a safely redacted preview of a detected secret (never log full values)."""
+    if len(sample) <= 10:
+        return sample[:2] + "…" if sample else ""
+    return f"{sample[:6]}…{sample[-2:]} (len={len(sample)})"
+
 
 class SecurityAnalyzer:
     """Performs static security analysis on Android APKs:
@@ -39,6 +79,45 @@ class SecurityAnalyzer:
 
     def __init__(self):
         pass
+
+    def detect_hardcoded_secrets(self, strings: List[str]) -> Dict[str, Any]:
+        """Scan DEX string pool for embedded credentials and API keys.
+
+        Returns redacted samples only — full secret values never leave this method.
+        """
+        findings: List[str] = []
+        detections: List[Dict[str, Any]] = []
+        score = 0.0
+
+        for label, pattern, weight in SECRET_PATTERNS:
+            hits = []
+            for s in strings:
+                m = pattern.search(s)
+                if m:
+                    hits.append(m.group(0))
+            if not hits:
+                continue
+            unique_hits = sorted(set(hits))
+            detections.append(
+                {
+                    "type": label,
+                    "occurrences": len(hits),
+                    "samples": [redact_secret(h) for h in unique_hits[:3]],
+                }
+            )
+            score += weight
+            findings.append(
+                f"Hardcoded {label} embedded in the bytecode string pool "
+                f"({len(hits)} occurrence(s)). Extractable secrets enable credential "
+                "theft, quota abuse, or backend impersonation."
+            )
+
+        return {
+            "secrets_detected": detections,
+            "secrets_count": sum(d["occurrences"] for d in detections),
+            "secret_risk_score": round(min(100.0, score), 1),
+            "findings": findings,
+        }
 
     def analyze_certificate(self, apk_obj: Any) -> Dict[str, Any]:
         """Inspects APK X.509 certificate(s) for security vulnerabilities."""
@@ -205,6 +284,12 @@ class SecurityAnalyzer:
                 f"High identifier minification detected ({round(obfuscation_ratio * 100, 1)}% short classes), indicative of ProGuard/R8 or packer obfuscation."
             )
 
+        # 5. Hardcoded secrets / credentials in the string pool
+        secrets_res = self.detect_hardcoded_secrets(strings)
+        if secrets_res["secrets_detected"]:
+            score += secrets_res["secret_risk_score"]
+            findings.extend(secrets_res["findings"])
+
         score = min(100.0, score)
 
         return {
@@ -216,6 +301,8 @@ class SecurityAnalyzer:
             "reflection_references": reflection_count,
             "is_obfuscated": is_obfuscated,
             "obfuscation_ratio": obfuscation_ratio,
+            "secrets_detected": secrets_res["secrets_detected"],
+            "secrets_count": secrets_res["secrets_count"],
             "security_risk_score": round(score, 1),
             "findings": findings,
         }
@@ -256,6 +343,8 @@ class SecurityAnalyzer:
         return {
             "certificate": cert_res,
             "bytecode_security": bytecode_res,
+            "secrets_detected": bytecode_res.get("secrets_detected", []),
+            "secrets_count": bytecode_res.get("secrets_count", 0),
             "security_risk_score": combined_score,
             "findings": combined_findings,
         }

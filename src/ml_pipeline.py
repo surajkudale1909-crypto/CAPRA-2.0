@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import re
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import joblib
@@ -437,6 +438,9 @@ def load_dataset(
             frames = [k[1] for k in kept]
             label_cols = [k[2] for k in kept]
 
+    # Provenance side-channel: record which files actually trained/evaluated.
+    load_dataset.last_used_files = list(used_files)
+
     if frames:
         # Union of canonical permission columns across all labelled files.
         # Real-world datasets often contain BOTH short and full names of the same
@@ -805,6 +809,7 @@ class PermissionMLPipeline:
         self.data_source: str = "SYNTHETIC"
         self.is_synthetic: bool = True
         self.decision_threshold: float = 0.5
+        self.provenance: Dict[str, Any] = {}
 
         os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
 
@@ -828,6 +833,7 @@ class PermissionMLPipeline:
                 self.data_source = saved_data.get("data_source", "SYNTHETIC")
                 self.is_synthetic = saved_data.get("is_synthetic", True)
                 self.decision_threshold = float(saved_data.get("decision_threshold", 0.5))
+                self.provenance = saved_data.get("provenance", {})
             else:
                 self.model = saved_data
                 self.model_name = "RandomForest"
@@ -855,6 +861,29 @@ class PermissionMLPipeline:
 
         self.data_source = source_desc
         self.is_synthetic = source_type == "SYNTHETIC"
+
+        # Model provenance (HANDOFF #7): dataset identity + training environment
+        import hashlib
+
+        import sklearn
+
+        loaded_files = getattr(load_dataset, "last_used_files", [])
+        sha_map = {}
+        for f in loaded_files:
+            try:
+                with open(f, "rb") as fh:
+                    sha_map[os.path.basename(f)] = hashlib.sha256(fh.read()).hexdigest()
+            except OSError:
+                continue
+        self.provenance = {
+            "dataset_files": sorted(sha_map.keys()),
+            "dataset_sha256": sha_map,
+            "n_samples": int(len(X)),
+            "class_balance": {"malware": int(sum(y == 1)), "benign": int(sum(y == 0))},
+            "feature_count": int(len(self.features)),
+            "sklearn_version": sklearn.__version__,
+            "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        }
 
         # Compare Random Forest vs Gradient Boosting with 5-fold CV
         eval_summary = compare_and_evaluate_models(X, y, data_source_label=source_desc)
@@ -886,6 +915,7 @@ class PermissionMLPipeline:
             "decision_threshold": self.decision_threshold,
             "n_samples": int(len(X)),
             "class_balance": {"malware": int(sum(y == 1)), "benign": int(sum(y == 0))},
+            "provenance": self.provenance,
         }
 
         # Save primary model file and best_model.joblib
@@ -976,6 +1006,7 @@ class PermissionMLPipeline:
             "is_synthetic": self.is_synthetic,
             "active_feature_count": len(active_perms),
             "top_contributing_permissions": ranked_active[:5],
+            "model_provenance": self.provenance,
         }
 
     def export_feature_importance_plot(

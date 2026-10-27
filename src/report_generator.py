@@ -276,6 +276,25 @@ def generate_markdown_report(
         lines.append(f"- **Trained Model:** `{model_name}` ({src_tag})")
         lines.append(f"- **Inference Risk Probability:** **`{ml_prob}%`** (`{ml_verdict}`)")
 
+        prov = ml.get("model_provenance", {})
+        if prov:
+            lines.append("")
+            lines.append("### Model Provenance")
+            lines.append("")
+            lines.append(
+                f"- **Dataset:** {', '.join(f'`{f}`' for f in prov.get('dataset_files', [])) or 'n/a'} "
+                f"({prov.get('n_samples', 'n/a')} samples, "
+                f"{prov.get('class_balance', {}).get('malware', '?')} malware / "
+                f"{prov.get('class_balance', {}).get('benign', '?')} benign, "
+                f"{prov.get('feature_count', '?')} features)"
+            )
+            for fname, sha in (prov.get("dataset_sha256") or {}).items():
+                lines.append(f"- **SHA-256 `{fname}`:** `{sha}`")
+            lines.append(
+                f"- **Training Environment:** scikit-learn {prov.get('sklearn_version', '?')}, "
+                f"trained at {prov.get('trained_at', '?')}"
+            )
+
         top_contrib = ml.get("top_contributing_permissions", [])
         if top_contrib:
             lines.append("")
@@ -340,6 +359,24 @@ def generate_markdown_report(
                 lines.append(f"- ⚠️ {sf}")
             lines.append("")
 
+        # Hardcoded secrets / credentials
+        secrets = s_data.get("secrets_detected", []) or s_data.get("bytecode_security", {}).get(
+            "secrets_detected", []
+        )
+        if secrets:
+            lines.append("### 🔑 Hardcoded Secrets & Embedded Credentials")
+            lines.append("")
+            lines.append("| Secret Type | Occurrences | Redacted Samples |")
+            lines.append("| :--- | :---: | :--- |")
+            for sec in secrets:
+                samples = ", ".join(f"`{s}`" for s in sec.get("samples", []))
+                lines.append(f"| **{sec.get('type')}** | {sec.get('occurrences', 0)} | {samples} |")
+            lines.append("")
+            lines.append(
+                "> Samples are redacted by CAPRA; full secret values are never written to reports."
+            )
+            lines.append("")
+
         # Reachability
         r_data = static_sec.get("reachability", {})
         if r_data.get("has_leakage_path"):
@@ -352,10 +389,34 @@ def generate_markdown_report(
             lines.append("")
             for p in r_data.get("paths", []):
                 lines.append(
-                    f"- **Source:** `{p.get('source')}` ➔ **Sink:** `{p.get('sink')}` ({p.get('confidence')})"
+                    f"- **Source:** `{p.get('source')}` ➔ **Sink:** `{p.get('sink')}` "
+                    f"({p.get('type')}, {p.get('confidence')})"
                 )
-                if p.get("intra_procedural"):
-                    lines.append(f"  - Direct intra-procedural call in: `{p.get('method')}`")
+                lines.append(f"  - **Path:** `{p.get('caller_method')}`")
+                if p.get("description"):
+                    lines.append(f"  - {p.get('description')}")
+            lines.append("")
+            if r_data.get("limitations_disclaimer"):
+                lines.append(f"> {r_data['limitations_disclaimer']}")
+                lines.append("")
+
+        # Exported component / deep-link attack surface
+        exp = manifest.get("components", {}).get("exported", {})
+        if exp.get("total_exported"):
+            lines.append("### 🌐 Exported Component & Deep-Link Surface")
+            lines.append("")
+            lines.append(
+                f"- **Exported components:** {exp.get('total_exported', 0)} "
+                f"({exp.get('unprotected_exported', 0)} without permission protection)"
+            )
+            deep = exp.get("deeplinks", [])
+            if deep:
+                lines.append(f"- **Registered deep links:** `{', '.join(sorted(set(deep)))}`")
+            if exp.get("browsable_unprotected"):
+                lines.append(
+                    f"- ⚠️ **{exp.get('browsable_unprotected')} unprotected BROWSABLE component(s)** "
+                    "reachable from external apps/web links — classic deep-link hijack surface."
+                )
             lines.append("")
     else:
         lines.append("Advanced static bytecode inspection was not executed.")

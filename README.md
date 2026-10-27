@@ -98,6 +98,12 @@ Expanded from 3 categories in v1 to 13 canonical functional profiles:
 - **Calibrated ML decision threshold** (0.45, chosen by max-F1 on out-of-fold predictions of the 4,464-app corpus) is trained, stored in the model payload, and applied to every verdict.
 - **Category auto-detector accuracy 94.6%** on real app listings (139/147) via keyword heuristics + permission profiles + a popular-app catalog; `scripts/calibrate.py` regenerates the full evidence in `reports/calibration.md`.
 
+### 1b. Analysis Depth: Call-Graph Reachability, Secrets & Deep Links
+- **Three-level egress reachability**: intra-method (High confidence), intra-class, and **inter-method call-graph paths** — sensitive source in one method, network sink in another, linked by a verified call edge. Honest methodology disclaimer included (heuristic xref traversal, not full IFDS taint analysis like FlowDroid).
+- **Hardcoded secret scanning**: AWS/Google API keys, JWTs, private-key blocks, credential assignments in the DEX string pool — with redacted samples only.
+- **Deep-link attack surface**: exported components with intent-filter actions, `scheme://host` deep links, BROWSABLE exposure flags.
+- **31 tracker signatures** (Exodus-style), and **model provenance** (dataset SHA-256, sklearn version, training timestamp) baked into every prediction payload.
+
 ### 2. Collusion & Exfiltration Matrix
 Detects dangerous co-occurring permissions capable of covert privacy leakage:
 - **Local Storage Exfiltration:** `READ_EXTERNAL_STORAGE` + `INTERNET`
