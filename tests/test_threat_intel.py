@@ -309,5 +309,50 @@ class TestThreatStatusResolution(unittest.TestCase):
         self.assertTrue(flash["threat"]["is_flagged"])
 
 
+class TestVtKeyPersistence(unittest.TestCase):
+    """The GUI-saved API key must survive restarts (all frontends load it)."""
+
+    def test_config_loads_key_saved_by_gui(self):
+        import json
+        import os
+        import tempfile
+        from unittest import mock
+
+        from src.config import _load_virustotal_api_key
+
+        with tempfile.TemporaryDirectory() as tmp:
+            capra_dir = os.path.join(tmp, ".capra")
+            os.makedirs(capra_dir)
+            with open(os.path.join(capra_dir, "gui_settings.json"), "w") as f:
+                json.dump({"theme": "dark", "vt_api_key": "persisted-key-123456"}, f)
+            with mock.patch.dict(os.environ, {"HOME": tmp, "VIRUSTOTAL_API_KEY": ""}):
+                self.assertEqual(_load_virustotal_api_key(), "persisted-key-123456")
+
+    def test_env_var_overrides_gui_settings(self):
+        import json
+        import os
+        import tempfile
+        from unittest import mock
+
+        from src.config import _load_virustotal_api_key
+
+        with tempfile.TemporaryDirectory() as tmp:
+            capra_dir = os.path.join(tmp, ".capra")
+            os.makedirs(capra_dir)
+            with open(os.path.join(capra_dir, "gui_settings.json"), "w") as f:
+                json.dump({"vt_api_key": "gui-key"}, f)
+            with mock.patch.dict(os.environ, {"HOME": tmp, "VIRUSTOTAL_API_KEY": "env-key-wins"}):
+                self.assertEqual(_load_virustotal_api_key(), "env-key-wins")
+
+    def test_no_key_anywhere_returns_none(self):
+        import os
+        from unittest import mock
+
+        from src.config import _load_virustotal_api_key
+
+        with mock.patch.dict(os.environ, {"HOME": "/nonexistent-home", "VIRUSTOTAL_API_KEY": ""}):
+            self.assertIsNone(_load_virustotal_api_key())
+
+
 if __name__ == "__main__":
     unittest.main()
