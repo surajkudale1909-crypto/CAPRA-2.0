@@ -235,6 +235,8 @@ python src/gui.py
 - Optional **drag & drop** of APKs (via `tkinterdnd2` when installed; Browse works regardless)
 - Friendlier error dialogs with actionable remediation hints
 
+**Definitive threat classification (never "UNKNOWN"):** every scan resolves to a clear verdict — `MALICIOUS` / `VERIFIED_BENIGN` / `SUSPICIOUS` from VirusTotal & the offline hash database, or `SUSPECTED_THREAT` / `NO_THREAT_DETECTED` derived from the fused risk analysis (Medium 46/100+ counts as a suspected threat) when no external intel exists.
+
 ### 3b. Web Dashboard (Phase 5)
 Browser front-end to the same analysis engine — upload an APK or run a bundled demo:
 ```bash

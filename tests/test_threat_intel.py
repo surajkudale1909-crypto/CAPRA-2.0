@@ -241,5 +241,73 @@ class TestThreatIntelPhase5(unittest.TestCase):
                 os.remove(cache_file)
 
 
+class TestThreatStatusResolution(unittest.TestCase):
+    """Definitive classification contract: no scan ever surfaces UNKNOWN."""
+
+    def setUp(self):
+        from src.threat_intel import display_threat_status, resolve_threat_status
+
+        self.resolve = resolve_threat_status
+        self.display = display_threat_status
+
+    def test_unknown_low_score_resolves_safe(self):
+        res = self.resolve(
+            {"status": "UNKNOWN", "source": "LOCAL_DATABASE"},
+            {"score": 15, "verdict": "Safe"},
+        )
+        self.assertEqual(res["status"], "NO_THREAT_DETECTED")
+
+    def test_unknown_medium_and_above_resolves_threat(self):
+        for score, verdict in ((62, "Medium"), (75, "High"), (98, "Critical")):
+            res = self.resolve({"status": "UNKNOWN"}, {"score": score, "verdict": verdict})
+            self.assertEqual(res["status"], "SUSPECTED_THREAT", f"score={score}")
+
+    def test_boundary_matches_medium_band(self):
+        self.assertEqual(
+            self.resolve({"status": "UNKNOWN"}, {"score": 45, "verdict": "Low"})["status"],
+            "NO_THREAT_DETECTED",
+        )
+        self.assertEqual(
+            self.resolve({"status": "UNKNOWN"}, {"score": 46, "verdict": "Medium"})["status"],
+            "SUSPECTED_THREAT",
+        )
+
+    def test_lookup_error_also_resolves(self):
+        res = self.resolve({"status": "LOOKUP_ERROR"}, {"score": 70, "verdict": "Medium"})
+        self.assertEqual(res["status"], "SUSPECTED_THREAT")
+
+    def test_intel_verdicts_pass_through_untouched(self):
+        for status in ("MALICIOUS", "VERIFIED_BENIGN", "SUSPICIOUS"):
+            res = self.resolve(
+                {"status": status, "is_flagged": True, "reputation": "keep"},
+                {"score": 5, "verdict": "Safe"},
+            )
+            self.assertEqual(res["status"], status)
+            self.assertEqual(res["reputation"], "keep")
+
+    def test_heuristic_verdicts_never_set_fusion_flags(self):
+        res = self.resolve({"status": "UNKNOWN"}, {"score": 95, "verdict": "Critical"})
+        self.assertFalse(res["is_flagged"])
+        self.assertFalse(res["is_verified_benign"])
+        self.assertEqual(res["source"], "LOCAL_ANALYSIS")
+
+    def test_display_helper_maps_old_history_rows(self):
+        self.assertEqual(self.display("UNKNOWN", 65), "SUSPECTED_THREAT")
+        self.assertEqual(self.display("UNKNOWN", 5), "NO_THREAT_DETECTED")
+        self.assertEqual(self.display("UNKNOWN", None), "NO_THREAT_DETECTED")
+        self.assertEqual(self.display(None, 0), "NO_THREAT_DETECTED")
+        self.assertEqual(self.display("VERIFIED_BENIGN", 99), "VERIFIED_BENIGN")
+        self.assertEqual(self.display("MALICIOUS", 0), "MALICIOUS")
+
+    def test_demo_scenarios_never_unknown(self):
+        from src.pipeline import run_synthetic_demo
+
+        nav = run_synthetic_demo("benign_navigation", category="Navigation")
+        self.assertEqual(nav["threat"]["status"], "NO_THREAT_DETECTED")
+        flash = run_synthetic_demo("malicious_flashlight", category="Flashlight")
+        self.assertEqual(flash["threat"]["status"], "MALICIOUS")
+        self.assertTrue(flash["threat"]["is_flagged"])
+
+
 if __name__ == "__main__":
     unittest.main()

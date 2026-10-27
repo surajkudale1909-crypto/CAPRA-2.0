@@ -376,3 +376,96 @@ class ThreatIntelEngine:
             "total_local_signatures": len(self.malware_signatures) + len(self.benign_signatures),
             "vt_api_configured": bool(self.api_key),
         }
+
+
+# =============================================================================
+# Threat-status resolution — every scan ends in a definitive classification.
+# =============================================================================
+# Status vocabulary surfaced to users:
+#   MALICIOUS           known threat (hash DB / VirusTotal)              [intel]
+#   VERIFIED_BENIGN     known safe (hash DB / VirusTotal)                [intel]
+#   SUSPICIOUS          low AV detections (VirusTotal)                   [intel]
+#   SUSPECTED_THREAT    no external intel; local analysis rates it risky
+#   NO_THREAT_DETECTED  no external intel; local analysis looks clean
+#
+# The raw intel layer may still yield UNKNOWN / LOOKUP_ERROR — those are
+# internal only and are always mapped onto the definitive pair above before
+# results reach the GUI, CLI, reports, or history database.
+
+THREAT_SIDE_STATUSES = {"MALICIOUS", "SUSPICIOUS", "SUSPECTED_THREAT"}
+SAFE_SIDE_STATUSES = {"VERIFIED_BENIGN", "NO_THREAT_DETECTED"}
+UNRESOLVED_STATUSES = {"", "UNKNOWN", "LOOKUP_ERROR"}
+
+# Medium band (golden semantics: Medium starts at 46/100) and above is
+# classified as a suspected threat when no external intel exists.
+HEURISTIC_THREAT_THRESHOLD = 46.0
+
+
+def resolve_threat_status(
+    threat_result: Optional[Dict[str, Any]],
+    fusion_result: Optional[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Map an unresolved threat-intel record onto the definitive vocabulary.
+
+    Known intel verdicts (MALICIOUS / VERIFIED_BENIGN / SUSPICIOUS) pass
+    through untouched. UNKNOWN / LOOKUP_ERROR records are classified from the
+    fused risk score: Medium (46) or above becomes SUSPECTED_THREAT, anything
+    lower becomes NO_THREAT_DETECTED. Heuristic verdicts never set
+    ``is_flagged``/``is_verified_benign``, so the fusion threat-override
+    semantics stay exactly as pinned.
+    """
+    if not threat_result:
+        return threat_result
+
+    status = str(threat_result.get("status") or "").strip().upper()
+    if status not in UNRESOLVED_STATUSES:
+        return threat_result
+
+    fusion_result = fusion_result or {}
+    try:
+        score = float(fusion_result.get("score", 0) or 0)
+    except (TypeError, ValueError):
+        score = 0.0
+    verdict = str(fusion_result.get("verdict") or "Unknown")
+    suspected = score >= HEURISTIC_THREAT_THRESHOLD
+
+    resolved = dict(threat_result)
+    resolved["intel_source"] = threat_result.get("source", "LOCAL_DATABASE")
+    resolved["source"] = "LOCAL_ANALYSIS"
+    resolved["status"] = "SUSPECTED_THREAT" if suspected else "NO_THREAT_DETECTED"
+    resolved["is_flagged"] = False
+    resolved["is_verified_benign"] = False
+    resolved["reputation"] = (
+        f"Not in threat databases — local analysis verdict: {verdict} ({score:g}/100)"
+    )
+    if suspected:
+        resolved["recommendation"] = (
+            f"Heuristic classification (no external intel): {verdict} risk ({score:g}/100) "
+            "crosses the threat threshold (Medium 46+). Treat as a suspected threat — "
+            "review permission combinations, trackers and network egress before trusting "
+            "this APK."
+        )
+    else:
+        resolved["recommendation"] = (
+            f"Heuristic classification (no external intel): {verdict} risk ({score:g}/100) "
+            "with no threat indicators. No threat detected; standard privacy caution "
+            "still applies."
+        )
+    return resolved
+
+
+def display_threat_status(status: Any, score: Any = 0) -> str:
+    """Definitive threat label for UI tables and history rows.
+
+    Old history rows may still hold the raw "UNKNOWN" label — derive the
+    definitive classification from the stored score so the UI never shows
+    an undecided state.
+    """
+    s = str(status or "").strip().upper()
+    if s in UNRESOLVED_STATUSES:
+        try:
+            sc = float(score or 0)
+        except (TypeError, ValueError):
+            sc = 0.0
+        return "SUSPECTED_THREAT" if sc >= HEURISTIC_THREAT_THRESHOLD else "NO_THREAT_DETECTED"
+    return str(status).strip()

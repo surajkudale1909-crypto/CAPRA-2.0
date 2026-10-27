@@ -6,6 +6,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [2.1.0] — 2026-10-27 — GUI Polish & Usability
 
+### Changed — Threat Classification (no more "UNKNOWN")
+- **Every scan now ends in a definitive classification.** When external intel (hash DB / VirusTotal) has no verdict, the fused risk decides: Medium risk (46/100) or above → `SUSPECTED_THREAT`, lower → `NO_THREAT_DETECTED`. Known intel verdicts (`MALICIOUS`, `VERIFIED_BENIGN`, `SUSPICIOUS`) are unchanged and keep their fusion-override semantics.
+- GUI history table and metric chip show the definitive label (old rows with stored `UNKNOWN` are re-derived from their score at display time) and are color-coded green/red.
+- Overview tab gains an explicit `Threat Status` line; heuristic verdicts carry an explanatory reputation/recommendation (`source: LOCAL_ANALYSIS`).
+
 ### Added — Desktop GUI
 - **Light/dark theme toggle** with persisted preference (`~/.capra/gui_settings.json`)
 - **Banded risk gauge** (5 verdict-colored arcs) with animated needle sweep and band legend

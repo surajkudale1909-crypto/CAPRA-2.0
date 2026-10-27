@@ -39,6 +39,7 @@ from src.gui_formatters import (
     build_overview_text,
     build_recommendations_text,
     combination_rows,
+    display_threat_status,
     format_file_label,
     gauge_geometry,
     load_settings,
@@ -909,12 +910,15 @@ class PrivacyAnalyzerGUI:
             self.gauge.draw_gauge(score, verdict)
 
         # 2. Left summary chips
-        t_status = threat.get("status", "UNKNOWN")
+        t_status = display_threat_status(threat.get("status"), score)
+        threat_side = bool(threat.get("is_flagged")) or t_status in (
+            "MALICIOUS",
+            "SUSPICIOUS",
+            "SUSPECTED_THREAT",
+        )
         self.metric_threat.config(
             text=f"Threat Intel: {t_status}",
-            fg=self.palette["bad"]
-            if threat.get("is_flagged")
-            else (self.palette["ok"] if threat.get("is_verified_benign") else self.palette["text"]),
+            fg=self.palette["bad"] if threat_side else self.palette["ok"],
         )
         self.metric_ml.config(
             text=f"ML Prob: {ml.get('risk_percentage')}% ({ml.get('ml_verdict')})",
@@ -1090,6 +1094,9 @@ class PrivacyAnalyzerGUI:
         ):
             tree.heading(col, text=head)
             tree.column(col, width=width, anchor="w")
+        tree.tag_configure("ok", foreground=self.palette["ok"])
+        tree.tag_configure("bad", foreground=self.palette["bad"])
+        tree.tag_configure("muted", foreground=self.palette["muted"])
         tree.pack(fill="both", expand=True, padx=10, pady=4)
 
         def refresh():
@@ -1097,6 +1104,13 @@ class PrivacyAnalyzerGUI:
             try:
                 hm = HistoryManager()
                 for rec in hm.get_history(limit=200):
+                    t_status = display_threat_status(rec.get("threat_status"), rec.get("score"))
+                    if t_status in ("MALICIOUS", "SUSPICIOUS", "SUSPECTED_THREAT"):
+                        t_tag = "bad"
+                    elif t_status in ("VERIFIED_BENIGN", "NO_THREAT_DETECTED"):
+                        t_tag = "ok"
+                    else:
+                        t_tag = "muted"
                     tree.insert(
                         "",
                         "end",
@@ -1107,8 +1121,9 @@ class PrivacyAnalyzerGUI:
                             rec.get("category"),
                             rec.get("score"),
                             rec.get("verdict"),
-                            rec.get("threat_status"),
+                            t_status,
                         ),
+                        tags=(t_tag,),
                     )
             except Exception as e:  # noqa: BLE001
                 messagebox.showerror("History Error", self._format_error(e))

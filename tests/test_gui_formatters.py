@@ -272,6 +272,17 @@ class TestTextBuilders(unittest.TestCase):
         self.assertIn("org.fossify.math", text)
         self.assertIn("ML Risk Estimation", text)
 
+    def test_overview_never_shows_unknown_threat(self):
+        text = build_overview_text(
+            {"app_name": "X", "package_name": "x", "components": {"exported": {}}},
+            {"category": "Messaging", "category_description": "d"},
+            {"score": 65, "verdict": "Medium", "findings": []},
+            {"status": "UNKNOWN", "hashes": {}},
+            {"risk_percentage": 40.0, "ml_verdict": "Medium"},
+        )
+        self.assertIn("Threat Status:      SUSPECTED_THREAT", text)
+        self.assertNotIn("Threat Status:      UNKNOWN", text)
+
     def test_overview_includes_static_and_empirical(self):
         text = build_overview_text(
             {"app_name": "X", "package_name": "x", "components": {"exported": {}}},

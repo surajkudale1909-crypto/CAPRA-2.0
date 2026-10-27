@@ -15,6 +15,8 @@ import math
 import os
 from typing import Any, Dict, List, Optional
 
+from src.threat_intel import display_threat_status
+
 # ---------------------------------------------------------------------------
 # Risk bands (must mirror fusion verdict bands pinned by tests/test_golden.py:
 # 0-20 Safe, 21-45 Low, 46-70 Medium, 71-89 High, 90-100 Critical)
@@ -381,7 +383,9 @@ def build_overview_text(
     lines.append("")
 
     lines.append(f"Threat Intel Hash:  {threat.get('hashes', {}).get('sha256', 'N/A')}")
-    lines.append(f"Reputation Status:  {threat.get('reputation') or threat.get('status')}")
+    t_status = display_threat_status(threat.get("status"), fusion.get("score", 0))
+    lines.append(f"Threat Status:      {t_status}")
+    lines.append(f"Reputation Status:  {threat.get('reputation') or t_status}")
     lines.append("")
     lines.append(
         f"ML Risk Estimation: {ml.get('risk_percentage')}% [{ml.get('ml_verdict')}] "
