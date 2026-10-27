@@ -33,7 +33,7 @@ from src.network_detector import NetworkDetector
 from src.reachability import ReachabilityAnalyzer
 from src.report_generator import export_json_report, generate_markdown_report
 from src.security_analyzer import SecurityAnalyzer
-from src.threat_intel import ThreatIntelEngine
+from src.threat_intel import ThreatIntelEngine, resolve_threat_status
 from src.tracker_detector import TrackerDetector
 
 logger = logging.getLogger(__name__)
@@ -208,6 +208,12 @@ class PrivacyAnalysisPipeline:
             ml_data=ml_result,
             static_data=static_result,
         )
+
+        # Stage 7b: Threat-status resolution — UNKNOWN/LOOKUP_ERROR never
+        # reaches the user; every scan ends in a definitive classification
+        # (SUSPECTED_THREAT / NO_THREAT_DETECTED when no external intel).
+        if threat_result is not None:
+            threat_result = resolve_threat_status(threat_result, fusion_result)
 
         logger.info(
             f"Analysis complete for {manifest_data.get('package_name')}: "
@@ -528,6 +534,9 @@ def run_synthetic_demo(scenario: str, category: Optional[str] = None) -> Dict[st
         ml_data=ml_result,
         static_data=mock_static,
     )
+
+    # Same definitive-classification contract as real scans (see analyze()).
+    threat_result = resolve_threat_status(threat_result, fusion_result)
 
     return {
         "manifest": mock_manifest,

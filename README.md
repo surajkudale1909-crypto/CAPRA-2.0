@@ -223,6 +223,27 @@ python main.py --gui
 python src/gui.py
 ```
 
+**Polished workbench (GUI Polish pass):**
+- Modern card layout with **light/dark theme toggle** (preference persisted in `~/.capra/gui_settings.json`)
+- **Verdict-colored banded risk gauge** (Safe/Low/Medium/High/Critical arcs, 0–100) with animated needle and band legend
+- Color-coded metric chips (threat intel, ML probability, permission totals)
+- **Permissions breakdown table** (green acceptable / amber suspicious / red dangerous / gray neutral / blue exempt rows) and an **Exfiltration Combinations** table
+- Real progress bar with **Cancel** and an elapsed-time ticker; concurrent scans are blocked while one runs
+- Selected-file feedback (name + size), **recent-files dropdown**, and last-directory memory
+- **Export Markdown / Export JSON / Open Reports Folder** buttons and an ML feature-importance plot viewer
+- **Scan History window** with refresh, delete, and **two-scan comparison** (score/ML drift, tracker delta, verdict trajectory)
+- Optional **drag & drop** of APKs (via `tkinterdnd2` when installed; Browse works regardless)
+- Friendlier error dialogs with actionable remediation hints
+
+**Definitive threat classification (never "UNKNOWN"):** every scan resolves to a clear verdict — `MALICIOUS` / `VERIFIED_BENIGN` / `SUSPICIOUS` from VirusTotal & the offline hash database, or `SUSPECTED_THREAT` / `NO_THREAT_DETECTED` derived from the fused risk analysis (Medium 46/100+ counts as a suspected threat) when no external intel exists.
+
+**Live VirusTotal reputation (optional, free):** grab a free API key at [virustotal.com](https://www.virustotal.com/) (profile → API key), then use any one of:
+1. **GUI (easiest):** click **⚙ API Key** in the app header → paste the key → Save. It persists across restarts and applies immediately.
+2. **`.env` file** in the project root: `VIRUSTOTAL_API_KEY=your-key-here`
+3. **Environment variable:** `setx VIRUSTOTAL_API_KEY "your-key-here"` (Windows, new terminals) or `export VIRUSTOTAL_API_KEY=...` (Linux/macOS), or one-off: `capra app.apk --vt-key your-key`.
+
+Free-tier limits (4 req/min, 500/day) are handled gracefully: every lookup is cached in `data/vt_cache.json` (each APK is queried once), rate-limit hits fall back to the offline heuristic for that scan, and `--no-vt` forces fully offline mode. The environment variable always overrides the GUI-saved key.
+
 ### 3b. Web Dashboard (Phase 5)
 Browser front-end to the same analysis engine — upload an APK or run a bundled demo:
 ```bash
