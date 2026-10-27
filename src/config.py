@@ -40,6 +40,28 @@ APKS_DIR = DATA_DIR / "apks"
 REPORTS_DIR = BASE_DIR / "reports"
 
 
+def _load_virustotal_api_key() -> Optional[str]:
+    """Resolve the VirusTotal key: env var / .env first, then the GUI's
+    persisted settings file (~/.capra/gui_settings.json, written by the
+    desktop app's Settings dialog)."""
+    key = os.getenv("VIRUSTOTAL_API_KEY")
+    if key and key.strip():
+        return key.strip()
+    try:
+        import json
+
+        gui_settings = Path.home() / ".capra" / "gui_settings.json"
+        if gui_settings.is_file():
+            with open(gui_settings, encoding="utf-8") as f:
+                data = json.load(f)
+            stored = data.get("vt_api_key") if isinstance(data, dict) else None
+            if isinstance(stored, str) and stored.strip():
+                return stored.strip()
+    except Exception:
+        pass
+    return None
+
+
 @dataclass
 class Settings:
     """Application-wide configuration settings."""
@@ -65,9 +87,7 @@ class Settings:
     threat_cache_path: Path = DATA_DIR / "threat_cache.db"
 
     # API Keys & Threat Intel (Loaded via Environment Variables)
-    virustotal_api_key: Optional[str] = field(
-        default_factory=lambda: os.getenv("VIRUSTOTAL_API_KEY")
-    )
+    virustotal_api_key: Optional[str] = field(default_factory=_load_virustotal_api_key)
     malwarebazaar_api_key: Optional[str] = field(
         default_factory=lambda: os.getenv("MALWAREBAZAAR_API_KEY")
     )

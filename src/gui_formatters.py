@@ -264,7 +264,22 @@ def default_settings_path() -> str:
 
 
 def default_settings() -> Dict[str, Any]:
-    return {"theme": "dark", "last_dir": "", "recent_files": []}
+    return {
+        "theme": "dark",
+        "last_dir": "",
+        "recent_files": [],
+        "vt_api_key": "",
+    }
+
+
+def mask_api_key(key: Any) -> str:
+    """Masked display form of an API key (never log or show raw keys)."""
+    s = str(key or "").strip()
+    if not s:
+        return "(not set)"
+    if len(s) >= 12:
+        return f"{s[:4]}…{s[-4:]}"
+    return "••••••"
 
 
 def load_settings(path: Optional[str] = None) -> Dict[str, Any]:
@@ -292,6 +307,7 @@ def save_settings(settings: Dict[str, Any], path: Optional[str] = None) -> bool:
                     "theme": settings.get("theme", "dark"),
                     "last_dir": settings.get("last_dir", ""),
                     "recent_files": list(settings.get("recent_files", []))[:MAX_RECENT_FILES],
+                    "vt_api_key": settings.get("vt_api_key", ""),
                 },
                 f,
                 indent=2,

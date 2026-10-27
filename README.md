@@ -237,6 +237,13 @@ python src/gui.py
 
 **Definitive threat classification (never "UNKNOWN"):** every scan resolves to a clear verdict — `MALICIOUS` / `VERIFIED_BENIGN` / `SUSPICIOUS` from VirusTotal & the offline hash database, or `SUSPECTED_THREAT` / `NO_THREAT_DETECTED` derived from the fused risk analysis (Medium 46/100+ counts as a suspected threat) when no external intel exists.
 
+**Live VirusTotal reputation (optional, free):** grab a free API key at [virustotal.com](https://www.virustotal.com/) (profile → API key), then use any one of:
+1. **GUI (easiest):** click **⚙ API Key** in the app header → paste the key → Save. It persists across restarts and applies immediately.
+2. **`.env` file** in the project root: `VIRUSTOTAL_API_KEY=your-key-here`
+3. **Environment variable:** `setx VIRUSTOTAL_API_KEY "your-key-here"` (Windows, new terminals) or `export VIRUSTOTAL_API_KEY=...` (Linux/macOS), or one-off: `capra app.apk --vt-key your-key`.
+
+Free-tier limits (4 req/min, 500/day) are handled gracefully: every lookup is cached in `data/vt_cache.json` (each APK is queried once), rate-limit hits fall back to the offline heuristic for that scan, and `--no-vt` forces fully offline mode. The environment variable always overrides the GUI-saved key.
+
 ### 3b. Web Dashboard (Phase 5)
 Browser front-end to the same analysis engine — upload an APK or run a bundled demo:
 ```bash

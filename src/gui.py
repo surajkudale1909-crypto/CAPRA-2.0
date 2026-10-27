@@ -43,6 +43,7 @@ from src.gui_formatters import (
     format_file_label,
     gauge_geometry,
     load_settings,
+    mask_api_key,
     permission_rows,
     save_settings,
     theme_palette,
@@ -352,6 +353,108 @@ class PrivacyAnalyzerGUI:
         self._apply_theme()
 
     # ------------------------------------------------------------------
+    # VirusTotal API key (Settings dialog)
+    # ------------------------------------------------------------------
+
+    def _apply_vt_key(self, key: str) -> bool:
+        """Persist and activate a VirusTotal API key (env var still wins)."""
+        key = (key or "").strip()
+        if not key:
+            self.status_var.set("VirusTotal API key is empty — nothing changed.")
+            return False
+        self._settings["vt_api_key"] = key
+        save_settings(self._settings)
+        try:
+            from src.config import settings as app_settings
+
+            app_settings.virustotal_api_key = key
+            self.pipeline.threat_engine.api_key = key
+        except Exception as e:  # noqa: BLE001
+            messagebox.showerror("API Key Error", self._format_error(e))
+            return False
+        self.status_var.set(
+            f"VirusTotal API key saved ({mask_api_key(key)}) — live AV reputation enabled."
+        )
+        return True
+
+    def _clear_vt_key(self):
+        self._settings["vt_api_key"] = ""
+        save_settings(self._settings)
+        try:
+            from src.config import settings as app_settings
+
+            app_settings.virustotal_api_key = None
+            self.pipeline.threat_engine.api_key = None
+        except Exception:  # noqa: BLE001
+            pass
+        self.status_var.set("VirusTotal API key removed — scans fall back to offline intel.")
+
+    def _open_vt_key_dialog(self):
+        win = tk.Toplevel(self.root)
+        win.title("VirusTotal API Key")
+        win.configure(bg=self.palette["bg"])
+        win.geometry("460x250")
+        win.resizable(False, False)
+
+        self._mklabel(
+            win,
+            text="Threat-Intel API Key (VirusTotal v3)",
+            font=("Segoe UI", 11, "bold"),
+        ).pack(anchor="w", padx=14, pady=(14, 2))
+
+        current = str(self._settings.get("vt_api_key") or "")
+        source = "GUI settings"
+        if not current:
+            from src.config import settings as app_settings
+
+            env_key = getattr(app_settings, "virustotal_api_key", None)
+            if env_key:
+                current = str(env_key)
+                source = "environment / .env"
+        self._mklabel(
+            win,
+            text=f"Current key: {mask_api_key(current)}   (source: {current and source or 'none'})",
+            font=("Segoe UI", 9),
+        ).pack(anchor="w", padx=14, pady=(0, 8))
+
+        entry_row = tk.Frame(win, bg=self.palette["card_bg"], padx=8, pady=8)
+        entry_row.pack(fill="x", padx=14)
+        self._register(entry_row, "surface")
+        self._mklabel(entry_row, text="Key:", font=("Segoe UI", 9, "bold")).pack(
+            side="left", padx=(0, 6)
+        )
+        key_var = tk.StringVar(value=current)
+        key_entry = tk.Entry(
+            entry_row, textvariable=key_var, show="•", font=("Consolas", 10), width=36
+        )
+        key_entry.pack(side="left", fill="x", expand=True)
+
+        self._mklabel(
+            win,
+            text="Free VirusTotal keys: 4 requests/min, 500/day. CAPRA caches every\n"
+            "lookup (data/vt_cache.json), so each APK is queried only once. The\n"
+            "VIRUSTOTAL_API_KEY environment variable overrides this setting.",
+            font=("Segoe UI", 8),
+        ).pack(anchor="w", padx=14, pady=(8, 4))
+
+        btns = tk.Frame(win, bg=self.palette["bg"])
+        btns.pack(pady=(2, 12))
+
+        def on_save():
+            if self._apply_vt_key(key_var.get()):
+                win.destroy()
+
+        def on_remove():
+            self._clear_vt_key()
+            win.destroy()
+
+        ttk.Button(btns, text="💾 Save", command=on_save).pack(side="left", padx=5)
+        ttk.Button(btns, text="🗑 Remove", command=on_remove).pack(side="left", padx=5)
+        ttk.Button(btns, text="Cancel", command=win.destroy).pack(side="left", padx=5)
+        key_entry.focus_set()
+        win.bind("<Return>", lambda _e: on_save())
+
+    # ------------------------------------------------------------------
     # UI construction
     # ------------------------------------------------------------------
 
@@ -378,6 +481,16 @@ class PrivacyAnalyzerGUI:
         )
         self._theme_btn.pack(side="right", padx=4)
         self._register(self._theme_btn, "header")
+        tk.Button(
+            header,
+            text="⚙ API Key",
+            command=self._open_vt_key_dialog,
+            bd=0,
+            padx=10,
+            pady=4,
+            font=("Segoe UI", 9),
+            cursor="hand2",
+        ).pack(side="right", padx=4)
         tk.Button(
             header,
             text="🕘 History",

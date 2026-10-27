@@ -22,6 +22,7 @@ from src.gui_formatters import (
     format_file_label,
     gauge_geometry,
     load_settings,
+    mask_api_key,
     permission_rows,
     save_settings,
     score_band,
@@ -240,6 +241,26 @@ class TestSettingsPersistence(unittest.TestCase):
             add_recent_file(s, paths[-1])  # re-add newest -> stays first, no dupe
             self.assertEqual(len(s["recent_files"]), 8)
             self.assertEqual(s["recent_files"][0], os.path.abspath(paths[-1]))
+
+    def test_vt_api_key_roundtrip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "gui_settings.json")
+            s = default_settings()
+            s["vt_api_key"] = "abc123def456ghi789"
+            self.assertTrue(save_settings(s, path))
+            self.assertEqual(load_settings(path)["vt_api_key"], "abc123def456ghi789")
+
+    def test_vt_api_key_default_empty(self):
+        self.assertEqual(default_settings()["vt_api_key"], "")
+
+    def test_mask_api_key_never_reveals_secret(self):
+        self.assertEqual(mask_api_key(""), "(not set)")
+        self.assertEqual(mask_api_key(None), "(not set)")
+        masked = mask_api_key("abcdefgh1234567890")
+        self.assertNotIn("gh12345678", masked)
+        self.assertTrue(masked.startswith("abcd"))
+        self.assertTrue(masked.endswith("7890"))
+        self.assertEqual(mask_api_key("short"), "••••••")
 
 
 class TestTextBuilders(unittest.TestCase):

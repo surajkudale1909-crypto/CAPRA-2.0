@@ -11,6 +11,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - GUI history table and metric chip show the definitive label (old rows with stored `UNKNOWN` are re-derived from their score at display time) and are color-coded green/red.
 - Overview tab gains an explicit `Threat Status` line; heuristic verdicts carry an explanatory reputation/recommendation (`source: LOCAL_ANALYSIS`).
 
+### Added — VirusTotal API Key
+- **GUI settings dialog** (header **⚙ API Key**): paste/save/remove a VirusTotal v3 key with masked display; persisted in `~/.capra/gui_settings.json` and applied live to the running scan engine.
+- The same stored key is picked up by the CLI and web dashboard (environment variable `VIRUSTOTAL_API_KEY` / `.env` still takes precedence); `--vt-key` and `--no-vt` unchanged.
+
 ### Added — Desktop GUI
 - **Light/dark theme toggle** with persisted preference (`~/.capra/gui_settings.json`)
 - **Banded risk gauge** (5 verdict-colored arcs) with animated needle sweep and band legend

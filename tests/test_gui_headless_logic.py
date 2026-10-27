@@ -479,6 +479,26 @@ class TestHeadlessGUIPinnedFlow(unittest.TestCase):
         self.assertTrue(callable(self.app._export_markdown))
         self.assertTrue(callable(self.app._export_json))
 
+    def test_vt_key_apply_and_clear(self):
+        """Settings dialog logic: persist + live-apply + clear (no real file I/O)."""
+        saved = {}
+        original_save = self.gui_mod.save_settings
+        self.gui_mod.save_settings = lambda s, **kw: saved.update(s) or True
+        try:
+            self.assertTrue(self.app._apply_vt_key("  test-key-1234567890  "))
+            self.assertEqual(self.app._settings["vt_api_key"], "test-key-1234567890")
+            self.assertEqual(saved.get("vt_api_key"), "test-key-1234567890")
+            self.assertEqual(self.app.pipeline.threat_engine.api_key, "test-key-1234567890")
+            self.assertFalse(self.app._apply_vt_key("   "))  # empty -> rejected
+            self.app._clear_vt_key()
+            self.assertEqual(self.app._settings["vt_api_key"], "")
+            self.assertIsNone(self.app.pipeline.threat_engine.api_key)
+        finally:
+            self.gui_mod.save_settings = original_save
+
+    def test_vt_key_dialog_opens(self):
+        self.app._open_vt_key_dialog()
+
 
 if __name__ == "__main__":
     unittest.main()
