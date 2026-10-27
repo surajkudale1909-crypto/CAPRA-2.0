@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "source": "Exodus Privacy & Android Tracker Signatures Database",
   "trackers": [
     {
@@ -103,6 +103,90 @@
       "category": "Crash Reporting",
       "code_signature": "com.google.firebase.crashlytics",
       "website": "https://firebase.google.com"
+    },
+    {
+      "name": "Amplitude",
+      "category": "Analytics",
+      "code_signature": "com.amplitude",
+      "website": "https://amplitude.com"
+    },
+    {
+      "name": "Countly",
+      "category": "Analytics",
+      "code_signature": "ly.count.android",
+      "website": "https://countly.com"
+    },
+    {
+      "name": "Matomo (Piwik)",
+      "category": "Analytics",
+      "code_signature": "org.matomo",
+      "website": "https://matomo.org"
+    },
+    {
+      "name": "MoEngage",
+      "category": "Marketing",
+      "code_signature": "com.moengage",
+      "website": "https://moengage.com"
+    },
+    {
+      "name": "CleverTap",
+      "category": "Marketing",
+      "code_signature": "com.clevertap",
+      "website": "https://clevertap.com"
+    },
+    {
+      "name": "Kochava",
+      "category": "Attribution",
+      "code_signature": "com.kochava",
+      "website": "https://kochava.com"
+    },
+    {
+      "name": "Singular",
+      "category": "Attribution",
+      "code_signature": "com.singular",
+      "website": "https://singular.net"
+    },
+    {
+      "name": "Tenjin",
+      "category": "Attribution",
+      "code_signature": "com.tenjin",
+      "website": "https://tenjin.com"
+    },
+    {
+      "name": "Tapjoy",
+      "category": "Advertising",
+      "code_signature": "com.tapjoy",
+      "website": "https://tapjoy.com"
+    },
+    {
+      "name": "StartApp",
+      "category": "Advertising",
+      "code_signature": "com.startapp",
+      "website": "https://start.io"
+    },
+    {
+      "name": "Pangle (TikTok Ads)",
+      "category": "Advertising",
+      "code_signature": "com.bytedance.sdk.openadsdk",
+      "website": "https://www.pangleglobal.com"
+    },
+    {
+      "name": "Yandex AppMetrica",
+      "category": "Analytics",
+      "code_signature": "com.yandex.metrica",
+      "website": "https://appmetrica.yandex.com"
+    },
+    {
+      "name": "OneSignal",
+      "category": "Push / Analytics",
+      "code_signature": "com.onesignal",
+      "website": "https://onesignal.com"
+    },
+    {
+      "name": "Airship",
+      "category": "Push / Analytics",
+      "code_signature": "com.urbanairship",
+      "website": "https://airship.com"
     }
   ]
 }

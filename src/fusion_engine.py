@@ -38,11 +38,17 @@ class FusionEngine:
         self.raw_ceiling = raw_ceiling
         self.weights = weights or {"heuristic": 0.50, "ml": 0.35, "surface": 0.15}
 
-    def calculate_score(self, raw_penalty: int) -> int:
-        """Normalize raw penalty points to a 0-100 integer score."""
+    def calculate_score(self, raw_penalty: int, ceiling: Optional[int] = None) -> int:
+        """Normalize raw penalty points to a 0-100 integer score.
+
+        Args:
+            raw_penalty: Raw accumulated penalty points.
+            ceiling: Optional per-call ceiling override; defaults to self.raw_ceiling.
+        """
         if raw_penalty <= 0:
             return 0
-        normalized = (raw_penalty / self.raw_ceiling) * 100
+        effective_ceiling = ceiling if ceiling is not None else self.raw_ceiling
+        normalized = (raw_penalty / effective_ceiling) * 100
         return min(100, max(0, int(round(normalized))))
 
     def get_verdict(self, score: int) -> str:
@@ -85,10 +91,11 @@ class FusionEngine:
                         f"CRITICAL THREAT: Matched known malware family '{td.get('family')}' ({td.get('threat_type')})."
                     )
             elif threat_data.get("is_verified_benign"):
-                findings.append(f"Threat Intel: SHA-256 matched verified signature ({threat_data.get('reputation')}).")
+                findings.append(
+                    f"Threat Intel: SHA-256 matched verified signature ({threat_data.get('reputation')})."
+                )
             elif threat_data.get("status") == "SUSPICIOUS":
                 findings.append(f"Threat Intel Warning: {threat_data.get('reputation')}.")
-
 
         # Machine learning alerts
         if ml_data:
@@ -105,7 +112,11 @@ class FusionEngine:
         combinations = context_result.get("triggered_combinations", [])
         unexpected = context_result.get("unexpected_dangerous_permissions", [])
 
-        if breakdown.get("acceptable_count", 0) > 0 and len(suspicious) == 0 and len(combinations) == 0:
+        if (
+            breakdown.get("acceptable_count", 0) > 0
+            and len(suspicious) == 0
+            and len(combinations) == 0
+        ):
             findings.append(
                 f"All requested permissions align with standard baseline requirements for {category} applications."
             )
@@ -180,44 +191,68 @@ class FusionEngine:
         combinations = context_result.get("triggered_combinations", [])
 
         if threat_data and threat_data.get("is_flagged"):
-            recs.append("CRITICAL: Immediate quarantine required. Known malware hash signature detected.")
+            recs.append(
+                "CRITICAL: Immediate quarantine required. Known malware hash signature detected."
+            )
             recs.append("Isolate device from network and check for unauthorized data exfiltration.")
             return recs
 
         if verdict in (RiskVerdict.CRITICAL, RiskVerdict.HIGH):
-            recs.append("DO NOT INSTALL or immediately quarantine this application in enterprise environments.")
-            recs.append("Conduct deep dynamic taint analysis (e.g. FlowDroid) to verify data sinks.")
+            recs.append(
+                "DO NOT INSTALL or immediately quarantine this application in enterprise environments."
+            )
+            recs.append(
+                "Conduct deep dynamic taint analysis (e.g. FlowDroid) to verify data sinks."
+            )
         elif verdict == RiskVerdict.MEDIUM:
-            recs.append("Review in-app runtime permission prompts carefully before granting access.")
-            recs.append("Disable background data access and revoke unused permissions via Android settings.")
+            recs.append(
+                "Review in-app runtime permission prompts carefully before granting access."
+            )
+            recs.append(
+                "Disable background data access and revoke unused permissions via Android settings."
+            )
         else:
             recs.append("Application exhibits normal permission footprint; safe for standard use.")
 
         for c in combinations:
             if "STORAGE" in c["id"] or "MEDIA" in c["id"]:
-                recs.append("Enforce Scoped Storage (Storage Access Framework) to prevent arbitrary file access.")
+                recs.append(
+                    "Enforce Scoped Storage (Storage Access Framework) to prevent arbitrary file access."
+                )
             if "SMS" in c["id"]:
-                recs.append("Verify if SMS Retriever API can replace full READ_SMS permissions for OTP verification.")
+                recs.append(
+                    "Verify if SMS Retriever API can replace full READ_SMS permissions for OTP verification."
+                )
             if "CONTACTS" in c["id"]:
-                recs.append("Replace direct contact reading with system Intent picker to preserve user privacy.")
+                recs.append(
+                    "Replace direct contact reading with system Intent picker to preserve user privacy."
+                )
 
         if static_data:
             net_info = static_data.get("network", {})
             if net_info.get("insecure_http_count", 0) > 0:
-                recs.append("Enforce HTTPS across all network operations; declare android:usesCleartextTraffic='false'.")
+                recs.append(
+                    "Enforce HTTPS across all network operations; declare android:usesCleartextTraffic='false'."
+                )
 
             trackers_info = static_data.get("trackers", {})
             if trackers_info.get("tracker_count", 0) > 2:
-                recs.append("Audit and consolidate embedded ad/tracking SDKs to minimize third-party data collection.")
+                recs.append(
+                    "Audit and consolidate embedded ad/tracking SDKs to minimize third-party data collection."
+                )
 
             sec_info = static_data.get("security", {})
             bytecode_sec = sec_info.get("bytecode_security", {})
             if bytecode_sec.get("has_dcl"):
-                recs.append("Avoid Dynamic Code Loading (DCL); load all required code statically within the verified package.")
+                recs.append(
+                    "Avoid Dynamic Code Loading (DCL); load all required code statically within the verified package."
+                )
 
             reach_info = static_data.get("reachability", {})
             if reach_info.get("has_leakage_path"):
-                recs.append("Decouple sensitive device queries from network transmission paths using local anonymization.")
+                recs.append(
+                    "Decouple sensitive device queries from network transmission paths using local anonymization."
+                )
 
         return recs
 
@@ -243,12 +278,11 @@ class FusionEngine:
         penalties = context_result.get("penalties", {})
         raw_penalty = penalties.get("total_raw_penalty", 0)
 
-        # Allow dynamic ceiling from rules if defined
+        # Allow dynamic ceiling from rules if defined (without mutating shared state)
         weights = context_result.get("scoring_weights", {})
         ceiling = weights.get("max_raw_score_ceiling", self.raw_ceiling)
-        self.raw_ceiling = ceiling
 
-        heuristic_score = self.calculate_score(raw_penalty)
+        heuristic_score = self.calculate_score(raw_penalty, ceiling=ceiling)
 
         if ml_data is not None:
             ml_prob = ml_data.get("risk_probability", 0.0)
@@ -267,7 +301,7 @@ class FusionEngine:
                 n_score = static_data.get("network", {}).get("network_risk_score", 0.0)
                 s_score = static_data.get("security", {}).get("security_risk_score", 0.0)
                 r_score = static_data.get("reachability", {}).get("leak_risk_score", 0.0)
-                static_avg = (t_score * 0.2 + n_score * 0.3 + s_score * 0.25 + r_score * 0.25)
+                static_avg = t_score * 0.2 + n_score * 0.3 + s_score * 0.25 + r_score * 0.25
                 surface_penalty += int(static_avg * 0.3)
 
             surface_score = min(100, (surface_penalty / 30.0) * 100)
@@ -294,8 +328,12 @@ class FusionEngine:
             is_threat_override = True
 
         verdict = self.get_verdict(score)
-        findings = self._generate_findings(context_result, manifest_data, threat_data, ml_data, static_data)
-        recommendations = self._generate_recommendations(verdict, context_result, threat_data, static_data)
+        findings = self._generate_findings(
+            context_result, manifest_data, threat_data, ml_data, static_data
+        )
+        recommendations = self._generate_recommendations(
+            verdict, context_result, threat_data, static_data
+        )
 
         score_breakdown = {
             "heuristic_component": round(heuristic_score, 1),
@@ -320,4 +358,3 @@ class FusionEngine:
             "findings": findings,
             "recommendations": recommendations,
         }
-

@@ -1,0 +1,437 @@
+# ==============================================================================
+# File: src/webapp.py
+# Owner: Group 8 (Web Dashboard — Phase 5)
+# Description: Minimal FastAPI web dashboard for CAPRA. Upload an APK (or run a
+#              bundled demo scenario) and view the full privacy-risk report in
+#              the browser. Reuses the exact same analysis pipeline as the CLI
+#              and Tkinter GUI — one engine, three front-ends.
+#
+# Run:  python main.py --web    (or:  python src/webapp.py)
+# ==============================================================================
+
+import html
+import logging
+import os
+import tempfile
+import uuid
+from typing import Any, Dict, Optional
+
+logger = logging.getLogger("CAPRA.WebApp")
+
+DEFAULT_HOST = "0.0.0.0"
+DEFAULT_PORT = int(os.environ.get("CAPRA_WEB_PORT", "8000"))
+
+DEMO_SCENARIOS = ["benign_calculator", "malicious_flashlight", "benign_navigation"]
+
+VERDICT_COLORS = {
+    "Safe": "#16a34a",
+    "Low": "#65a30d",
+    "Medium": "#d97706",
+    "High": "#dc2626",
+    "Critical": "#7f1d1d",
+}
+
+_CSS = """
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0;
+       background: #0f172a; color: #e2e8f0; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+header h1 { font-size: 1.9rem; margin: 0 0 4px; }
+header p { color: #94a3b8; margin: 0 0 20px; }
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+        padding: 18px 22px; margin: 14px 0; }
+.card h2 { font-size: 1.15rem; margin: 0 0 12px; color: #f1f5f9; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.stat { background: #0f172a; border-radius: 10px; padding: 14px; text-align: center; }
+.stat .v { font-size: 2rem; font-weight: 700; }
+.stat .l { color: #94a3b8; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; }
+.badge { display: inline-block; padding: 6px 16px; border-radius: 999px;
+         font-weight: 700; letter-spacing: .05em; color: #fff; }
+.bar { height: 14px; border-radius: 7px; background: #334155; overflow: hidden; margin: 10px 0 4px; }
+.bar > div { height: 100%; border-radius: 7px; transition: width .4s; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #334155; vertical-align: top; }
+th { color: #94a3b8; font-weight: 600; font-size: .82rem; text-transform: uppercase; }
+code, .mono { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: .86rem; }
+ul { padding-left: 20px; margin: 8px 0; }
+li { margin: 4px 0; }
+label.file { display: block; border: 2px dashed #475569; border-radius: 10px; padding: 22px;
+             text-align: center; cursor: pointer; color: #94a3b8; margin-bottom: 12px; }
+label.file:hover { border-color: #38bdf8; color: #e2e8f0; }
+button, .btn { background: #2563eb; border: 0; color: #fff; padding: 10px 22px;
+               border-radius: 8px; font-size: 1rem; cursor: pointer; text-decoration: none;
+               display: inline-block; margin: 4px 6px 4px 0; }
+button:hover, .btn:hover { background: #1d4ed8; }
+button.ghost { background: #334155; }
+button.ghost:hover { background: #475569; }
+.muted { color: #94a3b8; font-size: .88rem; }
+.alert { border-left: 4px solid #dc2626; background: #450a0a40; padding: 12px 16px;
+         border-radius: 8px; margin: 10px 0; }
+.ok { border-left: 4px solid #16a34a; background: #052e1640; padding: 12px 16px;
+      border-radius: 8px; margin: 10px 0; }
+#spinner { display: none; margin-top: 14px; }
+#spinner .ring { display: inline-block; width: 22px; height: 22px; border: 3px solid #475569;
+                 border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;
+                 vertical-align: middle; margin-right: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+footer { margin-top: 30px; color: #64748b; font-size: .82rem; text-align: center; }
+"""
+
+
+def _esc(value: Any) -> str:
+    return html.escape(str(value if value is not None else ""))
+
+
+def _short(perm: str) -> str:
+    return _esc(str(perm).replace("android.permission.", ""))
+
+
+def _score_bar(score: float) -> str:
+    color = VERDICT_COLORS.get("Safe", "#16a34a")
+    return (
+        f'<div class="bar"><div style="width:{max(0, min(100, score)):.0f}%;'
+        f'background:{color}"></div></div>'
+    )
+
+
+def _page(title: str, body: str) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{_esc(title)}</title>
+<style>{_CSS}</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🛡️ CAPRA 2.0 — Privacy Risk Analyzer</h1>
+  <p>Context-Aware Mobile App Privacy Risk Analyzer · Web Dashboard</p>
+</header>
+{body}
+<footer>One analysis engine — CLI · Tkinter GUI · Web. Generated by CAPRA 2.0 (VIT Pune, EDAI Group 8).</footer>
+</div>
+</body>
+</html>"""
+
+
+def render_home() -> str:
+    demo_buttons = "".join(
+        f'<button class="ghost" type="submit" name="scenario" value="{_esc(s)}">'
+        f"{_esc(s.replace('_', ' ').title())}</button>"
+        for s in DEMO_SCENARIOS
+    )
+    body = f"""
+<div class="card">
+  <h2>📤 Analyze an Android APK</h2>
+  <form action="/analyze" method="post" enctype="multipart/form-data"
+        onsubmit="document.getElementById('spinner').style.display='block'">
+    <label class="file">Tap to choose an .apk file (or drag &amp; drop)
+      <input type="file" name="file" accept=".apk" required hidden>
+    </label>
+    <label style="display:block;margin-bottom:12px;" class="muted">
+      Category override (optional):
+      <select name="category" style="background:#0f172a;color:#e2e8f0;border:1px solid #475569;
+              border-radius:8px;padding:8px;margin-left:8px;">
+        <option value="">Auto-detect</option>
+        <option>Calculator</option><option>Flashlight</option><option>Navigation</option>
+        <option>Social Media</option><option>Messaging</option><option>Banking/Finance</option>
+        <option>Health/Fitness</option><option>Games</option><option>Camera/Photo</option>
+        <option>Music/Video</option><option>Shopping</option><option>Productivity</option>
+        <option>Education</option>
+      </select>
+    </label>
+    <button type="submit">Analyze APK</button>
+    <div id="spinner"><span class="ring"></span>Analyzing… static parsing can take up to a minute.</div>
+  </form>
+</div>
+<div class="card">
+  <h2>🎬 Demo Scenarios (no APK needed)</h2>
+  <p class="muted">Pre-baked permission profiles that showcase every analyzer module.</p>
+  <form action="/demo" method="post">{demo_buttons}</form>
+</div>
+<div class="card">
+  <h2>🧩 What CAPRA analyzes</h2>
+  <div class="grid">
+    <div class="stat"><div class="v">13</div><div class="l">Category baselines</div></div>
+    <div class="stat"><div class="v">9</div><div class="l">Collusion combos</div></div>
+    <div class="stat"><div class="v">31</div><div class="l">Tracker signatures</div></div>
+    <div class="stat"><div class="v">3</div><div class="l">Reachability levels</div></div>
+    <div class="stat"><div class="v">0.95</div><div class="l">ML ROC-AUC</div></div>
+    <div class="stat"><div class="v">5</div><div class="l">Verdict bands</div></div>
+  </div>
+</div>
+"""
+    return _page("CAPRA 2.0 — Privacy Risk Analyzer", body)
+
+
+def render_result(result: Dict[str, Any], error: Optional[str] = None) -> str:
+    if error:
+        return _page(
+            "CAPRA — Analysis Error",
+            f'<div class="card"><h2>⚠️ Analysis Failed</h2>'
+            f'<div class="alert">{_esc(error)}</div>'
+            f'<a class="btn" href="/">← Back</a></div>',
+        )
+
+    manifest = result.get("manifest", {})
+    fusion = result.get("fusion", {})
+    context = result.get("context", {})
+    ml = result.get("ml", {})
+    threat = result.get("threat", {})
+    static_sec = result.get("static_analysis", {})
+    category = result.get("category") or context.get("category") or "General"
+    score = float(fusion.get("score", 0))
+    verdict = fusion.get("verdict", "UNKNOWN")
+    color = VERDICT_COLORS.get(verdict, "#64748b")
+
+    # Header card
+    body = f"""
+<div class="card">
+  <h2>{_esc(manifest.get("app_name") or "Unknown Application")}
+      <span class="muted">· {_esc(manifest.get("package_name"))}</span></h2>
+  <div class="grid">
+    <div class="stat"><div class="v">{score:.0f}</div><div class="l">Risk Score</div></div>
+    <div class="stat"><div class="v"><span class="badge" style="background:{color}">{_esc(verdict)}</span></div>
+         <div class="l">Verdict</div></div>
+    <div class="stat"><div class="v">{_esc(category)}</div><div class="l">Category</div></div>
+    <div class="stat"><div class="v">{_esc(manifest.get("total_permissions_count", 0))}</div>
+         <div class="l">Permissions</div></div>
+  </div>
+  {_score_bar(score)}
+  <div class="muted">Composite = 50% context heuristics · 35% ML · 15% attack surface
+    (threat-intel override possible)</div>
+</div>
+"""
+
+    # Threat intel
+    t_findings = threat.get("findings") or []
+    body += f"""
+<div class="card"><h2>🔍 Threat Intelligence</h2>
+<p>Status: <strong>{_esc(threat.get("status") or threat.get("threat_status") or "N/A")}</strong>
+ — {_esc(threat.get("reputation") or "")}</p>
+{"".join(f'<div class="alert">{_esc(f)}</div>' for f in t_findings)}
+</div>
+"""
+
+    # Context
+    susp = context.get("suspicious_permissions", [])
+    combos = context.get("triggered_combinations", [])
+    exemptions = context.get("contextual_exemptions", [])
+    empirical = context.get("empirical_context", {})
+    rows = "".join(
+        f"<tr><td><code>{_short(s.get('permission'))}</code></td>"
+        f"<td>+{_esc(s.get('penalty', 0))}</td><td>{_esc(s.get('reason', ''))}</td>"
+        f"<td class='muted'>{_esc(s.get('empirical_note', ''))}</td></tr>"
+        for s in susp
+    )
+    combo_items = "".join(
+        f"<li><strong>{_esc(c.get('name'))}</strong> "
+        f"(<code>{' + '.join(_short(p) for p in c.get('matched_permissions', []))}</code>, "
+        f"+{_esc(c.get('penalty', 0))}) — {_esc(c.get('description', ''))}</li>"
+        for c in combos
+    )
+    exempt_items = "".join(
+        f"<li><strong>{_esc(c.get('name'))}</strong> — {_esc(c.get('exempt_reason', ''))}</li>"
+        for c in exemptions
+    )
+    notes = "".join(f"<li>{_esc(n)}</li>" for n in empirical.get("category_norm_notes", []))
+    body += f"""
+<div class="card"><h2>🧠 Context Engine — {_esc(category)}</h2>
+<p class="muted">{_esc(context.get("category_description", ""))}</p>
+{"<table><tr><th>Permission</th><th>Penalty</th><th>Why</th><th>Real-World Baseline</th></tr>" + rows + "</table>" if rows else '<div class="ok">✅ No suspicious category mismatches.</div>'}
+{'<h2 style="font-size:1rem;margin-top:16px">🚨 Dangerous Combinations</h2><ul>' + combo_items + "</ul>" if combo_items else ""}
+{'<h2 style="font-size:1rem;margin-top:16px">ℹ️ Expected Functionality (not penalized)</h2><ul>' + exempt_items + "</ul>" if exempt_items else ""}
+{('<h2 style="font-size:1rem;margin-top:16px">📊 Real-World Baselines (n=' + _esc(empirical.get("sample_size", 0)) + " apps)</h2><ul>" + notes + "</ul>") if notes else ""}
+</div>
+"""
+
+    # ML
+    prov = ml.get("model_provenance", {})
+    top = ml.get("top_contributing_permissions", [])
+    top_rows = "".join(
+        f"<tr><td><code>{_esc(c.get('short_name'))}</code></td>"
+        f"<td>{_esc(c.get('importance_score', 0))}</td>"
+        f"<td>+{_esc(c.get('risk_contribution_pct', 0))}%</td></tr>"
+        for c in top
+    )
+    body += f"""
+<div class="card"><h2>🤖 Machine Learning Estimation</h2>
+<div class="grid">
+  <div class="stat"><div class="v">{_esc(ml.get("risk_percentage", 0))}%</div>
+       <div class="l">Malware Probability</div></div>
+  <div class="stat"><div class="v">{_esc(ml.get("decision_threshold", 0.5))}</div>
+       <div class="l">Calibrated Threshold</div></div>
+  <div class="stat"><div class="v">{_esc(ml.get("model_type", "N/A"))}</div>
+       <div class="l">Model</div></div>
+</div>
+<p>{_esc(ml.get("ml_verdict", ""))} · data source: {_esc(ml.get("data_source", ""))}</p>
+{("<table><tr><th>Permission</th><th>Importance</th><th>Contribution</th></tr>" + top_rows + "</table>") if top_rows else ""}
+{('<p class="muted">Provenance: ' + _esc(", ".join(prov.get("dataset_files", []))) + " · sklearn " + _esc(prov.get("sklearn_version", "")) + " · " + _esc(prov.get("trained_at", "")) + "</p>") if prov else ""}
+</div>
+"""
+
+    # Static analysis
+    t_data = static_sec.get("trackers", {})
+    n_data = static_sec.get("network", {})
+    s_data = static_sec.get("security", {})
+    r_data = static_sec.get("reachability", {})
+    exp = manifest.get("components", {}).get("exported", {})
+    trackers = "".join(
+        f"<li><strong>{_esc(t.get('name'))}</strong> ({_esc(t.get('category'))}) "
+        f"<code>{_esc(t.get('signature', ''))}</code></li>"
+        for t in t_data.get("detected_trackers", [])
+    )
+    secrets = s_data.get("secrets_detected", []) or s_data.get("bytecode_security", {}).get(
+        "secrets_detected", []
+    )
+    secret_items = "".join(
+        f"<li><strong>{_esc(s.get('type'))}</strong> ×{_esc(s.get('occurrences', 0))} "
+        f"<span class='muted mono'>{_esc(', '.join(s.get('samples', [])))}</span></li>"
+        for s in secrets
+    )
+    paths = "".join(
+        f"<li><code>{_esc(p.get('source'))}</code> → <code>{_esc(p.get('sink'))}</code> "
+        f"({_esc(p.get('type'))}, {_esc(p.get('confidence'))})"
+        f"<div class='muted mono'>{_esc(p.get('caller_method'))}</div></li>"
+        for p in r_data.get("paths", [])
+    )
+    deep = sorted(set(exp.get("deeplinks", [])))
+    body += f"""
+<div class="card"><h2>🧬 Static Analysis &amp; Attack Surface</h2>
+<p>Trackers: <strong>{_esc(t_data.get("tracker_count", 0))}</strong> ·
+ URLs: <strong>{_esc(n_data.get("total_urls", 0))}</strong> ·
+ Cleartext HTTP: <strong>{_esc(n_data.get("insecure_http_count", 0))}</strong> ·
+ Exported components: <strong>{_esc(exp.get("total_exported", 0))}</strong>
+ ({_esc(exp.get("unprotected_exported", 0))} unprotected)</p>
+{"<ul>" + trackers + "</ul>" if trackers else ""}
+{'<h2 style="font-size:1rem;margin-top:16px">🔑 Hardcoded Secrets (redacted)</h2><ul>' + secret_items + "</ul>" if secret_items else ""}
+{'<h2 style="font-size:1rem;margin-top:16px">🚨 Egress Reachability Paths</h2><ul>' + paths + "</ul>" if paths else ""}
+{('<h2 style="font-size:1rem;margin-top:16px">🌐 Deep Links</h2><p><code>' + _esc(", ".join(deep)) + "</code></p>" + ('<div class="alert">⚠️ ' + _esc(exp.get("browsable_unprotected", 0)) + " unprotected BROWSABLE component(s) — deep-link hijack surface.</div>" if exp.get("browsable_unprotected") else "")) if deep else ""}
+</div>
+"""
+
+    # Findings & recommendations
+    findings = fusion.get("findings", [])
+    recs = fusion.get("recommendations", [])
+    body += f"""
+<div class="card"><h2>📌 Key Findings &amp; Recommendations</h2>
+<ul>{"".join(f"<li>{_esc(f)}</li>" for f in findings) or '<li class="muted">No major findings.</li>'}</ul>
+<ol>{"".join(f"<li>{_esc(r)}</li>" for r in recs)}</ol>
+<a class="btn" href="/">← Analyze another</a>
+</div>
+"""
+    return _page(f"CAPRA — {manifest.get('app_name', 'Report')}", body)
+
+
+def create_app():
+    """Build the FastAPI application (import-safe for tests)."""
+    from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+    from fastapi.responses import HTMLResponse, JSONResponse
+
+    from src.extractor import (
+        friendly_error_message,
+    )
+    from src.pipeline import run_synthetic_demo
+
+    app = FastAPI(title="CAPRA 2.0 Web Dashboard", docs_url="/api/docs", redoc_url=None)
+
+    def _limits():
+        from src.extractor import APKSecurityLimits
+
+        return APKSecurityLimits.from_settings()
+
+    def _analyze_uploaded(file: UploadFile, category: Optional[str]) -> Dict[str, Any]:
+        limits = _limits()
+        max_bytes = int(limits.max_apk_size_mb * 1024 * 1024)
+        suffix = ".apk"
+        tmp_dir = tempfile.mkdtemp(prefix="capra_web_")
+        tmp_path = os.path.join(tmp_dir, f"{uuid.uuid4().hex}{suffix}")
+        try:
+            size = 0
+            with open(tmp_path, "wb") as out:
+                while chunk := file.file.read(1024 * 1024):
+                    size += len(chunk)
+                    if size > max_bytes:
+                        raise HTTPException(
+                            status_code=413,
+                            detail=f"APK exceeds the {limits.max_apk_size_mb:.0f} MB upload cap.",
+                        )
+                    out.write(chunk)
+            if size == 0:
+                raise HTTPException(status_code=400, detail="Empty upload.")
+            from src.pipeline import PrivacyAnalysisPipeline
+
+            pipeline = PrivacyAnalysisPipeline()
+            return pipeline.analyze(tmp_path, category=category or None)
+        finally:
+            try:
+                import shutil
+
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+            except Exception:
+                pass
+
+    @app.get("/", response_class=HTMLResponse)
+    def home():
+        return render_home()
+
+    @app.get("/health")
+    def health():
+        return {"status": "ok", "service": "capra-web"}
+
+    @app.post("/analyze", response_class=HTMLResponse)
+    def analyze_form(file: UploadFile = File(...), category: str = Form("")):
+        try:
+            result = _analyze_uploaded(file, category)
+            return render_result(result)
+        except HTTPException:
+            raise
+        except Exception as e:  # noqa: BLE001 — surface friendly errors in the UI
+            return render_result({}, error=friendly_error_message(e))
+
+    @app.post("/demo")
+    def demo_form(scenario: str = Form(...)):
+        if scenario not in DEMO_SCENARIOS:
+            raise HTTPException(status_code=404, detail=f"Unknown demo scenario '{scenario}'")
+        category = (
+            "Calculator"
+            if "calculator" in scenario
+            else ("Navigation" if "navigation" in scenario else "Flashlight")
+        )
+        return HTMLResponse(render_result(run_synthetic_demo(scenario, category=category)))
+
+    @app.post("/api/analyze")
+    def api_analyze(file: UploadFile = File(...), category: str = Form("")):
+        try:
+            return JSONResponse(_analyze_uploaded(file, category))
+        except HTTPException:
+            raise
+        except Exception as e:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=friendly_error_message(e)) from e
+
+    @app.get("/api/demo/{scenario}")
+    def api_demo(scenario: str):
+        if scenario not in DEMO_SCENARIOS:
+            raise HTTPException(status_code=404, detail=f"Unknown demo scenario '{scenario}'")
+        category = (
+            "Calculator"
+            if "calculator" in scenario
+            else ("Navigation" if "navigation" in scenario else "Flashlight")
+        )
+        return JSONResponse(run_synthetic_demo(scenario, category=category))
+
+    return app
+
+
+def run_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+    import uvicorn
+
+    logger.info("Starting CAPRA web dashboard on http://%s:%s", host, port)
+    uvicorn.run(create_app(), host=host, port=port, log_level="info")
+
+
+if __name__ == "__main__":
+    run_server()

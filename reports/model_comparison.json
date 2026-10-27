@@ -1,25 +1,33 @@
 {
-  "data_source": "EMPIRICAL (sample_android_malware_dataset.csv)",
+  "data_source": "EMPIRICAL (Android_Malware_Benign.csv, 213 features)",
   "is_synthetic": false,
-  "n_samples": 60,
+  "n_samples": 4464,
   "cv_folds": 5,
   "models": {
     "RandomForest": {
-      "accuracy_mean": 0.9833,
-      "accuracy_std": 0.0333,
-      "precision_mean": 1.0,
-      "recall_mean": 0.9667,
-      "f1_mean": 0.9818,
-      "roc_auc_mean": 1.0
+      "accuracy_mean": 0.8577,
+      "accuracy_std": 0.0084,
+      "precision_mean": 0.8931,
+      "recall_mean": 0.8516,
+      "f1_mean": 0.8717,
+      "roc_auc_mean": 0.9379
     },
     "GradientBoosting": {
-      "accuracy_mean": 1.0,
-      "accuracy_std": 0.0,
-      "precision_mean": 1.0,
-      "recall_mean": 1.0,
-      "f1_mean": 1.0,
-      "roc_auc_mean": 1.0
+      "accuracy_mean": 0.8752,
+      "accuracy_std": 0.0103,
+      "precision_mean": 0.8818,
+      "recall_mean": 0.9013,
+      "f1_mean": 0.8913,
+      "roc_auc_mean": 0.9542
     }
   },
-  "selected_winner": "GradientBoosting"
+  "selected_winner": "GradientBoosting",
+  "calibration": {
+    "decision_threshold": 0.45,
+    "f1_at_threshold": 0.8917,
+    "precision_at_threshold": 0.8638,
+    "recall_at_threshold": 0.9214,
+    "youden_threshold": 0.64,
+    "criterion": "max_F1_on_out_of_fold_predictions"
+  }
 }

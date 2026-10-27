@@ -9,7 +9,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import sys
 from typing import Any, Dict, Optional
 
@@ -25,6 +24,7 @@ if sys.platform == "win32":
 
 try:
     import colorama
+
     colorama.init(autoreset=True)
 except ImportError:
     pass
@@ -35,8 +35,10 @@ from src.extractor import APKCorruptedError, APKExtractionError, APKNotFoundErro
 from src.fusion_engine import RiskVerdict
 from src.history_manager import HistoryManager
 from src.ml_pipeline import PermissionMLPipeline
-from src.pipeline import PrivacyAnalysisPipeline, analyze_apk, run_synthetic_demo
+from src.pipeline import PrivacyAnalysisPipeline, run_synthetic_demo
 from src.report_generator import generate_markdown_report
+
+DEFAULT_WEB_PORT = 8000
 
 logger = logging.getLogger("capra.cli")
 
@@ -89,12 +91,18 @@ def format_report_terminal(
     score = fusion_data.get("score", 0)
     v_color = get_verdict_color(verdict)
 
-    print(f"\n{COLOR_BOLD}[1] APPLICATION METADATA & THREAT INTEL (SURAJ'S MODULE){COLOR_RESET}")
+    print(f"\n{COLOR_BOLD}[1] APPLICATION METADATA & THREAT INTEL{COLOR_RESET}")
     print("-" * 80)
-    print(f"  {COLOR_BOLD}App Name:{COLOR_RESET}           {manifest_data.get('app_name') or 'N/A'}")
+    print(
+        f"  {COLOR_BOLD}App Name:{COLOR_RESET}           {manifest_data.get('app_name') or 'N/A'}"
+    )
     print(f"  {COLOR_BOLD}Package Name:{COLOR_RESET}       {manifest_data.get('package_name')}")
-    print(f"  {COLOR_BOLD}Target SDK:{COLOR_RESET}         {manifest_data.get('target_sdk_version') or 'N/A'} (Min SDK: {manifest_data.get('min_sdk_version') or 'N/A'})")
-    print(f"  {COLOR_BOLD}Version:{COLOR_RESET}            {manifest_data.get('version_name') or 'N/A'} (Code: {manifest_data.get('version_code') or 'N/A'})")
+    print(
+        f"  {COLOR_BOLD}Target SDK:{COLOR_RESET}         {manifest_data.get('target_sdk_version') or 'N/A'} (Min SDK: {manifest_data.get('min_sdk_version') or 'N/A'})"
+    )
+    print(
+        f"  {COLOR_BOLD}Version:{COLOR_RESET}            {manifest_data.get('version_name') or 'N/A'} (Code: {manifest_data.get('version_code') or 'N/A'})"
+    )
 
     cat_name = context_data.get("category", "General")
     if detection_data:
@@ -106,8 +114,12 @@ def format_report_terminal(
     else:
         cat_display = cat_name
 
-    print(f"  {COLOR_BOLD}Analyzed Category:{COLOR_RESET}  {cat_display} - {COLOR_DIM}{context_data.get('category_description')}{COLOR_RESET}")
-    print(f"  {COLOR_BOLD}Total Permissions:{COLOR_RESET}  {manifest_data.get('total_permissions_count')}")
+    print(
+        f"  {COLOR_BOLD}Analyzed Category:{COLOR_RESET}  {cat_display} - {COLOR_DIM}{context_data.get('category_description')}{COLOR_RESET}"
+    )
+    print(
+        f"  {COLOR_BOLD}Total Permissions:{COLOR_RESET}  {manifest_data.get('total_permissions_count')}"
+    )
 
     comps = manifest_data.get("components", {})
     exported = comps.get("exported", {})
@@ -126,35 +138,50 @@ def format_report_terminal(
         status = threat_data.get("status")
         source = threat_data.get("source", "LOCAL_DATABASE")
         src_badge = f"{COLOR_CYAN}[{source}]{COLOR_RESET}"
-        print(f"  {COLOR_BOLD}SHA-256 Hash:{COLOR_RESET}       {COLOR_DIM}{h.get('sha256', 'N/A')}{COLOR_RESET} {src_badge}")
+        print(
+            f"  {COLOR_BOLD}SHA-256 Hash:{COLOR_RESET}       {COLOR_DIM}{h.get('sha256', 'N/A')}{COLOR_RESET} {src_badge}"
+        )
 
         vt_stats = threat_data.get("vt_stats")
         if vt_stats:
             mal = vt_stats.get("malicious", 0)
             tot = vt_stats.get("total_engines", 0)
             det_color = COLOR_RED if mal >= 3 else (COLOR_YELLOW if mal > 0 else COLOR_GREEN)
-            print(f"  {COLOR_BOLD}VirusTotal Live:{COLOR_RESET}    {det_color}{COLOR_BOLD}{mal}/{tot} Security Vendors Flagged{COLOR_RESET} ({vt_stats.get('suggested_threat_label') or 'Clean'})")
-            print(f"  {COLOR_BOLD}VT Analysis Link:{COLOR_RESET}   {COLOR_DIM}{vt_stats.get('permalink')}{COLOR_RESET}")
+            print(
+                f"  {COLOR_BOLD}VirusTotal Live:{COLOR_RESET}    {det_color}{COLOR_BOLD}{mal}/{tot} Security Vendors Flagged{COLOR_RESET} ({vt_stats.get('suggested_threat_label') or 'Clean'})"
+            )
+            print(
+                f"  {COLOR_BOLD}VT Analysis Link:{COLOR_RESET}   {COLOR_DIM}{vt_stats.get('permalink')}{COLOR_RESET}"
+            )
 
         if status == "MALICIOUS":
             td = threat_data.get("threat_details", {})
-            print(f"  {COLOR_RED}{COLOR_BOLD}Threat Intel Alert: [MALICIOUS MATCH] {td.get('family')} ({td.get('threat_type')}){COLOR_RESET}")
+            print(
+                f"  {COLOR_RED}{COLOR_BOLD}Threat Intel Alert: [MALICIOUS MATCH] {td.get('family')} ({td.get('threat_type')}){COLOR_RESET}"
+            )
         elif status == "VERIFIED_BENIGN":
-            print(f"  {COLOR_GREEN}{COLOR_BOLD}Threat Intel Alert: [VERIFIED BENIGN] {threat_data.get('reputation')}{COLOR_RESET}")
+            print(
+                f"  {COLOR_GREEN}{COLOR_BOLD}Threat Intel Alert: [VERIFIED BENIGN] {threat_data.get('reputation')}{COLOR_RESET}"
+            )
         elif status == "SUSPICIOUS":
-            print(f"  {COLOR_YELLOW}{COLOR_BOLD}Threat Intel Alert: [SUSPICIOUS] {threat_data.get('reputation')}{COLOR_RESET}")
+            print(
+                f"  {COLOR_YELLOW}{COLOR_BOLD}Threat Intel Alert: [SUSPICIOUS] {threat_data.get('reputation')}{COLOR_RESET}"
+            )
         else:
-            print(f"  {COLOR_DIM}Threat Intel Alert: No matching signature in local malware database.{COLOR_RESET}")
-
+            print(
+                f"  {COLOR_DIM}Threat Intel Alert: No matching signature in local malware database.{COLOR_RESET}"
+            )
 
     # Permission Classification Breakdown
-    print(f"\n{COLOR_BOLD}[2] CONTEXTUAL PERMISSION EVALUATION (OMRAJ'S MODULE){COLOR_RESET}")
+    print(f"\n{COLOR_BOLD}[2] CONTEXTUAL PERMISSION EVALUATION (CONTEXT ENGINE){COLOR_RESET}")
     print("-" * 80)
 
     # Acceptable
     acceptable = context_data.get("acceptable_permissions", [])
     if acceptable:
-        print(f"  {COLOR_GREEN}[+] Baseline Acceptable Permissions ({len(acceptable)}):{COLOR_RESET}")
+        print(
+            f"  {COLOR_GREEN}[+] Baseline Acceptable Permissions ({len(acceptable)}):{COLOR_RESET}"
+        )
         for item in acceptable:
             p_name = item["permission"].replace("android.permission.", "")
             print(f"     - {COLOR_GREEN}{p_name}{COLOR_RESET}")
@@ -164,32 +191,73 @@ def format_report_terminal(
     # Suspicious
     suspicious = context_data.get("suspicious_permissions", [])
     if suspicious:
-        print(f"\n  {COLOR_RED}[-] Category Mismatches / Suspicious Permissions ({len(suspicious)}):{COLOR_RESET}")
+        print(
+            f"\n  {COLOR_RED}[-] Category Mismatches / Suspicious Permissions ({len(suspicious)}):{COLOR_RESET}"
+        )
         for item in suspicious:
             p_name = item["permission"].replace("android.permission.", "")
             print(f"     - {COLOR_RED}{COLOR_BOLD}{p_name}{COLOR_RESET} (+{item['penalty']} pts)")
             print(f"       {COLOR_DIM}Reason: {item['reason']}{COLOR_RESET}")
+            if item.get("empirical_note"):
+                print(f"       {COLOR_DIM}Real-world: {item['empirical_note']}{COLOR_RESET}")
 
     # Unexpected Dangerous
     unexp = context_data.get("unexpected_dangerous_permissions", [])
     if unexp:
-        print(f"\n  {COLOR_ORANGE}[!] Unlisted Dangerous AOSP Permissions ({len(unexp)}):{COLOR_RESET}")
+        print(
+            f"\n  {COLOR_ORANGE}[!] Unlisted Dangerous AOSP Permissions ({len(unexp)}):{COLOR_RESET}"
+        )
         for item in unexp:
             p_name = item["permission"].replace("android.permission.", "")
             print(f"     - {COLOR_ORANGE}{p_name}{COLOR_RESET} (+{item['penalty']} pts)")
+            if item.get("empirical_note"):
+                print(f"       {COLOR_DIM}Real-world: {item['empirical_note']}{COLOR_RESET}")
 
     # Dangerous Combinations
     combinations = context_data.get("triggered_combinations", [])
-    print(f"\n{COLOR_BOLD}[3] DANGEROUS PERMISSION COMBINATIONS (COLLUSION / EXFILTRATION){COLOR_RESET}")
+    print(
+        f"\n{COLOR_BOLD}[3] DANGEROUS PERMISSION COMBINATIONS (COLLUSION / EXFILTRATION){COLOR_RESET}"
+    )
     print("-" * 80)
     if combinations:
         for comb in combinations:
-            print(f"  {COLOR_RED}[ALERT] {comb['name']} [{comb['risk_type']}]{COLOR_RESET} (+{comb['penalty']} pts)")
+            print(
+                f"  {COLOR_RED}[ALERT] {comb['name']} [{comb['risk_type']}]{COLOR_RESET} (+{comb['penalty']} pts)"
+            )
             matched = [p.replace("android.permission.", "") for p in comb["matched_permissions"]]
             print(f"     Co-occurring: {COLOR_BOLD}{' + '.join(matched)}{COLOR_RESET}")
             print(f"     {COLOR_DIM}Description: {comb['description']}{COLOR_RESET}")
     else:
-        print(f"  {COLOR_GREEN}[+] No high-risk collusion or data-exfiltration combinations triggered.{COLOR_RESET}")
+        print(
+            f"  {COLOR_GREEN}[+] No high-risk collusion or data-exfiltration combinations triggered.{COLOR_RESET}"
+        )
+
+    # Contextual exemptions (expected functionality — not penalized)
+    exemptions = context_data.get("contextual_exemptions", [])
+    if exemptions:
+        print(
+            f"\n  {COLOR_DIM}[i] Expected Functionality Combinations (not penalized):{COLOR_RESET}"
+        )
+        for comb in exemptions:
+            matched = [p.replace("android.permission.", "") for p in comb["matched_permissions"]]
+            print(f"     {COLOR_DIM}- {comb['name']}: {' + '.join(matched)}{COLOR_RESET}")
+
+    # Real-world empirical category baselines (informational)
+    empirical = context_data.get("empirical_context", {})
+    if empirical.get("available"):
+        store_list = ", ".join(empirical.get("store_categories", []))
+        print(
+            f"\n  {COLOR_DIM}[i] Real-World Baselines (n={empirical.get('sample_size', 0)} apps, "
+            f"store: {store_list}):{COLOR_RESET}"
+        )
+        notes = empirical.get("category_norm_notes", [])
+        if notes:
+            for note in notes:
+                print(f"     {COLOR_DIM}- {note}{COLOR_RESET}")
+        else:
+            print(
+                f"     {COLOR_DIM}- No unusually rare permissions for this category.{COLOR_RESET}"
+            )
 
     # Machine Learning Estimation
     if ml_data:
@@ -198,23 +266,38 @@ def format_report_terminal(
         ml_color = COLOR_RED if ml_prob >= 50 else COLOR_GREEN
         data_source = ml_data.get("data_source", "SYNTHETIC")
         model_name = ml_data.get("model_type", "Random Forest")
-        source_badge = f"{COLOR_YELLOW}[SYNTHETIC FALLBACK]{COLOR_RESET}" if ml_data.get("is_synthetic") else f"{COLOR_CYAN}[{data_source}]{COLOR_RESET}"
+        source_badge = (
+            f"{COLOR_YELLOW}[SYNTHETIC FALLBACK]{COLOR_RESET}"
+            if ml_data.get("is_synthetic")
+            else f"{COLOR_CYAN}[{data_source}]{COLOR_RESET}"
+        )
 
-        print(f"\n{COLOR_BOLD}[4] MACHINE LEARNING RISK ESTIMATION (ISHAN'S MODULE){COLOR_RESET}")
+        print(f"\n{COLOR_BOLD}[4] MACHINE LEARNING RISK ESTIMATION (ML PIPELINE){COLOR_RESET}")
         print("-" * 80)
         print(f"  {COLOR_BOLD}Model:{COLOR_RESET}                      {model_name} {source_badge}")
-        print(f"  {COLOR_BOLD}Inference Risk Probability:{COLOR_RESET} [{ml_color}{COLOR_BOLD} {ml_prob}% {COLOR_RESET}] -> {ml_color}{ml_verdict}{COLOR_RESET}")
+        print(
+            f"  {COLOR_BOLD}Inference Risk Probability:{COLOR_RESET} [{ml_color}{COLOR_BOLD} {ml_prob}% {COLOR_RESET}] -> {ml_color}{ml_verdict}{COLOR_RESET}"
+        )
+        prov = ml_data.get("model_provenance", {})
+        if prov:
+            ds = ", ".join(prov.get("dataset_files", [])) or "n/a"
+            print(
+                f"  {COLOR_DIM}Provenance: {ds} | {prov.get('n_samples', '?')} samples | "
+                f"sklearn {prov.get('sklearn_version', '?')} | {prov.get('trained_at', '')}{COLOR_RESET}"
+            )
 
         top_contrib = ml_data.get("top_contributing_permissions", [])
         if top_contrib:
             print(f"  {COLOR_BOLD}Active Permission Explainability:{COLOR_RESET}")
             for c in top_contrib:
                 contrib_val = c.get("risk_contribution_pct", 0.0)
-                print(f"     • {COLOR_BOLD}{c['short_name']:<24}{COLOR_RESET} (importance: {c['importance_score']:.4f}, impact: +{contrib_val}%)")
+                print(
+                    f"     • {COLOR_BOLD}{c['short_name']:<24}{COLOR_RESET} (importance: {c['importance_score']:.4f}, impact: +{contrib_val}%)"
+                )
 
     # Advanced Static Analysis & Reachability
     if static_data:
-        print(f"\n{COLOR_BOLD}[5] ADVANCED STATIC ANALYSIS & REACHABILITY (SURAJ & OMRAJ){COLOR_RESET}")
+        print(f"\n{COLOR_BOLD}[5] ADVANCED STATIC ANALYSIS & REACHABILITY{COLOR_RESET}")
         print("-" * 80)
         # Trackers
         t_data = static_data.get("trackers", {})
@@ -222,19 +305,29 @@ def format_report_terminal(
         if t_count > 0:
             print(f"  {COLOR_RED}[-] Embedded Third-Party Trackers ({t_count}):{COLOR_RESET}")
             for trk in t_data.get("detected_trackers", [])[:5]:
-                print(f"     • {COLOR_BOLD}{trk['name']}{COLOR_RESET} ({trk['category']}) - {COLOR_DIM}{trk.get('signature')}{COLOR_RESET}")
+                print(
+                    f"     • {COLOR_BOLD}{trk['name']}{COLOR_RESET} ({trk['category']}) - {COLOR_DIM}{trk.get('signature')}{COLOR_RESET}"
+                )
         else:
-            print(f"  {COLOR_GREEN}[+] Embedded Trackers: None detected in DEX bytecode.{COLOR_RESET}")
+            print(
+                f"  {COLOR_GREEN}[+] Embedded Trackers: None detected in DEX bytecode.{COLOR_RESET}"
+            )
 
         # Network endpoints
         n_data = static_data.get("network", {})
         insecure_cnt = n_data.get("insecure_http_count", 0)
         raw_ips = n_data.get("raw_public_ips", [])
-        print(f"  {COLOR_BOLD}Network Extraction:{COLOR_RESET}         {n_data.get('total_urls', 0)} URLs discovered in string pool")
+        print(
+            f"  {COLOR_BOLD}Network Extraction:{COLOR_RESET}         {n_data.get('total_urls', 0)} URLs discovered in string pool"
+        )
         if insecure_cnt > 0:
-            print(f"     {COLOR_RED}[!] Insecure Cleartext HTTP:{COLOR_RESET} {insecure_cnt} endpoint(s) found")
+            print(
+                f"     {COLOR_RED}[!] Insecure Cleartext HTTP:{COLOR_RESET} {insecure_cnt} endpoint(s) found"
+            )
         if raw_ips:
-            print(f"     {COLOR_RED}[!] Raw Public IP Targets:{COLOR_RESET}   {', '.join(raw_ips[:3])}")
+            print(
+                f"     {COLOR_RED}[!] Raw Public IP Targets:{COLOR_RESET}   {', '.join(raw_ips[:3])}"
+            )
 
         # Security & Bytecode
         s_data = static_data.get("security", {})
@@ -244,33 +337,81 @@ def format_report_terminal(
             for sf in sec_findings[:3]:
                 print(f"     • {sf}")
 
+        # Hardcoded secrets
+        secrets = s_data.get("secrets_detected", []) or s_data.get("bytecode_security", {}).get(
+            "secrets_detected", []
+        )
+        if secrets:
+            print(
+                f"  {COLOR_RED}[ALERT] Hardcoded Secrets in String Pool ({len(secrets)} type(s)):{COLOR_RESET}"
+            )
+            for sec in secrets:
+                print(
+                    f"     • {COLOR_BOLD}{sec['type']}{COLOR_RESET} x{sec['occurrences']} "
+                    f"{COLOR_DIM}(e.g. {', '.join(sec.get('samples', [])[:2])}){COLOR_RESET}"
+                )
+
         # Reachability
         r_data = static_data.get("reachability", {})
         if r_data.get("has_leakage_path"):
             p_count = r_data.get("leakage_paths_count", 0)
-            print(f"  {COLOR_RED}[ALERT] Privacy Data Egress Reachability Paths ({p_count}):{COLOR_RESET}")
+            print(
+                f"  {COLOR_RED}[ALERT] Privacy Data Egress Reachability Paths ({p_count}):{COLOR_RESET}"
+            )
             for p in r_data.get("paths", [])[:3]:
-                print(f"     • {COLOR_BOLD}{p.get('source')}{COLOR_RESET} --> [{COLOR_CYAN}{p.get('sink')}{COLOR_RESET}] ({p.get('confidence')})")
+                print(
+                    f"     • {COLOR_BOLD}{p.get('source')}{COLOR_RESET} --> [{COLOR_CYAN}{p.get('sink')}{COLOR_RESET}] ({p.get('confidence')})"
+                )
         else:
-            print(f"  {COLOR_GREEN}[+] Reachability: No direct source-to-sink egress pathways identified.{COLOR_RESET}")
+            print(
+                f"  {COLOR_GREEN}[+] Reachability: No direct source-to-sink egress pathways identified.{COLOR_RESET}"
+            )
+
+        # Deep-link attack surface
+        exp = manifest_data.get("components", {}).get("exported", {}) if manifest_data else {}
+        if exp.get("deeplinks") or exp.get("browsable_unprotected"):
+            deep = sorted(set(exp.get("deeplinks", [])))
+            print(
+                f"  {COLOR_YELLOW}[!] Deep-Link Surface:{COLOR_RESET} "
+                f"{', '.join(deep[:4]) if deep else 'none'}"
+                + (
+                    f" | {COLOR_RED}{exp.get('browsable_unprotected')} unprotected BROWSABLE{COLOR_RESET}"
+                    if exp.get("browsable_unprotected")
+                    else ""
+                )
+            )
 
     # Final Risk Verdict Box
     section_num = "[6]" if static_data else ("[5]" if ml_data else "[4]")
     print(f"\n{COLOR_BOLD}{section_num} PRIVACY RISK VERDICT & AGGREGATION{COLOR_RESET}")
     print("=" * 80)
-    print(f"  {COLOR_BOLD}Raw Penalty Points:{COLOR_RESET}    {fusion_data.get('raw_penalty', 0)} pts")
-    print(f"  {COLOR_BOLD}Normalized Risk Score:{COLOR_RESET} [{v_color}{COLOR_BOLD} {score} / 100 {COLOR_RESET}]")
-    print(f"  {COLOR_BOLD}Risk Verdict Level:{COLOR_RESET}    {v_color}{COLOR_BOLD}* {verdict.upper()} RISK *{COLOR_RESET}")
+    print(
+        f"  {COLOR_BOLD}Raw Penalty Points:{COLOR_RESET}    {fusion_data.get('raw_penalty', 0)} pts"
+    )
+    print(
+        f"  {COLOR_BOLD}Normalized Risk Score:{COLOR_RESET} [{v_color}{COLOR_BOLD} {score} / 100 {COLOR_RESET}]"
+    )
+    print(
+        f"  {COLOR_BOLD}Risk Verdict Level:{COLOR_RESET}    {v_color}{COLOR_BOLD}* {verdict.upper()} RISK *{COLOR_RESET}"
+    )
 
     sb = fusion_data.get("score_breakdown", {})
     if sb:
         print("-" * 80)
         print(f"  {COLOR_DIM}Component Contribution Breakdown:{COLOR_RESET}")
-        print(f"    • Contextual Heuristics ({int(sb.get('heuristic_weight', 0.5)*100)}% wt):  {sb.get('heuristic_component', 0)}% risk -> {sb.get('heuristic_contribution', 0)} pts")
-        print(f"    • Machine Learning ({int(sb.get('ml_weight', 0.35)*100)}% wt):        {sb.get('ml_component', 0)}% risk -> {sb.get('ml_contribution', 0)} pts")
-        print(f"    • Attack Surface ({int(sb.get('surface_weight', 0.15)*100)}% wt):          {sb.get('surface_component', 0)}% risk -> {sb.get('surface_contribution', 0)} pts")
+        print(
+            f"    • Contextual Heuristics ({int(sb.get('heuristic_weight', 0.5) * 100)}% wt):  {sb.get('heuristic_component', 0)}% risk -> {sb.get('heuristic_contribution', 0)} pts"
+        )
+        print(
+            f"    • Machine Learning ({int(sb.get('ml_weight', 0.35) * 100)}% wt):        {sb.get('ml_component', 0)}% risk -> {sb.get('ml_contribution', 0)} pts"
+        )
+        print(
+            f"    • Attack Surface ({int(sb.get('surface_weight', 0.15) * 100)}% wt):          {sb.get('surface_component', 0)}% risk -> {sb.get('surface_contribution', 0)} pts"
+        )
         if sb.get("threat_intel_override"):
-            print(f"    {COLOR_RED}{COLOR_BOLD}[!] Threat Intel Critical Override Applied: Normalized to {score}/100{COLOR_RESET}")
+            print(
+                f"    {COLOR_RED}{COLOR_BOLD}[!] Threat Intel Critical Override Applied: Normalized to {score}/100{COLOR_RESET}"
+            )
     print("=" * 80)
 
     print(f"\n{COLOR_BOLD}Key Privacy Findings:{COLOR_RESET}")
@@ -281,7 +422,6 @@ def format_report_terminal(
     for rec in fusion_data.get("recommendations", []):
         print(f"  -> {rec}")
     print("=" * 80 + "\n")
-
 
 
 def print_history_table(records: list[Dict[str, Any]]) -> None:
@@ -312,10 +452,16 @@ def print_compare_diff(diff: Dict[str, Any]) -> None:
     r2 = diff["record_2"]
     cmp = diff["comparison"]
 
-    print(f"\n{COLOR_BOLD}COMPARATIVE DIFFERENTIAL AUDIT: Scan #{r1['id']} vs Scan #{r2['id']}{COLOR_RESET}")
+    print(
+        f"\n{COLOR_BOLD}COMPARATIVE DIFFERENTIAL AUDIT: Scan #{r1['id']} vs Scan #{r2['id']}{COLOR_RESET}"
+    )
     print("=" * 80)
-    print(f"  {COLOR_BOLD}Baseline (Build 1):{COLOR_RESET}   #{r1['id']} [{r1['timestamp'][:19]}] - {r1['package_name']} (v{r1['version_name'] or 'N/A'})")
-    print(f"  {COLOR_BOLD}Comparison (Build 2):{COLOR_RESET} #{r2['id']} [{r2['timestamp'][:19]}] - {r2['package_name']} (v{r2['version_name'] or 'N/A'})")
+    print(
+        f"  {COLOR_BOLD}Baseline (Build 1):{COLOR_RESET}   #{r1['id']} [{r1['timestamp'][:19]}] - {r1['package_name']} (v{r1['version_name'] or 'N/A'})"
+    )
+    print(
+        f"  {COLOR_BOLD}Comparison (Build 2):{COLOR_RESET} #{r2['id']} [{r2['timestamp'][:19]}] - {r2['package_name']} (v{r2['version_name'] or 'N/A'})"
+    )
     print("-" * 80)
 
     delta = cmp["score_delta"]
@@ -324,10 +470,18 @@ def print_compare_diff(diff: Dict[str, Any]) -> None:
     v2_col = get_verdict_color(r2["verdict"])
     delta_col = COLOR_RED if delta > 0 else (COLOR_GREEN if delta < 0 else COLOR_CYAN)
 
-    print(f"  {COLOR_BOLD}Risk Score Drift:{COLOR_RESET}     {r1['score']}/100 ➔ {r2['score']}/100 [{delta_col}{COLOR_BOLD}{d_sign} pts{COLOR_RESET}]")
-    print(f"  {COLOR_BOLD}Verdict Shift:{COLOR_RESET}        {v1_col}{r1['verdict']}{COLOR_RESET} ➔ {v2_col}{r2['verdict']}{COLOR_RESET}")
-    print(f"  {COLOR_BOLD}Audit Trajectory:{COLOR_RESET}     {delta_col}{COLOR_BOLD}{cmp['trajectory']}{COLOR_RESET} ({cmp['summary']})")
-    print(f"  {COLOR_BOLD}ML Risk Drift:{COLOR_RESET}        {cmp['ml_delta']:+.1f}% probability shift")
+    print(
+        f"  {COLOR_BOLD}Risk Score Drift:{COLOR_RESET}     {r1['score']}/100 ➔ {r2['score']}/100 [{delta_col}{COLOR_BOLD}{d_sign} pts{COLOR_RESET}]"
+    )
+    print(
+        f"  {COLOR_BOLD}Verdict Shift:{COLOR_RESET}        {v1_col}{r1['verdict']}{COLOR_RESET} ➔ {v2_col}{r2['verdict']}{COLOR_RESET}"
+    )
+    print(
+        f"  {COLOR_BOLD}Audit Trajectory:{COLOR_RESET}     {delta_col}{COLOR_BOLD}{cmp['trajectory']}{COLOR_RESET} ({cmp['summary']})"
+    )
+    print(
+        f"  {COLOR_BOLD}ML Risk Drift:{COLOR_RESET}        {cmp['ml_delta']:+.1f}% probability shift"
+    )
     print("-" * 80)
 
     added_perms = cmp.get("permissions_added", [])
@@ -340,7 +494,9 @@ def print_compare_diff(diff: Dict[str, Any]) -> None:
 
     removed_perms = cmp.get("permissions_removed", [])
     if removed_perms:
-        print(f"\n  {COLOR_CYAN}[-] Revoked / Removed Permissions ({len(removed_perms)}):{COLOR_RESET}")
+        print(
+            f"\n  {COLOR_CYAN}[-] Revoked / Removed Permissions ({len(removed_perms)}):{COLOR_RESET}"
+        )
         for p in removed_perms:
             print(f"     - {COLOR_CYAN}{p}{COLOR_RESET}")
 
@@ -382,6 +538,13 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
+        "apk_path",
+        nargs="?",
+        type=str,
+        default=None,
+        help="Path to the Android APK file to inspect (positional shortcut for --apk).",
+    )
+    parser.add_argument(
         "--apk",
         type=str,
         help="Path to the Android APK file to inspect.",
@@ -416,7 +579,15 @@ def main() -> None:
     parser.add_argument(
         "--gui",
         action="store_true",
-        help="Launch the interactive desktop Graphical User Interface (Samriddhi's Module).",
+        help="Launch the interactive desktop Graphical User Interface.",
+    )
+    parser.add_argument(
+        "--web",
+        nargs="?",
+        type=int,
+        const=DEFAULT_WEB_PORT,
+        metavar="PORT",
+        help=f"Launch the web dashboard (default port {DEFAULT_WEB_PORT}; 0.0.0.0 bind).",
     )
     parser.add_argument(
         "--plot",
@@ -461,6 +632,17 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    # Resolve APK path: --apk flag takes precedence, positional argument as fallback
+    if not args.apk and args.apk_path:
+        args.apk = args.apk_path
+
+    if args.vt_key:
+        print(
+            f"{COLOR_YELLOW}Warning: --vt-key exposes the API key in shell history and process lists. "
+            f"Prefer the VIRUSTOTAL_API_KEY environment variable.{COLOR_RESET}",
+            file=sys.stderr,
+        )
+
     # History Mode
     if args.history:
         try:
@@ -494,10 +676,26 @@ def main() -> None:
     if args.gui:
         try:
             from src.gui import launch_gui
+
             launch_gui()
             sys.exit(0)
         except Exception as e:
             print(f"Failed to launch GUI: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    # Web Dashboard (Phase 5)
+    if args.web:
+        try:
+            from src.webapp import run_server
+
+            print(
+                f"{COLOR_BOLD}CAPRA web dashboard starting on "
+                f"http://0.0.0.0:{args.web}/{COLOR_RESET}"
+            )
+            run_server(port=args.web)
+            sys.exit(0)
+        except Exception as e:
+            print(f"Failed to launch web dashboard: {e}", file=sys.stderr)
             sys.exit(1)
 
     # Feature Importance Plot generation (Ishan's Module)
@@ -530,7 +728,11 @@ def main() -> None:
     if args.demo:
         if not args.json:
             print_banner()
-        demo_category = args.category or ("Calculator" if "calculator" in args.demo else ("Navigation" if "navigation" in args.demo else "Flashlight"))
+        demo_category = args.category or (
+            "Calculator"
+            if "calculator" in args.demo
+            else ("Navigation" if "navigation" in args.demo else "Flashlight")
+        )
         results = run_synthetic_demo(args.demo, category=demo_category)
 
         # Save to history unless disabled
@@ -566,7 +768,9 @@ def main() -> None:
     # Standard APK Analysis mode
     if not args.apk:
         parser.print_help()
-        print(f"\n{COLOR_RED}Error: --apk is required for analysis (or use --demo for simulation, --gui for desktop app).{COLOR_RESET}")
+        print(
+            f"\n{COLOR_RED}Error: an APK path is required for analysis (e.g. 'python main.py app.apk'; or use --apk, --demo for simulation, --gui for desktop app).{COLOR_RESET}"
+        )
         sys.exit(1)
 
     if not args.json:
@@ -602,11 +806,14 @@ def main() -> None:
                 results.get("static_analysis"),
             )
     except APKNotFoundError as e:
-
         print(f"\n{COLOR_RED}File Error: {e}{COLOR_RESET}", file=sys.stderr)
         sys.exit(1)
     except APKCorruptedError as e:
         print(f"\n{COLOR_RED}APK Archive Corrupted / Invalid: {e}{COLOR_RESET}", file=sys.stderr)
+        sys.exit(1)
+    except APKExtractionError as e:
+        # APKTooLargeError / APKSecurityError / APKParseTimeoutError land here
+        print(f"\n{COLOR_RED}APK Safety Check Failed: {e}{COLOR_RESET}", file=sys.stderr)
         sys.exit(1)
     except ContextRuleError as e:
         print(f"\n{COLOR_RED}Context Rule Error: {e}{COLOR_RESET}", file=sys.stderr)

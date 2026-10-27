@@ -4,6 +4,12 @@ venv/
 env/
 ENV/
 
+# Build artifacts & packaging metadata
+build/
+dist/
+*.egg-info/
+capra.egg-info/
+
 # Python bytecode & caches
 __pycache__/
 *.py[cod]

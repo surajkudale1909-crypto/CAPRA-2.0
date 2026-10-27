@@ -2,13 +2,13 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-72%2F72%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-117%2F117%20passing-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Android%20Static%20Analysis-orange.svg)]()
 
 > **Institution:** Vishwakarma Institute of Technology (VIT Pune)  
 > **Department:** Computer Science & Artificial Intelligence (CS-AI)  
 > **Course:** Engineering Design & Innovation (EDAI) | Group 8  
-> **Academic Year:** 2024–2026
+> **Academic Year:** 2026–2027 | Semester 3
 
 ---
 
@@ -89,8 +89,20 @@ CAPRA 2.0 processes an APK through a deterministic, 8-stage unified pipeline wit
 
 ### 1. Context-Aware Baseline Rules (13 Categories)
 Expanded from 3 categories in v1 to 13 canonical functional profiles:
-- `Calculator`, `Flashlight`, `Navigation`, `Camera / Photography`, `Social Media`, `Finance / Banking`, `Fitness & Health`, `Music & Audio`, `Productivity / Office`, `Communication / Messaging`, `E-Commerce / Shopping`, `Weather`, `General Utility`.
+- `Calculator`, `Flashlight`, `Navigation`, `Social Media`, `Messaging`, `Banking/Finance`, `Health/Fitness`, `Games`, `Camera/Photo`, `Music/Video`, `Shopping`, `Productivity`, `Education`.
 - Modern Android 11–14 permission definitions: `POST_NOTIFICATIONS`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, `NEARBY_WIFI_DEVICES`.
+
+### 1a. Context Intelligence: Real-World Baselines & Calibration
+- **Empirical category baselines** (`data/empirical_baselines.json`, derived from 200 real-world apps across 28 Play-store categories): every context verdict carries real-world request frequencies — flagged permissions get evidence like *"READ_SMS is requested by only 12% of real-world Flashlight apps (2/16)"*. Purely informational — analysis scores are provably unchanged with or without it.
+- **Data-driven context exemptions**: combinations that are *expected functionality* for a category (camera+internet in a camera app, location+internet in navigation, SMS+internet in a messaging app) are reported but not penalized — the same permission set scores **Safe in Camera/Photo but Low/High in Calculator/Flashlight** (`reports/calibration.md`).
+- **Calibrated ML decision threshold** (0.45, chosen by max-F1 on out-of-fold predictions of the 4,464-app corpus) is trained, stored in the model payload, and applied to every verdict.
+- **Category auto-detector accuracy 94.6%** on real app listings (139/147) via keyword heuristics + permission profiles + a popular-app catalog; `scripts/calibrate.py` regenerates the full evidence in `reports/calibration.md`.
+
+### 1b. Analysis Depth: Call-Graph Reachability, Secrets & Deep Links
+- **Three-level egress reachability**: intra-method (High confidence), intra-class, and **inter-method call-graph paths** — sensitive source in one method, network sink in another, linked by a verified call edge. Honest methodology disclaimer included (heuristic xref traversal, not full IFDS taint analysis like FlowDroid).
+- **Hardcoded secret scanning**: AWS/Google API keys, JWTs, private-key blocks, credential assignments in the DEX string pool — with redacted samples only.
+- **Deep-link attack surface**: exported components with intent-filter actions, `scheme://host` deep links, BROWSABLE exposure flags.
+- **31 tracker signatures** (Exodus-style), and **model provenance** (dataset SHA-256, sklearn version, training timestamp) baked into every prediction payload.
 
 ### 2. Collusion & Exfiltration Matrix
 Detects dangerous co-occurring permissions capable of covert privacy leakage:
@@ -123,6 +135,12 @@ Detects dangerous co-occurring permissions capable of covert privacy leakage:
 - **Scan-to-Scan Comparisons:** Evaluates score drift and permission deltas between builds (e.g., comparing v1.0 to v2.0 of an app).
 - Automatic publication-grade Markdown and JSON report exports.
 
+### 7. Untrusted-Input Hardening
+APKs under analysis are hostile by definition; every archive is validated before any heavy parser touches it:
+- **Size caps & zip-bomb guards:** max file size (500 MB), entry count (100k), declared uncompressed total (4 GB), and compression ratio (200:1) — all checked against the zip central directory with zero extraction, and all env-tunable (`CAPRA_MAX_APK_SIZE_MB`, `CAPRA_MAX_ZIP_ENTRIES`, `CAPRA_MAX_UNCOMPRESSED_MB`, `CAPRA_MAX_COMPRESSION_RATIO`).
+- **Hard parse time budgets:** manifest parsing (120 s) and the DEX/static-analysis stage (300 s) run under daemon-thread time budgets (`CAPRA_APK_PARSE_TIMEOUT`, `CAPRA_STATIC_ANALYSIS_TIMEOUT`) so pathological APKs cannot hang the CLI or GUI.
+- Malformed archives raise typed errors (`APKTooLargeError`, `APKSecurityError`, `APKParseTimeoutError`, `APKCorruptedError`) with actionable messages.
+
 ---
 
 ## 📦 Installation & Setup
@@ -133,8 +151,8 @@ Detects dangerous co-occurring permissions capable of covert privacy leakage:
 
 ### 1. Clone & Set Up Virtual Environment
 ```bash
-git clone https://github.com/vit-pune-edai/capra.git
-cd capra
+git clone https://github.com/surajkudale1909-crypto/CAPRA-2.0.git
+cd CAPRA-2.0
 
 # Create and activate virtual environment
 python -m venv .venv
@@ -169,17 +187,19 @@ CAPRA_LOG_LEVEL="INFO"
 
 ### 1. Analyze an Android APK
 ```bash
-# Auto-detect category and analyze APK
-python main.py --apk data/apks/calculator_sample.apk
+# Auto-detect category and analyze APK (positional path)
+python main.py data/apks/calculator_sample.apk
 
 # Explicitly specify app category
-python main.py --apk data/apks/calculator_sample.apk --category Calculator
+python main.py data/apks/calculator_sample.apk --category Calculator
 
 # Export Markdown audit report
-python main.py --apk data/apks/calculator_sample.apk --report-md
+python main.py data/apks/calculator_sample.apk --report-md
 
 # Output structured JSON
-python main.py --apk data/apks/calculator_sample.apk --json
+python main.py data/apks/calculator_sample.apk --json
+
+# The --apk flag also works: python main.py --apk data/apks/calculator_sample.apk
 ```
 
 ### 2. Presentation Demo Scenarios (No APK Required)
@@ -203,6 +223,21 @@ python main.py --gui
 python src/gui.py
 ```
 
+### 3b. Web Dashboard (Phase 5)
+Browser front-end to the same analysis engine — upload an APK or run a bundled demo:
+```bash
+pip install -r requirements.txt        # includes fastapi, uvicorn, python-multipart
+python main.py --web                   # default port 8000 (or: python main.py --web 9000)
+# or directly
+python src/webapp.py
+```
+- `GET /` — upload form with category override + demo scenarios
+- `POST /analyze` — full HTML risk report (score gauge, context, ML, static analysis, findings)
+- `POST /demo` / `GET /api/demo/{scenario}` — bundled demos (HTML / JSON)
+- `POST /api/analyze` — machine-readable JSON for automation
+- `GET /api/docs` — OpenAPI explorer
+- Uploads honor the same env-tunable APK size caps as the CLI (`CAPRA_*`), are stored under a random temp name, and are deleted after analysis.
+
 ### 4. Audit History & Comparative Diff Audits
 ```bash
 # View table of past scans stored in SQLite history
@@ -218,8 +253,20 @@ python main.py --compare 1 2
 python main.py --plot
 
 # Re-train models and generate full evaluation report (ROC, PR curves, confusion matrix)
-python -m src.ml_pipeline --compare
+python -m src.ml_pipeline --train
 ```
+
+### 6. Train on Real Kaggle / Drebin / CIC-AndMal Datasets
+```bash
+# 1. Drop your labelled CSV(s) into data/datasets/ (e.g. Android_Malware_Benign.csv)
+
+# 2. Inspect what the loader detects (schema, label column, feature count)
+python scripts/train_from_kaggle.py --scan-only
+
+# 3. Train + evaluate (Random Forest vs Gradient Boosting, 5-fold stratified CV)
+python scripts/train_from_kaggle.py
+```
+Short permission names (`SEND_SMS`) and full names (`android.permission.SEND_SMS`) are both supported; metadata columns (`pkgname`, `App categore`, `Downloads`) and unlabelled permission dumps are handled automatically. See `data/datasets/README.md` for the full schema rules.
 
 ---
 
@@ -231,9 +278,11 @@ python -m src.ml_pipeline --compare
 | **Tracker Detection** | None | **17 Exodus Signatures** |
 | **Bytecode Call-Graph Analysis** | None | **Source-to-Sink Reachability** |
 | **Threat Intelligence** | None | **Live VirusTotal v3 + Local DB** |
-| **ML Cross-Validation AUC** | Single split | **0.992 (5-Fold Stratified CV)** |
+| **ML Cross-Validation AUC** | Single split | **0.954 AUC** (5-Fold Stratified CV, 4,464-app real dataset) |
 | **Audit Persistence** | Ephemeral | **SQLite History + Diff Auditing** |
 | **Reporting** | Console text only | **Terminal + Markdown + JSON + GUI** |
+
+> **Note on ML metrics:** the model is trained on `data/datasets/Android_Malware_Benign.csv` — **4,464 real apps (2,533 malware / 1,931 benign), 213 permission features** — with 5-fold stratified cross-validation (Gradient Boosting selected: accuracy 0.875, F1 0.891, ROC-AUC 0.954; see `reports/evaluation_metrics.md`). The bundled 60-row `sample_android_malware_dataset.csv` is an illustrative toy set and is automatically ignored once real labelled data is present.
 
 ---
 
@@ -247,16 +296,57 @@ python -m src.ml_pipeline --compare
 
 ## 🧪 Running Unit & Integration Tests
 
-CAPRA includes a complete test suite covering all modules:
+CAPRA includes a complete regression suite (177 tests) covering all modules:
 ```bash
-# Run full regression suite across all 6 phases
-python -m unittest discover tests
+# Run the full suite (pytest)
+python -m pytest tests/ -q
 
-# Run specific module test suite
-python -m unittest tests.test_pipeline.TestPhase6HistoryAndReporting
-python -m unittest tests.test_pipeline.TestThreatIntelPhase5
-python -m unittest tests.test_pipeline.TestAdvancedStaticAnalysisPhase4
+# Golden regression tests (freeze verified demo behavior)
+python -m pytest tests/test_golden.py -v
+
+# Malformed/hostile input edge-case corpus
+python -m pytest tests/test_edge_cases.py -v
+
+# Demo-day smoke check — run this before any live presentation
+python scripts/demo_check.py
+
+# Fresh-machine release check — full install verification in a clean venv
+python scripts/release_check.py
 ```
+The smoke check exercises every demo path end-to-end (sample APK scan, all three demo scenarios, report export, history diffing, ML sanity, zip-bomb rejection, CLI subprocess, web boot) and prints a PASS/FAIL checklist (13 checks). The release check additionally proves a clean `pip install` works end-to-end (console script, packaged data files, tests) — 9 checks.
+
+---
+
+## 🚀 Release & Packaging (Phase 6)
+
+### Fresh install (demo-day machine)
+```bash
+git clone https://github.com/surajkudale1909-crypto/CAPRA-2.0.git
+cd CAPRA-2.0
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pip install ".[dev]"          # installs the `capra` console command + test tools
+sudo apt install python3-tk   # ONLY needed for the desktop GUI (system package!)
+capra --demo malicious_flashlight
+```
+> **Note:** `python3-tk` is an OS package — `pip install` alone provides the CLI,
+> web dashboard, and tests, but not the Tkinter GUI. Verify any machine with
+> `python scripts/release_check.py` before a presentation.
+
+### One-file demo binary (optional)
+```bash
+sudo apt install libpython3.11   # PyInstaller needs the shared library
+pip install pyinstaller
+bash scripts/build_binary.sh     # -> dist/capra (do not commit the binary)
+./dist/capra --demo benign_calculator
+```
+The build script encodes the known gotchas (androguard `pentest` package exclusion, sklearn pickles) and smoke-tests the artifact.
+
+### Demo-day checklist
+1. `python scripts/release_check.py` on the exact presentation machine
+2. `python scripts/demo_check.py` immediately before the demo (13 checks, exit 0)
+3. Web dashboard: `python main.py --web` · GUI: `python main.py --gui` · CLI: `capra app.apk`
+4. History diffs and reports land under `data/` and `reports/`
 
 ---
 
@@ -265,7 +355,4 @@ python -m unittest tests.test_pipeline.TestAdvancedStaticAnalysisPhase4
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 Developed with ❤️ by **CS-AI Group 8 (Suraj, Omraj, Ishan, Samriddhi)** at **Vishwakarma Institute of Technology, Pune**.
-
-# CAPRA-2.0
-Context-Aware Privacy Risk Analyzer (CAPRA) — a research project for analyzing Android application security and privacy risks using static analysis, data-flow analysis, and context-aware risk assessment.
 

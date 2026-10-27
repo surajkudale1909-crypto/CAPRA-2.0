@@ -15,11 +15,10 @@ logger = logging.getLogger("CAPRA.NetworkDetector")
 
 # Regex patterns for URL and IP extraction
 URL_REGEX = re.compile(
-    r'(https?://[a-zA-Z0-9.-]+(?::[0-9]+)?(?:/[^\s"\'<>{}|\^~`\[\]]*)?)',
-    re.IGNORECASE
+    r'(https?://[a-zA-Z0-9.-]+(?::[0-9]+)?(?:/[^\s"\'<>{}|\^~`\[\]]*)?)', re.IGNORECASE
 )
 IP_REGEX = re.compile(
-    r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
+    r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
 )
 
 # Common development / local / schema namespaces to filter out false positives
@@ -32,7 +31,7 @@ IGNORED_DOMAINS = {
     "github.com",
     "schema.org",
     "goo.gl",
-    "play.google.com"
+    "play.google.com",
 }
 
 SUSPICIOUS_TLDS = {".top", ".xyz", ".onion", ".cc", ".tk", ".ru", ".buzz"}
@@ -67,7 +66,6 @@ class NetworkDetector:
             return not ip_str.startswith("0.")
         except ValueError:
             return False
-
 
     def analyze_strings(self, strings: List[str]) -> Dict[str, Any]:
         """Analyzes a collection of strings extracted from DEX bytecodes or manifest."""
@@ -124,17 +122,23 @@ class NetworkDetector:
             count = len(insecure_http)
             penalty = min(30.0, count * 5.0)
             risk_score += penalty
-            findings.append(f"Identified {count} cleartext HTTP endpoint(s), exposing user traffic to MitM interception.")
+            findings.append(
+                f"Identified {count} cleartext HTTP endpoint(s), exposing user traffic to MitM interception."
+            )
 
         if found_ips:
             count = len(found_ips)
             penalty = min(40.0, count * 15.0)
             risk_score += penalty
-            findings.append(f"Hardcoded public IP addresses detected ({', '.join(sorted(list(found_ips))[:3])}), bypassing domain name verification.")
+            findings.append(
+                f"Hardcoded public IP addresses detected ({', '.join(sorted(list(found_ips))[:3])}), bypassing domain name verification."
+            )
 
         if suspicious_endpoints:
             risk_score += min(30.0, len(suspicious_endpoints) * 10.0)
-            findings.append(f"Identified {len(suspicious_endpoints)} suspicious external domain/TLD references.")
+            findings.append(
+                f"Identified {len(suspicious_endpoints)} suspicious external domain/TLD references."
+            )
 
         risk_score = min(100.0, risk_score)
 
@@ -146,13 +150,14 @@ class NetworkDetector:
             "suspicious_endpoints": sorted(suspicious_endpoints),
             "unique_domains": sorted(list(parsed_domains)),
             "network_risk_score": round(risk_score, 1),
-            "findings": findings
+            "findings": findings,
         }
 
     def analyze_apk(self, apk_obj: Any) -> Dict[str, Any]:
         """Extracts all strings from all DEX files of an Androguard APK and analyzes them."""
         try:
             from androguard.core.dex import DEX
+
             extracted_strings = []
             dex_files = apk_obj.get_all_dex()
             for dex_bytes in dex_files:
@@ -171,5 +176,5 @@ class NetworkDetector:
                 "unique_domains": [],
                 "network_risk_score": 0.0,
                 "findings": [],
-                "error": str(e)
+                "error": str(e),
             }

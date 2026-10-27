@@ -540,7 +540,8 @@
       ],
       "risk_type": "Media Harvesting",
       "penalty": 30,
-      "description": "App can access sensitive personal photos and graphics via Scoped Storage APIs and exfiltrate them externally."
+      "exempt_categories": ["Camera/Photo", "Music/Video"],
+      "description": "App can access sensitive personal photos and graphics via Scoped Storage APIs and exfiltrate them externally. Exempt for media-centric apps where photo/audio access is the core function."
     },
     {
       "id": "COMB_CONTACTS_HARVESTING",
@@ -573,7 +574,8 @@
       ],
       "risk_type": "Credential Theft",
       "penalty": 45,
-      "description": "App can intercept incoming two-factor authentication (2FA) one-time passwords and transmit them to remote command-and-control servers."
+      "exempt_categories": ["Messaging"],
+      "description": "App can intercept incoming two-factor authentication (2FA) one-time passwords and transmit them to remote command-and-control servers. Exempt for messaging apps where SMS access is expected functionality."
     },
     {
       "id": "COMB_VISUAL_SURVEILLANCE",
@@ -584,7 +586,8 @@
       ],
       "risk_type": "Visual Surveillance",
       "penalty": 35,
-      "description": "Ability to capture camera frames combined with internet transmission allows unauthorized image/video streaming."
+      "exempt_categories": ["Camera/Photo"],
+      "description": "Ability to capture camera frames combined with internet transmission allows unauthorized image/video streaming. Exempt for camera/photography apps where camera and sharing are the core function."
     },
     {
       "id": "COMB_CALL_LOG_EXFILTRATION",
@@ -606,7 +609,8 @@
       ],
       "risk_type": "Geolocation Tracking",
       "penalty": 25,
-      "description": "High-precision GPS coordinates can be streamed to cloud analytics or third-party ad brokers to establish physical movement patterns."
+      "exempt_categories": ["Navigation"],
+      "description": "High-precision GPS coordinates can be streamed to cloud analytics or third-party ad brokers to establish physical movement patterns. Exempt for navigation apps where location is the core function."
     },
     {
       "id": "COMB_DEVICE_TRACKING",

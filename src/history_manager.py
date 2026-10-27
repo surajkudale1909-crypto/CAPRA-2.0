@@ -14,7 +14,7 @@ import logging
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from src.config import settings
 
@@ -65,15 +65,11 @@ class HistoryManager:
                 )
                 """
             )
-            cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_analyses_pkg ON analyses(package_name)"
-            )
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_analyses_pkg ON analyses(package_name)")
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_analyses_time ON analyses(timestamp DESC)"
             )
-            cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_analyses_sha ON analyses(sha256)"
-            )
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_analyses_sha ON analyses(sha256)")
             conn.commit()
 
     def save_analysis(self, analysis_result: Dict[str, Any]) -> int:
@@ -118,7 +114,9 @@ class HistoryManager:
             report_str = json.dumps(analysis_result)
         except (TypeError, ValueError) as e:
             logger.warning(f"Could not cleanly serialize report_json, using fallback: {e}")
-            report_str = json.dumps({"error": f"Serialization error: {e}", "score": score, "verdict": verdict})
+            report_str = json.dumps(
+                {"error": f"Serialization error: {e}", "score": score, "verdict": verdict}
+            )
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -295,7 +293,9 @@ class HistoryManager:
             if isinstance(static_sec, dict):
                 trk = static_sec.get("trackers", {})
                 if isinstance(trk, dict):
-                    return {t.get("name") for t in trk.get("detected_trackers", []) if t.get("name")}
+                    return {
+                        t.get("name") for t in trk.get("detected_trackers", []) if t.get("name")
+                    }
             return set()
 
         trackers1 = _get_tracker_names(rep1)
@@ -318,10 +318,14 @@ class HistoryManager:
         # Trajectory classification
         if score_delta > 5:
             trajectory = "REGRESSION"
-            trajectory_summary = f"Privacy risk increased by +{score_delta} points ({verdict1} -> {verdict2})"
+            trajectory_summary = (
+                f"Privacy risk increased by +{score_delta} points ({verdict1} -> {verdict2})"
+            )
         elif score_delta < -5:
             trajectory = "IMPROVEMENT"
-            trajectory_summary = f"Privacy risk decreased by {abs(score_delta)} points ({verdict1} -> {verdict2})"
+            trajectory_summary = (
+                f"Privacy risk decreased by {abs(score_delta)} points ({verdict1} -> {verdict2})"
+            )
         else:
             trajectory = "STABLE"
             trajectory_summary = f"Privacy risk posture is stable ({verdict1} -> {verdict2})"

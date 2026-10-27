@@ -47,27 +47,119 @@ CATEGORY_KEYWORDS: Dict[str, Dict[str, List[str]]] = {
     },
     "Navigation": {
         "primary": ["navigation", "navigator", "maps", "gps", "route"],
-        "secondary": ["transit", "osm", "waze", "commute", "turnbyturn", "directions", "location_tracker"],
+        "secondary": [
+            "transit",
+            "osm",
+            "waze",
+            "commute",
+            "turnbyturn",
+            "directions",
+            "location_tracker",
+        ],
     },
     "Social Media": {
         "primary": ["social", "network", "community", "feed", "profile"],
         "secondary": ["tweet", "insta", "forum", "clubhouse", "friends", "posts", "connect"],
     },
     "Messaging": {
-        "primary": ["message", "messaging", "chat", "messenger", "sms"],
-        "secondary": ["talk", "texting", "wechat", "whatsapp", "signal", "telegram", "inbox", "voip"],
+        "primary": [
+            "message",
+            "messaging",
+            "chat",
+            "messenger",
+            "sms",
+            "browser",
+            "email",
+            "mail",
+            "voip",
+            "dialer",
+        ],
+        "secondary": [
+            "talk",
+            "texting",
+            "wechat",
+            "whatsapp",
+            "signal",
+            "telegram",
+            "inbox",
+            "voip",
+        ],
     },
     "Banking/Finance": {
         "primary": ["bank", "banking", "finance", "fintech", "wallet"],
-        "secondary": ["pay", "payment", "money", "loan", "crypto", "credit", "invest", "stock", "wealth", "upi"],
+        "secondary": [
+            "pay",
+            "payment",
+            "money",
+            "loan",
+            "crypto",
+            "credit",
+            "invest",
+            "stock",
+            "wealth",
+            "upi",
+        ],
     },
     "Health/Fitness": {
-        "primary": ["fitness", "workout", "health", "exercise", "running"],
-        "secondary": ["pedometer", "diet", "gym", "cardio", "sleep", "heartrate", "steps", "calorie"],
+        "primary": [
+            "fitness",
+            "workout",
+            "health",
+            "exercise",
+            "running",
+            "sport",
+            "sports",
+            "football",
+            "soccer",
+            "cricket",
+            "basketball",
+            "baseball",
+            "hockey",
+            "tennis",
+            "golf",
+        ],
+        "secondary": [
+            "pedometer",
+            "diet",
+            "gym",
+            "cardio",
+            "sleep",
+            "heartrate",
+            "steps",
+            "calorie",
+            "league",
+            "score",
+            "scores",
+            "olympic",
+            "marathon",
+            "yoga",
+            "meditation",
+            "pain",
+            "symptom",
+            "wellness",
+        ],
     },
     "Games": {
         "primary": ["game", "games", "gaming", "play", "arcade"],
-        "secondary": ["puzzle", "rpg", "quest", "racing", "clash", "simulator", "unity", "craft", "battle", "hero"],
+        "secondary": [
+            "puzzle",
+            "rpg",
+            "quest",
+            "racing",
+            "clash",
+            "simulator",
+            "unity",
+            "craft",
+            "battle",
+            "hero",
+            "gacha",
+            "tycoon",
+            "survival",
+            "sudoku",
+            "chess",
+            "ludo",
+            "royale",
+        ],
     },
     "Camera/Photo": {
         "primary": ["camera", "photo", "photography", "selfie", "editor"],
@@ -75,19 +167,65 @@ CATEGORY_KEYWORDS: Dict[str, Dict[str, List[str]]] = {
     },
     "Music/Video": {
         "primary": ["music", "video", "media", "player", "audio"],
-        "secondary": ["stream", "mp3", "podcast", "radio", "track", "tune", "sound", "mp4", "playback"],
+        "secondary": [
+            "stream",
+            "mp3",
+            "podcast",
+            "radio",
+            "track",
+            "tune",
+            "sound",
+            "mp4",
+            "playback",
+            "fm",
+            "movies",
+            "clips",
+            "karaoke",
+            "lyrics",
+        ],
     },
     "Shopping": {
         "primary": ["shop", "shopping", "store", "ecommerce", "cart"],
-        "secondary": ["deals", "buy", "marketplace", "mall", "fashion", "retail", "discounts", "orders"],
+        "secondary": [
+            "deals",
+            "buy",
+            "marketplace",
+            "mall",
+            "fashion",
+            "retail",
+            "discounts",
+            "orders",
+        ],
     },
     "Productivity": {
         "primary": ["productivity", "office", "notes", "notepad", "task"],
-        "secondary": ["todo", "calendar", "document", "pdf", "scanner", "organizer", "workflow", "sheets"],
+        "secondary": [
+            "todo",
+            "calendar",
+            "document",
+            "pdf",
+            "scanner",
+            "organizer",
+            "workflow",
+            "sheets",
+        ],
     },
     "Education": {
         "primary": ["education", "learning", "study", "course", "quiz"],
-        "secondary": ["tutor", "school", "dictionary", "language", "academy", "vocab", "flashcards", "learn"],
+        "secondary": [
+            "tutor",
+            "school",
+            "dictionary",
+            "language",
+            "academy",
+            "vocab",
+            "flashcards",
+            "learn",
+            "quran",
+            "bible",
+            "exam",
+            "lectures",
+        ],
     },
 }
 
@@ -98,7 +236,10 @@ PERMISSION_PROFILE_HINTS: Dict[str, Tuple[List[str], str]] = {
         "Includes biometric body sensor / physical activity telemetry",
     ),
     "Navigation": (
-        ["android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_BACKGROUND_LOCATION"],
+        [
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_BACKGROUND_LOCATION",
+        ],
         "Includes continuous background geolocation tracking",
     ),
     "Camera/Photo": (
@@ -113,6 +254,232 @@ PERMISSION_PROFILE_HINTS: Dict[str, Tuple[List[str], str]] = {
         ["android.permission.USE_BIOMETRIC", "android.permission.INTERNET"],
         "Includes biometric authentication with internet connectivity",
     ),
+}
+
+# Catalog of well-known apps (brand tokens -> canonical category).
+# Real-world app listings are frequently brand names ("Spotify", "Turbo VPN") that
+# carry no descriptive keywords; a curated catalog is the only reliable signal for
+# them. Matching prefers the most specific (most-token) entry. This mirrors how
+# commercial app-classification products combine heuristics with app catalogs.
+KNOWN_APPS: Dict[str, str] = {
+    # Navigation & travel
+    "waze": "Navigation",
+    "sygic": "Navigation",
+    "osmand": "Navigation",
+    "komoot": "Navigation",
+    "alltrails": "Navigation",
+    "google maps": "Navigation",
+    "google map": "Navigation",
+    "uber": "Navigation",
+    "lyft": "Navigation",
+    # Social & dating
+    "facebook": "Social Media",
+    "instagram": "Social Media",
+    "tiktok": "Social Media",
+    "snapchat": "Social Media",
+    "reddit": "Social Media",
+    "pinterest": "Social Media",
+    "linkedin": "Social Media",
+    "threads": "Social Media",
+    "twitter": "Social Media",
+    "tumblr": "Social Media",
+    "quora": "Social Media",
+    "sharechat": "Social Media",
+    "likee": "Social Media",
+    "bigo": "Social Media",
+    "tango": "Social Media",
+    "whisper": "Social Media",
+    "textplus": "Social Media",
+    "meetme": "Social Media",
+    "coffee meets bagel": "Social Media",
+    "hinge": "Social Media",
+    "tinder": "Social Media",
+    "bumble": "Social Media",
+    "badoo": "Social Media",
+    "okcupid": "Social Media",
+    # Messaging & communication (incl. browsers/mail — the comms bucket)
+    "whatsapp": "Messaging",
+    "telegram": "Messaging",
+    "signal": "Messaging",
+    "viber": "Messaging",
+    "wechat": "Messaging",
+    "kik": "Messaging",
+    "hangouts": "Messaging",
+    "skype": "Messaging",
+    "zoom": "Messaging",
+    "jitsi meet": "Messaging",
+    "groupme": "Messaging",
+    "truecaller": "Messaging",
+    "nextplus": "Messaging",
+    "messenger": "Messaging",
+    "discord": "Messaging",
+    "google meet": "Messaging",
+    "google chat": "Messaging",
+    "gmail": "Messaging",
+    "yahoo mail": "Messaging",
+    "protonmail": "Messaging",
+    "firefox": "Messaging",
+    "google chrome": "Messaging",
+    "chrome": "Messaging",
+    "microsoft edge": "Messaging",
+    "opera": "Messaging",
+    "brave": "Messaging",
+    "puffin": "Messaging",
+    # Banking & finance
+    "paypal": "Banking/Finance",
+    "venmo": "Banking/Finance",
+    "webull": "Banking/Finance",
+    "revolut": "Banking/Finance",
+    "robinhood": "Banking/Finance",
+    "coinbase": "Banking/Finance",
+    "binance": "Banking/Finance",
+    "cash app": "Banking/Finance",
+    "monzo": "Banking/Finance",
+    "nubank": "Banking/Finance",
+    "chime": "Banking/Finance",
+    "klarna": "Banking/Finance",
+    "afterpay": "Banking/Finance",
+    "wise": "Banking/Finance",
+    "google pay": "Banking/Finance",
+    "paytm": "Banking/Finance",
+    "phonepe": "Banking/Finance",
+    # Health & fitness (incl. sports — the health bucket)
+    "fitbit": "Health/Fitness",
+    "fitnotes": "Health/Fitness",
+    "strava": "Health/Fitness",
+    "peloton": "Health/Fitness",
+    "myfitnesspal": "Health/Fitness",
+    "google fit": "Health/Fitness",
+    "garmin": "Health/Fitness",
+    "headspace": "Health/Fitness",
+    "espn": "Health/Fitness",
+    "nba": "Health/Fitness",
+    "nfl": "Health/Fitness",
+    "premier league": "Health/Fitness",
+    "onefootball": "Health/Fitness",
+    "flashscore": "Health/Fitness",
+    "cricbuzz": "Health/Fitness",
+    # Games
+    "roblox": "Games",
+    "pubg": "Games",
+    "among us": "Games",
+    "angry birds": "Games",
+    "candy crush": "Games",
+    "subway surfers": "Games",
+    "clash of clans": "Games",
+    "clash royale": "Games",
+    "brawl stars": "Games",
+    "minecraft": "Games",
+    "fortnite": "Games",
+    "temple run": "Games",
+    "shadow fight": "Games",
+    "mobile legends": "Games",
+    "free fire": "Games",
+    "lego": "Games",
+    # Camera & photo
+    "picsart": "Camera/Photo",
+    "vsco": "Camera/Photo",
+    "snapseed": "Camera/Photo",
+    "lightroom": "Camera/Photo",
+    "beautyplus": "Camera/Photo",
+    "retrica": "Camera/Photo",
+    "google photos": "Camera/Photo",
+    "imaging edge": "Camera/Photo",
+    # Music & video
+    "spotify": "Music/Video",
+    "youtube music": "Music/Video",
+    "youtube": "Music/Video",
+    "deezer": "Music/Video",
+    "soundcloud": "Music/Video",
+    "tidal": "Music/Video",
+    "netflix": "Music/Video",
+    "prime video": "Music/Video",
+    "amazon music": "Music/Video",
+    "hotstar": "Music/Video",
+    "vlc": "Music/Video",
+    "mx player": "Music/Video",
+    "jiosaavn": "Music/Video",
+    "gaana": "Music/Video",
+    "shazam": "Music/Video",
+    "siriusxm": "Music/Video",
+    "bilibili": "Music/Video",
+    "dailymotion": "Music/Video",
+    "vimeo": "Music/Video",
+    "twitch": "Music/Video",
+    "capcut": "Music/Video",
+    "powerdirector": "Music/Video",
+    "youcut": "Music/Video",
+    "inshot": "Music/Video",
+    "kinemaster": "Music/Video",
+    "plex": "Music/Video",
+    # Shopping
+    "amazon": "Shopping",
+    "aliexpress": "Shopping",
+    "shein": "Shopping",
+    "ebay": "Shopping",
+    "etsy": "Shopping",
+    "zara": "Shopping",
+    "walmart": "Shopping",
+    "kroger": "Shopping",
+    "walgreens": "Shopping",
+    "nike": "Shopping",
+    "adidas": "Shopping",
+    "family dollar": "Shopping",
+    "asos": "Shopping",
+    "flipkart": "Shopping",
+    "myntra": "Shopping",
+    "ajio": "Shopping",
+    "noon": "Shopping",
+    "jumia": "Shopping",
+    "lazada": "Shopping",
+    "shopee": "Shopping",
+    "temu": "Shopping",
+    "zalando": "Shopping",
+    "dolap": "Shopping",
+    "wayfair": "Shopping",
+    # Productivity & utilities
+    "shopify": "Productivity",
+    "amazon alexa": "Productivity",
+    "google go": "Productivity",
+    "google translate": "Productivity",
+    "family link": "Productivity",
+    "authenticator": "Productivity",
+    "termux": "Productivity",
+    "bing": "Productivity",
+    "shareme": "Productivity",
+    "govee": "Productivity",
+    "soundcore": "Productivity",
+    "sennheiser": "Productivity",
+    "duckduckgo": "Productivity",
+    "turbo vpn": "Productivity",
+    "canva": "Productivity",
+    "evernote": "Productivity",
+    "trello": "Productivity",
+    "notion": "Productivity",
+    "dropbox": "Productivity",
+    "onedrive": "Productivity",
+    "google drive": "Productivity",
+    "google keep": "Productivity",
+    "camscanner": "Productivity",
+    "wps": "Productivity",
+    # Education & books
+    "duolingo": "Education",
+    "khan academy": "Education",
+    "coursera": "Education",
+    "udemy": "Education",
+    "quizlet": "Education",
+    "brainly": "Education",
+    "byjus": "Education",
+    "goodreads": "Education",
+    "tapas": "Education",
+    "wattpad": "Education",
+    "kindle": "Education",
+    "google play books": "Education",
+    "audiobooks": "Education",
+    "audible": "Education",
+    "dreame": "Education",
+    "photomath": "Education",
+    "memrise": "Education",
 }
 
 
@@ -130,6 +497,27 @@ class CategoryDetector:
         s = re.sub(r"([a-z])([A-Z])", r"\1 \2", text)
         tokens = re.split(r"[^a-zA-Z0-9]+", s.lower())
         return {t for t in tokens if len(t) >= 2}
+
+    def _match_known_app(self, *names: str) -> Optional[Tuple[str, str]]:
+        """Return (brand_key, category) for the most specific known-app match.
+
+        A brand key matches when ALL of its tokens appear in the name's tokens;
+        the entry with the most tokens wins ("google chrome" beats "chrome").
+        Brand matching deliberately avoids camelCase splitting so glued brands
+        ("AliExpress", "WhatsApp", "YouTube") stay intact.
+        """
+        best_key = None
+        best_cat = ""
+        for name in names:
+            tokens = {t for t in re.split(r"[^a-zA-Z0-9]+", (name or "").lower()) if len(t) >= 2}
+            if not tokens:
+                continue
+            for key, cat in KNOWN_APPS.items():
+                key_tokens = key.split()
+                if set(key_tokens).issubset(tokens):
+                    if best_key is None or len(key_tokens) > len(best_key.split()):
+                        best_key, best_cat = key, cat
+        return (best_key, best_cat) if best_key else None
 
     def detect(
         self,
@@ -154,6 +542,7 @@ class CategoryDetector:
         # 1. Check for explicit manual override
         if override_category:
             from src.context_engine import ContextEngine
+
             try:
                 ce = ContextEngine()
                 resolved = ce.resolve_category(override_category)
@@ -172,10 +561,22 @@ class CategoryDetector:
         app_tokens = self._tokenize(app_name)
         perms_set = set(declared_permissions or [])
 
+        # 2. Known-app catalog (brand names carry no descriptive keywords)
+        known = self._match_known_app(app_name, package_name)
+        if known:
+            brand_key, brand_cat = known
+            return CategoryDetectionResult(
+                category=brand_cat,
+                confidence=0.95,
+                method="known_app_catalog",
+                matched_signals=[f"Recognized popular app brand '{brand_key}'"],
+                is_overridden=False,
+            )
+
         category_scores: Dict[str, float] = {cat: 0.0 for cat in self.categories}
         category_signals: Dict[str, List[str]] = {cat: [] for cat in self.categories}
 
-        # 2. Keyword scoring across package name and app label
+        # 3. Keyword scoring across package name and app label
         for cat, kw_dict in CATEGORY_KEYWORDS.items():
             # App Label matches (strongest weight: 4.0 primary, 2.0 secondary)
             for kw in kw_dict["primary"]:
@@ -205,13 +606,13 @@ class CategoryDetector:
                     category_scores[cat] += 1.5
                     category_signals[cat].append(f"Package name matches secondary keyword '{kw}'")
 
-        # 3. Manifest Permission Profile scoring
+        # 4. Manifest Permission Profile scoring
         for cat, (target_perms, desc) in PERMISSION_PROFILE_HINTS.items():
             if set(target_perms).issubset(perms_set):
                 category_scores[cat] += 2.5
                 category_signals[cat].append(f"Permission signature: {desc}")
 
-        # 4. Determine winning category
+        # 5. Determine winning category
         best_cat = max(category_scores.keys(), key=lambda c: category_scores[c])
         max_score = category_scores[best_cat]
 
@@ -230,7 +631,9 @@ class CategoryDetector:
             best_cat = "Calculator" if "calc" in package_name.lower() else "Productivity"
             confidence = 0.30
             method = "fallback_heuristic"
-            category_signals[best_cat].append("No explicit keywords matched; default baseline applied.")
+            category_signals[best_cat].append(
+                "No explicit keywords matched; default baseline applied."
+            )
 
         return CategoryDetectionResult(
             category=best_cat,
