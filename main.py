@@ -38,6 +38,8 @@ from src.ml_pipeline import PermissionMLPipeline
 from src.pipeline import PrivacyAnalysisPipeline, run_synthetic_demo
 from src.report_generator import generate_markdown_report
 
+DEFAULT_WEB_PORT = 8000
+
 logger = logging.getLogger("capra.cli")
 
 # ANSI Color Codes for terminal reporting
@@ -580,6 +582,14 @@ def main() -> None:
         help="Launch the interactive desktop Graphical User Interface.",
     )
     parser.add_argument(
+        "--web",
+        nargs="?",
+        type=int,
+        const=DEFAULT_WEB_PORT,
+        metavar="PORT",
+        help=f"Launch the web dashboard (default port {DEFAULT_WEB_PORT}; 0.0.0.0 bind).",
+    )
+    parser.add_argument(
         "--plot",
         action="store_true",
         help="Generate and export the Machine Learning feature-importance chart to data/feature_importance.png.",
@@ -671,6 +681,21 @@ def main() -> None:
             sys.exit(0)
         except Exception as e:
             print(f"Failed to launch GUI: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    # Web Dashboard (Phase 5)
+    if args.web:
+        try:
+            from src.webapp import run_server
+
+            print(
+                f"{COLOR_BOLD}CAPRA web dashboard starting on "
+                f"http://0.0.0.0:{args.web}/{COLOR_RESET}"
+            )
+            run_server(port=args.web)
+            sys.exit(0)
+        except Exception as e:
+            print(f"Failed to launch web dashboard: {e}", file=sys.stderr)
             sys.exit(1)
 
     # Feature Importance Plot generation (Ishan's Module)

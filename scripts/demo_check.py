@@ -220,6 +220,21 @@ def c_gui():
         raise AssertionError(f"GUI module failed to import: {e}") from e
 
 
+@check("13. Web dashboard boots (headless)")
+def c_web():
+    try:
+        from fastapi.testclient import TestClient
+    except Exception:
+        return SKIP
+    from src.webapp import create_app
+
+    client = TestClient(create_app())
+    r = client.get("/health")
+    assert r.status_code == 200 and r.json().get("status") == "ok", "health check failed"
+    r = client.get("/")
+    assert r.status_code == 200 and "CAPRA" in r.text, "home page failed"
+
+
 def main() -> int:
     print("=" * 78)
     print("  CAPRA 2.0 — DEMO-DAY SMOKE CHECK")

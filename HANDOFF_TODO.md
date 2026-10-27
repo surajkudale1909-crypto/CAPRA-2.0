@@ -22,6 +22,7 @@ Each item is scoped so it can be picked up independently. Priority: P1 = before 
 **Why:** `fastapi`, `uvicorn`, `python-multipart`, `reportlab` were removed from `requirements.txt` (Dec 2026 review) because no code used them. Either earn them back or leave them out.
 **Option A (recommended):** skip the web dashboard entirely — the Tkinter GUI + Markdown/JSON reports already satisfy the synopsis.
 **Option B:** build it — minimal FastAPI app with an upload form calling `src.pipeline.analyze_apk`, render the same sections as `report_generator`. Re-add the four deps when the code exists.
+**Status (2026-10-27): ✅ DONE via Option B (Phase 5).** `src/webapp.py` — FastAPI dashboard (`python main.py --web`): APK upload with category override, demo scenarios, styled HTML report + JSON API (`/api/analyze`, `/api/demo/{scenario}`, `/api/docs`). Upload caps shared with CLI, temp-file cleanup, XSS-escaped rendering. 11 headless tests + demo_check web-boot check. `fastapi`/`uvicorn`/`python-multipart` re-added to `requirements.txt` (+ optional `web` extra); `reportlab` intentionally NOT re-added (no PDF export — Markdown reports remain the deliverable).
 
 ---
 

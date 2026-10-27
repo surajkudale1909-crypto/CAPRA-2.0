@@ -25,6 +25,13 @@ Complete v2 rebuild of the CAPRA privacy-risk analyzer (VIT Pune, CS-AI, EDAI Gr
 - Per-prediction explainability (top contributing permissions), model comparison (Random Forest vs Gradient Boosting), exported evaluation charts
 - `scripts/train_from_kaggle.py` one-command training with `--scan-only` schema reports
 
+### Added — Web Dashboard (Phase 5)
+- **FastAPI web dashboard** (`src/webapp.py`, `python main.py --web`): APK upload with category override, one-click demo scenarios, and a styled HTML report rendering the same sections as `report_generator` (score gauge, threat intel, context + empirical baselines, ML + provenance, static analysis, secrets, reachability, deep links, findings)
+- Machine-readable `POST /api/analyze` + `GET /api/demo/{scenario}` JSON endpoints and OpenAPI explorer at `/api/docs`
+- Upload hardening: same env-tunable size caps as the CLI, random temp filenames, automatic cleanup, friendly typed-error messages, HTML-escaping of all APK-derived strings (XSS-tested)
+- `tests/test_webapp.py` (11 headless TestClient tests) + demo_check web boot check
+- Web dependencies (`fastapi`, `uvicorn[standard]`, `python-multipart`) in `requirements.txt` and the optional `web` extra; `httpx` in dev extras
+
 ### Added — Analysis Depth (Phase 4)
 - **Call-graph reachability fixed and deepened**: the xref lookup read `get_xref_to()` (callees — always empty for framework APIs) instead of `get_xref_from()` (callers), silently disabling reachability on every real APK; fixed, and analysis now also finds **inter-method paths** — source in one method, sink in another, linked by a real call edge (1-hop), ranked with intra-method (High) and intra-class (Medium) paths, capped at 25
 - **Hardcoded secret detection**: AWS access keys, Google API keys, JWTs, embedded private-key blocks, and generic credential assignments in the DEX string pool — samples are **redacted in all outputs**, full values never leave the detector

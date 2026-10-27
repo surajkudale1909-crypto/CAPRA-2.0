@@ -223,6 +223,21 @@ python main.py --gui
 python src/gui.py
 ```
 
+### 3b. Web Dashboard (Phase 5)
+Browser front-end to the same analysis engine — upload an APK or run a bundled demo:
+```bash
+pip install -r requirements.txt        # includes fastapi, uvicorn, python-multipart
+python main.py --web                   # default port 8000 (or: python main.py --web 9000)
+# or directly
+python src/webapp.py
+```
+- `GET /` — upload form with category override + demo scenarios
+- `POST /analyze` — full HTML risk report (score gauge, context, ML, static analysis, findings)
+- `POST /demo` / `GET /api/demo/{scenario}` — bundled demos (HTML / JSON)
+- `POST /api/analyze` — machine-readable JSON for automation
+- `GET /api/docs` — OpenAPI explorer
+- Uploads honor the same env-tunable APK size caps as the CLI (`CAPRA_*`), are stored under a random temp name, and are deleted after analysis.
+
 ### 4. Audit History & Comparative Diff Audits
 ```bash
 # View table of past scans stored in SQLite history

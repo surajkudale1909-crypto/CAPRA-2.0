@@ -11,3 +11,8 @@ loguru>=0.7.0
 # Threat Intelligence & Network Lookups
 requests>=2.31.0
 python-dotenv>=1.0.0
+
+# Web Dashboard (Phase 5)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
