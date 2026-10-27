@@ -1,17 +1,5 @@
 # CAPRA 2.0 - Context-Aware Mobile App Privacy Risk Analyzer
 
-[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-117%2F117%20passing-brightgreen.svg)]()
-[![Platform](https://img.shields.io/badge/platform-Android%20Static%20Analysis-orange.svg)]()
-
-> **Institution:** Vishwakarma Institute of Technology (VIT Pune)  
-> **Department:** Computer Science & Artificial Intelligence (CS-AI)  
-> **Course:** Engineering Design & Innovation (EDAI) | Group 8  
-> **Academic Year:** 2026–2027 | Semester 3
-
----
-
 ## 📌 Executive Summary
 
 **CAPRA (Context-Aware Mobile App Privacy Risk Analyzer)** is an advanced static analysis framework designed to evaluate the true privacy risk posture of Android applications (`.apk`). Unlike traditional antiviruses that focus exclusively on binary malware signatures, or generic permission counters that treat all permissions equally, CAPRA recognizes that **permissions only make sense in context**.
@@ -374,6 +362,4 @@ The build script encodes the known gotchas (androguard `pentest` package exclusi
 ## 📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
-Developed with ❤️ by **CS-AI Group 8 (Suraj, Omraj, Ishan, Samriddhi)** at **Vishwakarma Institute of Technology, Pune**.
 
