@@ -5,6 +5,7 @@ the desktop GUI makes: risk bands, gauge geometry, permission row colors,
 theme palettes, settings persistence, and text builders.
 """
 
+import math
 import os
 import tempfile
 import unittest
@@ -80,14 +81,42 @@ class TestGaugeGeometry(unittest.TestCase):
         self.assertLess(ny, cy)  # screen y grows downward
 
     def test_progress_extent_tracks_score(self):
+        # Signed Tk extents sweep over the top (negative direction).
         self.assertAlmostEqual(gauge_geometry(0)["progress_extent"], 0.0)
-        self.assertAlmostEqual(gauge_geometry(100)["progress_extent"], 180.0)
-        self.assertAlmostEqual(gauge_geometry(50)["progress_extent"], 90.0)
+        self.assertAlmostEqual(gauge_geometry(100)["progress_extent"], -180.0)
+        self.assertAlmostEqual(gauge_geometry(50)["progress_extent"], -90.0)
 
     def test_segments_cover_full_sweep(self):
         geo = gauge_geometry(0)
         total = sum(s["extent"] for s in geo["segments"])
-        self.assertAlmostEqual(total, 180.0, delta=1.0)
+        self.assertAlmostEqual(total, -180.0, delta=1.0)
+
+    def test_band_sweep_direction_over_the_top(self):
+        # Tk create_arc angles increase counter-clockwise (point at
+        # cx + r·cos α, cy − r·sin α), so the top-half sweep must start at
+        # 180° (9 o'clock) with NEGATIVE extents ending at 0° (3 o'clock).
+        geo = gauge_geometry(50)
+        self.assertAlmostEqual(geo["segments"][0]["start"], 180.0)
+        self.assertLess(geo["segments"][0]["extent"], 0)
+        last = geo["segments"][-1]
+        self.assertAlmostEqual(last["start"] + last["extent"], 0.0, delta=1.0)
+
+    def test_text_stack_sits_below_hub(self):
+        # Score/unit/verdict live below the hub so the needle sweep never
+        # crosses the numbers (the layout bug this geometry was rebuilt for).
+        geo = gauge_geometry(65, size=250)
+        cx, cy = geo["center"]
+        for key in ("score_pos", "unit_pos", "verdict_pos"):
+            px, py = geo[key]
+            self.assertGreater(py, cy, f"{key} must sit below the hub")
+        # verdict is the lowest element and must fit inside the canvas
+        self.assertLess(geo["verdict_pos"][1] + 16, geo["height"])
+
+    def test_needle_stays_inside_arc(self):
+        geo = gauge_geometry(65, size=250)
+        cx, cy = geo["center"]
+        nx, ny = geo["needle"]
+        self.assertLess(math.hypot(nx - cx, ny - cy), geo["radius"])
 
 
 class TestPermissionRows(unittest.TestCase):

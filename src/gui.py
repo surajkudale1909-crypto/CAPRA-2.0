@@ -83,7 +83,7 @@ class RiskGaugeCanvas(tk.Canvas):
         super().__init__(
             parent,
             width=size,
-            height=int(size * 0.78),
+            height=int(size * 0.88),
             bg=bg_color,
             highlightthickness=0,
             **kwargs,
@@ -133,7 +133,7 @@ class RiskGaugeCanvas(tk.Canvas):
             )
 
         # Progress arc overlay (the traversed portion, in its band color)
-        if geo["progress_extent"] > 0.5:
+        if abs(geo["progress_extent"]) > 0.5:
             self.create_arc(
                 cx - radius,
                 cy - radius,
@@ -152,26 +152,31 @@ class RiskGaugeCanvas(tk.Canvas):
         hub = geo["hub_radius"]
         self.create_oval(cx - hub, cy - hub, cx + hub, cy + hub, fill=band_color, outline="")
 
-        # Score + verdict text
+        # Score / unit / verdict text (stacked BELOW the hub — the needle
+        # sweep and the number never overlap).
+        sx, sy = geo["score_pos"]
         self.create_text(
-            cx,
-            cy - radius * 0.34,
+            sx,
+            sy,
             text=f"{int(round(score))}",
-            font=("Segoe UI", max(18, self.size // 7), "bold"),
-            fill=self.palette.get("text", "#1e293b"),
+            font=("Segoe UI", max(22, self.size // 7), "bold"),
+            fill=band_color,
         )
+        ux, uy = geo["unit_pos"]
         self.create_text(
-            cx,
-            cy - radius * 0.10,
+            ux,
+            uy,
             text="/ 100",
-            font=("Segoe UI", max(8, self.size // 20)),
+            anchor="w",
+            font=("Segoe UI", max(8, self.size // 24)),
             fill=self.palette.get("muted", "#64748b"),
         )
+        vx, vy = geo["verdict_pos"]
         self.create_text(
-            cx,
-            cy + radius * 0.22,
+            vx,
+            vy,
             text=f"{str(verdict).upper()} RISK",
-            font=("Segoe UI", max(9, self.size // 18), "bold"),
+            font=("Segoe UI", max(11, self.size // 18), "bold"),
             fill=band_color,
         )
 

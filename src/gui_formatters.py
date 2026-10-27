@@ -51,14 +51,18 @@ def score_band(score: float) -> Dict[str, Any]:
 def gauge_geometry(score: float, size: int = 240) -> Dict[str, Any]:
     """Compute canvas geometry for the semicircular risk gauge.
 
-    Pure math (no tkinter) so the visual layout is unit-testable. Angles use
-    Tk's create_arc convention: degrees, counter-clockwise from 3 o'clock.
-    The band sweep is 180° (9 o'clock) → 360° (3 o'clock) across the top.
+    Pure math (no tkinter) so the visual layout is unit-testable.
+
+    Tk's create_arc measures angles counter-clockwise from 3 o'clock
+    (a point at angle α sits at cx + r·cos α, cy − r·sin α). The top-half
+    sweep therefore runs 180° (9 o'clock, score 0) → 90° (top) → 0°
+    (3 o'clock, score 100) — i.e. each band is stroked with a NEGATIVE
+    extent starting at its lower-score edge.
     """
     frac = max(0.0, min(1.0, float(score) / 100.0))
-    pad = max(10, size // 12)
-    cx, cy = size / 2, size * 0.62
-    radius = size / 2 - pad
+    pad = max(12, size // 16)
+    cx, cy = size / 2.0, size * 0.55
+    radius = size / 2.0 - pad
 
     segments = []
     cursor = 180.0
@@ -67,17 +71,17 @@ def gauge_geometry(score: float, size: int = 240) -> Dict[str, Any]:
         segments.append(
             {
                 "start": cursor,
-                "extent": extent,
+                "extent": -extent,
                 "color": band["color"],
                 "band": band["name"],
             }
         )
-        cursor += extent
+        cursor -= extent
 
-    # Needle endpoint: Tk angle convention (degrees clockwise from 3 o'clock,
-    # screen y grows downward): 180° = left (score 0), 270° = top, 360° = right.
+    # Needle endpoint (plain screen-cartesian math: 180° = left / score 0,
+    # 270° = top, 360° = right / score 100).
     theta = math.radians(180.0 + 180.0 * frac)
-    needle = (cx + radius * 0.82 * math.cos(theta), cy + radius * 0.82 * math.sin(theta))
+    needle = (cx + radius * 0.70 * math.cos(theta), cy + radius * 0.70 * math.sin(theta))
 
     band = score_band(score)
     return {
@@ -85,10 +89,15 @@ def gauge_geometry(score: float, size: int = 240) -> Dict[str, Any]:
         "radius": radius,
         "pad": pad,
         "segments": segments,
-        "progress_extent": 180.0 * frac,
+        "progress_extent": -180.0 * frac,
         "progress_start": 180.0,
         "needle": needle,
-        "hub_radius": max(4, size // 30),
+        "hub_radius": max(6, size // 36),
+        "height": int(size * 0.88),
+        # Text stack lives BELOW the hub so the needle sweep stays clear.
+        "score_pos": (cx, cy + radius * 0.28),
+        "unit_pos": (cx + radius * 0.36, cy + radius * 0.32),
+        "verdict_pos": (cx, cy + radius * 0.58),
         "band_name": band["name"],
         "band_color": band["color"],
     }
